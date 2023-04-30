@@ -1,22 +1,22 @@
 mod ui;
-use crate::ReverbParameters;
+use crate::SpaceEchoParameters;
 use std::sync::Arc;
 pub use ui::plugin_gui;
 use vizia::{prelude::WindowSize, Application, ParentWindow};
 use vst::{editor::Editor, prelude::HostCallback};
 
 const WINDOW_SIZE: WindowSize = WindowSize {
-  width: 520,
-  height: 260,
+  width: 720,
+  height: 360,
 };
 
-pub struct ReverbEditor {
-  pub params: Arc<ReverbParameters>,
+pub struct SpaceEchoEditor {
+  pub params: Arc<SpaceEchoParameters>,
   pub is_open: bool,
   pub host: Option<HostCallback>,
 }
 
-impl Editor for ReverbEditor {
+impl Editor for SpaceEchoEditor {
   fn position(&self) -> (i32, i32) {
     (0, 0)
   }
@@ -36,7 +36,7 @@ impl Editor for ReverbEditor {
     let params = self.params.clone();
 
     Application::new(move |cx| plugin_gui(cx, Arc::clone(&params), host))
-      .title("Dm-Reverb")
+      .title("dm-SpaceEcho")
       .inner_size(WINDOW_SIZE)
       .open_parented(&ParentWindow(parent));
 

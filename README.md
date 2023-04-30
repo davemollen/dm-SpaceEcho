@@ -1,6 +1,6 @@
-## dm-Reverb
+## dm-SpaceEcho
 
-A reverb effect written in Rust.
+A space echo effect written in Rust.
 The effect can be compiled to a [lv2](./lv2) or [vst](./vst) plugin.
 This plugin has been written primarily to run on [Mod devices](https://moddevices.com/). And because I mainly use this for guitar it's just mono to stereo for now.
 
@@ -12,14 +12,14 @@ This plugin has been written primarily to run on [Mod devices](https://moddevice
 
 ## Mod devices installation
 
-You can find the plugin for the Mod Dwarf [here](./lv2/dm-Reverb.lv2/).
+You can find the plugin for the Mod Dwarf [here](./lv2/dm-SpaceEcho.lv2/).
 
 For Mod Duo, follow the [lv2 instructions](#LV2-installation) first. Then finish the instructions below.
 
 - Copy the .lv2 folder into your Mod:
 
   ```
-  scp -rp <path to dm-Reverb.lv2> root@192.168.51.1:/root/.lv2
+  scp -rp <path to dm-SpaceEcho.lv2> root@192.168.51.1:/root/.lv2
   ```
 
 - Enter Mod password

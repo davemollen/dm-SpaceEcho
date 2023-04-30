@@ -1,5 +1,5 @@
 PACKAGE_NAME=(`./scripts/get-package-name.sh vst3`)
-NAME=$(echo $PACKAGE_NAME | perl -pe 's/(?<=[^\W_])_+([^\W_])|_+/-\U$1/g')
+NAME=$(echo $PACKAGE_NAME | perl -pe 's/dm_+([^\W_])/dm-\U$1/g' | perl -pe 's/(?<=[^\W_])_+([^\W_])/\U$1/g')
 OLD_VST_NAME="$PACKAGE_NAME.vst3"
 NEW_VST_NAME="$NAME.vst3"
 MOVE_FROM="./target/bundled/$OLD_VST_NAME"

@@ -39,3 +39,38 @@ textbox:hover {
   border-width: 0px;
   outline-color: none;
 }
+
+button {
+  background-color: #6d6d6d;
+  outline-color: none;
+}
+
+button label {
+  font-size: 12px;
+}
+
+button.active {
+  background-color: #ffb74d;
+  outline-color: none;
+}
+
+button.active label {
+  color: black;
+}
+
+button.inactive {
+  background-color: #6d6d6d;
+  outline-color: none;
+}
+
+button.inactive label {
+  color: white;
+}
+
+label.plugin-name {
+  font-size: 32px;
+  font-weight: bold;
+  border-radius: 4px;
+  border-width: 1px;
+  text-decoration: underline;
+}

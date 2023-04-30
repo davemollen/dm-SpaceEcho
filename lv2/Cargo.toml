@@ -1,0 +1,11 @@
+[package]
+name = "dm_space_echo"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+lv2 = "0.6.0"
+space_echo = { path = "../space_echo" }
+
+[lib]
+crate-type = ["cdylib"]

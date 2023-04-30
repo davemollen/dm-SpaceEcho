@@ -1,4 +1,4 @@
-use crate::reverb_parameters::{FloatParam, Params};
+use crate::space_echo_parameters::{FloatParam, Params};
 use std::any::Any;
 use vizia::{
   prelude::{ActionModifiers, Context, EmitContext, LensExt, StyleModifiers},
@@ -6,7 +6,7 @@ use vizia::{
   views::{Knob, Label, TextEvent, Textbox},
 };
 
-pub struct ParamKnob {}
+pub struct ParamKnob;
 
 impl ParamKnob {
   pub fn new<L, F, M, C>(

@@ -1,4 +1,4 @@
-use crate::reverb_parameters::{BoolParam, Params};
+use crate::space_echo_parameters::{BoolParam, Params};
 use std::any::Any;
 use vizia::{
   prelude::{ActionModifiers, Context, EmitContext, LensExt},
@@ -6,7 +6,7 @@ use vizia::{
   views::{Checkbox, Label},
 };
 
-pub struct ParamCheckbox {}
+pub struct ParamCheckbox;
 
 impl ParamCheckbox {
   pub fn new<L, F, M, C>(

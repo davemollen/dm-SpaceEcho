@@ -1,0 +1,105 @@
+extern crate lv2;
+extern crate space_echo;
+use lv2::prelude::*;
+use space_echo::SpaceEcho;
+
+#[derive(PortCollection)]
+struct Ports {
+  input: InputPort<Control>,
+  channel_mode: InputPort<Control>,
+  time_mode: InputPort<Control>,
+  time_link: InputPort<Control>,
+  time_left: InputPort<Control>,
+  time_right: InputPort<Control>,
+  feedback: InputPort<Control>,
+  wow_and_flutter: InputPort<Control>,
+  highpass_freq: InputPort<Control>,
+  highpass_res: InputPort<Control>,
+  lowpass_freq: InputPort<Control>,
+  lowpass_res: InputPort<Control>,
+  reverb: InputPort<Control>,
+  decay: InputPort<Control>,
+  stereo: InputPort<Control>,
+  output: InputPort<Control>,
+  mix: InputPort<Control>,
+  input_left: InputPort<Audio>,
+  input_right: InputPort<Audio>,
+  output_left: OutputPort<Audio>,
+  output_right: OutputPort<Audio>,
+}
+
+#[uri("https://github.com/davemollen/dm-SpaceEcho")]
+struct DmSpaceEcho {
+  space_echo: SpaceEcho,
+}
+
+impl Plugin for DmSpaceEcho {
+  // Tell the framework which ports this plugin has.
+  type Ports = Ports;
+
+  // We don't need any special host features; We can leave them out.
+  type InitFeatures = ();
+  type AudioFeatures = ();
+
+  // Create a new instance of the plugin; Trivial in this case.
+  fn new(_plugin_info: &PluginInfo, _features: &mut ()) -> Option<Self> {
+    Some(Self {
+      space_echo: SpaceEcho::new(_plugin_info.sample_rate() as f32),
+    })
+  }
+
+  // Process a chunk of audio. The audio ports are dereferenced to slices, which the plugin
+  // iterates over.
+  fn run(&mut self, ports: &mut Ports, _features: &mut (), _sample_count: u32) {
+    let input_level = *ports.input;
+    let channel_mode = *ports.channel_mode;
+    let time_mode = *ports.time_mode;
+    let time_left = *ports.time_left;
+    let time_right = *ports.time_right;
+    let feedback = *ports.feedback * 0.01;
+    let wow_and_flutter = *ports.wow_and_flutter * 0.01;
+    let highpass_freq = *ports.highpass_freq;
+    let highpass_res = *ports.highpass_res * 0.01;
+    let lowpass_freq = *ports.lowpass_freq;
+    let lowpass_res = *ports.lowpass_res * 0.01;
+    let reverb = *ports.reverb * 0.01;
+    let decay = *ports.decay * 0.01;
+    let stereo = *ports.stereo * 0.01;
+    let output_level = *ports.output;
+    let mix = *ports.mix * 0.01;
+
+    let input_channels = ports
+      .input_left
+      .iter_mut()
+      .zip(ports.output_right.iter_mut());
+    let output_channels = ports
+      .output_left
+      .iter_mut()
+      .zip(ports.output_right.iter_mut());
+
+    for (input, output) in input_channels.zip(output_channels) {
+      *output = self.space_echo.run(
+        *input,
+        input_level,
+        channel_mode,
+        time_mode,
+        time_left,
+        time_right,
+        feedback,
+        wow_and_flutter,
+        highpass_freq,
+        highpass_res,
+        lowpass_freq,
+        lowpass_res,
+        reverb,
+        decay,
+        stereo,
+        output_level,
+        mix,
+      );
+    }
+  }
+}
+
+// Generate the plugin descriptor function which exports the plugin to the outside world.
+lv2_descriptors!(DmSpaceEcho);

@@ -1,5 +1,5 @@
 [package]
-name = "dm_reverb"
+name = "dm_space_echo"
 version = "0.1.0"
 authors = ["Dave Mollen <davemollen@gmail.com>"]
 edition = "2021"
@@ -9,11 +9,11 @@ edition = "2021"
 [dependencies]
 vst = "0.3.0"
 vizia = {git = "https://github.com/vizia/vizia", branch = "main", features = ["baseview"], default-features = false}
-reverb = { path = "../reverb" }
+space_echo = { path = "../space_echo" }
 
 [lib]
 crate-type = ["cdylib"]
 
 [[bin]]
-name = "dm_reverb_gui"
+name = "dm_space_echo_gui"
 path = "src/bin.rs"

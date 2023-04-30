@@ -1,10 +1,10 @@
 #[macro_use]
 extern crate vst;
 mod editor;
-use editor::ReverbEditor;
-mod reverb_parameters;
-use reverb::Reverb;
-use reverb_parameters::{Params, ReverbParameters};
+use editor::SpaceEchoEditor;
+mod space_echo_parameters;
+use space_echo::SpaceEcho;
+use space_echo_parameters::{Params, SpaceEchoParameters};
 use std::sync::Arc;
 use vst::{
   buffer::AudioBuffer,
@@ -13,20 +13,20 @@ use vst::{
   prelude::HostCallback,
 };
 
-struct DmReverb {
-  params: Arc<ReverbParameters>,
-  reverb: Reverb,
-  editor: Option<ReverbEditor>,
+struct DmSpaceEcho {
+  params: Arc<SpaceEchoParameters>,
+  space_echo: SpaceEcho,
+  editor: Option<SpaceEchoEditor>,
 }
 
-impl Plugin for DmReverb {
+impl Plugin for DmSpaceEcho {
   fn new(host: HostCallback) -> Self {
-    let params = Arc::new(ReverbParameters::default());
+    let params = Arc::new(SpaceEchoParameters::default());
 
     Self {
       params: params.clone(),
-      reverb: Reverb::new(44100.),
-      editor: Some(ReverbEditor {
+      space_echo: SpaceEcho::new(44100.),
+      editor: Some(SpaceEchoEditor {
         params: params.clone(),
         is_open: false,
         host: Some(host),
@@ -35,17 +35,17 @@ impl Plugin for DmReverb {
   }
 
   fn set_sample_rate(&mut self, sample_rate: f32) {
-    self.reverb = Reverb::new(sample_rate);
+    self.space_echo = SpaceEcho::new(sample_rate);
   }
 
   fn get_info(&self) -> Info {
     Info {
-      name: "dm-Reverb".to_string(),
+      name: "dm-SpaceEcho".to_string(),
       vendor: "DM".to_string(),
       version: 1,
       inputs: 2,
       outputs: 2,
-      parameters: 10,
+      parameters: 17,
       unique_id: 1358,
       f64_precision: true,
       category: Category::Effect,
@@ -54,16 +54,22 @@ impl Plugin for DmReverb {
   }
 
   fn process(&mut self, buffer: &mut AudioBuffer<f32>) {
-    let reverse = self.params.reverse.get_value();
-    let predelay = self.params.predelay.get_value();
-    let size = self.params.size.get_value();
-    let speed = self.params.speed.get_value();
-    let depth = self.params.depth.get_value() * 2. - 1.;
-    let absorb = self.params.absorb.get_value();
+    let input_level = self.params.input.get_value();
+    let time_left = self.params.time_left.get_value();
+    let time_right = self.params.time_right.get_value();
+    let feedback = self.params.feedback.get_value();
+    let wow_and_flutter = self.params.wow_and_flutter.get_value();
+    let highpass_freq = self.params.highpass_freq.get_value();
+    let highpass_res = self.params.highpass_res.get_value();
+    let lowpass_freq = self.params.lowpass_freq.get_value();
+    let lowpass_res = self.params.lowpass_res.get_value();
+    let reverb = self.params.reverb.get_value();
     let decay = self.params.decay.get_value();
-    let tilt = self.params.tilt.get_value() * 2. - 1.;
-    let shimmer = self.params.shimmer.get_value();
+    let output_level = self.params.output.get_value();
+    let stereo = self.params.stereo.get_value();
     let mix = self.params.mix.get_value();
+    let channel_mode = self.params.channel_mode.get_value();
+    let time_mode = self.params.time_mode.get_value();
 
     let (input_channels, mut output_channels) = buffer.split();
     let zipped_input_channels = input_channels.get(0).iter().zip(input_channels.get(1));
@@ -74,21 +80,27 @@ impl Plugin for DmReverb {
     for ((input_left, input_right), (output_left, output_right)) in
       zipped_input_channels.zip(zipped_output_channels)
     {
-      let (reverb_left, reverb_right) = self.reverb.run(
+      let (space_echo_left, space_echo_right) = self.space_echo.run(
         (*input_left, *input_right),
-        reverse,
-        predelay,
-        size,
-        speed,
-        depth,
-        absorb,
+        input_level,
+        channel_mode,
+        time_mode,
+        time_left,
+        time_right,
+        feedback,
+        wow_and_flutter,
+        highpass_freq,
+        highpass_res,
+        lowpass_freq,
+        lowpass_res,
+        reverb,
         decay,
-        tilt,
-        shimmer,
+        stereo,
+        output_level,
         mix,
       );
-      *output_left = reverb_left;
-      *output_right = reverb_right;
+      *output_left = space_echo_left;
+      *output_right = space_echo_right;
     }
   }
 
@@ -105,4 +117,4 @@ impl Plugin for DmReverb {
   }
 }
 
-plugin_main!(DmReverb);
+plugin_main!(DmSpaceEcho);
