@@ -5,3 +5,4 @@
     a lv2:Plugin ;
     lv2:binary <libdm_space_echo.so> ;
     rdfs:seeAlso <dm-SpaceEcho.ttl> .
+<https://github.com/davemollen/dm-SpaceEcho> rdfs:seeAlso <modgui.ttl> .
