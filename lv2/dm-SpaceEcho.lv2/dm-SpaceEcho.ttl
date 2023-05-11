@@ -4,11 +4,11 @@
 @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix units: <http://lv2plug.in/ns/extensions/units#> .
-@prefix epp:   <http://lv2plug.in/ns/ext/port-props#> .
+@prefix pprops:   <http://lv2plug.in/ns/ext/port-props#> .
 @prefix mod:   <http://moddevices.com/ns/mod#> .
 
 <https://github.com/davemollen/dm-SpaceEcho>
-	a lv2:Plugin , lv2:DelayPlugin , lv2:ReverbPlugin , mod:DelayPlugin ;
+	a lv2:Plugin , lv2:DelayPlugin , lv2:ReverbPlugin ;
 	lv2:project <http://lv2plug.in/ns/lv2> ;
 	doap:name "dm-SpaceEcho" ;
 	doap:license <http://opensource.org/licenses/isc> ;
@@ -64,7 +64,7 @@ A space echo effect written in Rust.
 		lv2:index 4 ;
 		lv2:symbol "time_left" ;
 		lv2:name "Time left" ;
-		lv2:portProperty epp:logarithmic ;
+		lv2:portProperty pprops:logarithmic ;
 		lv2:default 250.0 ;
 		lv2:minimum 1.0 ;
 		lv2:maximum 2500.0 ;
@@ -74,7 +74,7 @@ A space echo effect written in Rust.
 		lv2:index 5;
 		lv2:symbol "time_right" ;
 		lv2:name "Time right" ;
-		lv2:portProperty epp:logarithmic ;
+		lv2:portProperty pprops:logarithmic ;
 		lv2:default 250.0 ;
 		lv2:minimum 1.0 ;
 		lv2:maximum 2500.0 ;
@@ -86,7 +86,7 @@ A space echo effect written in Rust.
 		lv2:name "Feedback" ;
 		lv2:default 50.0 ;
 		lv2:minimum 0.0 ;
-		lv2:maximum 100.0 ;
+		lv2:maximum 150.0 ;
 		units:unit units:pc
 	], [
 		a lv2:InputPort, lv2:ControlPort ;
@@ -102,7 +102,7 @@ A space echo effect written in Rust.
 		lv2:index 8 ;
 		lv2:symbol "highpass_freq" ;
 		lv2:name "Highpass" ;
-		lv2:portProperty epp:logarithmic ;
+		lv2:portProperty pprops:logarithmic ;
 		lv2:default 0.0 ;
 		lv2:minimum 20.0 ;
 		lv2:maximum 20000.0 ;
@@ -112,7 +112,7 @@ A space echo effect written in Rust.
 		lv2:index 9 ;
 		lv2:symbol "highpass_res" ;
 		lv2:name "Res" ;
-		lv2:default 0.0 ;
+		lv2:default 20.0 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 100.0 ;
 		units:unit units:pc
@@ -121,8 +121,8 @@ A space echo effect written in Rust.
 		lv2:index 10 ;
 		lv2:symbol "lowpass_freq" ;
 		lv2:name "Lowpass" ;
-		lv2:portProperty epp:logarithmic ;
-		lv2:default 0.0 ;
+		lv2:portProperty pprops:logarithmic ;
+		lv2:default 20000.0 ;
 		lv2:minimum 20.0 ;
 		lv2:maximum 20000.0 ;
 		units:unit units:hz
@@ -158,7 +158,7 @@ A space echo effect written in Rust.
 		lv2:index 14 ;
 		lv2:symbol "stereo" ;
 		lv2:name "Stereo" ;
-		lv2:portProperty epp:logarithmic ;
+		lv2:portProperty pprops:logarithmic ;
 		lv2:default 100.0 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 100.0 ;
