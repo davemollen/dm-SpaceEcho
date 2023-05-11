@@ -14,12 +14,12 @@
 	doap:license <http://opensource.org/licenses/isc> ;
 	doap:maintainer [
 		foaf:name "Dave Mollen" ;
-		foaf:homepage <https://github.com/davemollen/dm-Reverb> ;
+		foaf:homepage <https://github.com/davemollen/dm-SpaceEcho> ;
 	] ;
 	mod:brand "DM" ;
 	mod:label "SpaceEcho" ;
 	rdfs:comment """
-A reverb effect written in Rust.
+A space echo effect written in Rust.
 """ ;
 	lv2:optionalFeature lv2:hardRTCapable ;
 	lv2:port [

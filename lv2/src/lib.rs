@@ -52,8 +52,8 @@ impl Plugin for DmSpaceEcho {
   // iterates over.
   fn run(&mut self, ports: &mut Ports, _features: &mut (), _sample_count: u32) {
     let input_level = *ports.input;
-    let channel_mode = *ports.channel_mode;
-    let time_mode = *ports.time_mode;
+    let channel_mode = *ports.channel_mode as i32;
+    let time_mode = *ports.time_mode as i32;
     let time_left = *ports.time_left;
     let time_right = *ports.time_right;
     let feedback = *ports.feedback * 0.01;
@@ -68,18 +68,17 @@ impl Plugin for DmSpaceEcho {
     let output_level = *ports.output;
     let mix = *ports.mix * 0.01;
 
-    let input_channels = ports
-      .input_left
-      .iter_mut()
-      .zip(ports.output_right.iter_mut());
+    let input_channels = ports.input_left.iter().zip(ports.input_right.iter());
     let output_channels = ports
       .output_left
       .iter_mut()
       .zip(ports.output_right.iter_mut());
 
-    for (input, output) in input_channels.zip(output_channels) {
-      *output = self.space_echo.run(
-        *input,
+    for ((input_left, input_right), (output_left, output_right)) in
+      input_channels.zip(output_channels)
+    {
+      let space_echo_output = self.space_echo.run(
+        (*input_left, *input_right),
         input_level,
         channel_mode,
         time_mode,
@@ -97,6 +96,8 @@ impl Plugin for DmSpaceEcho {
         output_level,
         mix,
       );
+      *output_left = space_echo_output.0;
+      *output_right = space_echo_output.1;
     }
   }
 }
