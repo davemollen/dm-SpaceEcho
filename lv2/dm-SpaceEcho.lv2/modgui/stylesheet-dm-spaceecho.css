@@ -9,10 +9,10 @@
 .mod-pedal-boxy{{{cns}}} {
     background-position:center center;
     background-repeat:no-repeat;
-    background-size:230px 431px;
-    height:431px;
+    background-size:631px 646px;
+    height:646px;
     position:absolute;
-    width:230px;
+    width:631px;
     border-radius: 21px;
 }
 
@@ -33,8 +33,8 @@
 }
 
 .mod-pedal-boxy{{{cns}}}.mod-boxy100 {
-    background-size:421px 431px;
-    width:421px;
+    background-size:631px 646px;
+    width:631px;
 }
 
 /* PORTS
@@ -71,7 +71,7 @@
 .mod-pedal-boxy{{{cns}}}.mod-six-knobs .mod-plugin-brand,
 .mod-pedal-boxy{{{cns}}}.mod-seven-knobs .mod-plugin-brand,
 .mod-pedal-boxy{{{cns}}}.mod-eight-knobs .mod-plugin-brand {
-    top:190px;
+    top:390px;
 }
 
 .mod-pedal-boxy{{{cns}}}.mod-boxy50 .mod-plugin-brand {
@@ -104,7 +104,7 @@
 .mod-pedal-boxy{{{cns}}}.mod-six-knobs .mod-plugin-name,
 .mod-pedal-boxy{{{cns}}}.mod-seven-knobs .mod-plugin-name,
 .mod-pedal-boxy{{{cns}}}.mod-eight-knobs .mod-plugin-name {
-    top:350px;
+    top:550px;
 }
 
 .mod-pedal-boxy{{{cns}}}.mod-boxy50 .mod-plugin-name {
@@ -128,7 +128,7 @@
 .mod-pedal-boxy{{{cns}}}.mod-six-knobs .mod-light,
 .mod-pedal-boxy{{{cns}}}.mod-seven-knobs .mod-light,
 .mod-pedal-boxy{{{cns}}}.mod-eight-knobs .mod-light {
-    top:253px;
+    top:453px;
 }
 
 .mod-pedal-boxy{{{cns}}}.mod-boxy50 .mod-light {
@@ -164,7 +164,7 @@
 .mod-pedal-boxy{{{cns}}}.mod-six-knobs .mod-footswitch,
 .mod-pedal-boxy{{{cns}}}.mod-seven-knobs .mod-footswitch,
 .mod-pedal-boxy{{{cns}}}.mod-eight-knobs .mod-footswitch {
-    top:285px;
+    top:485px;
 }
 
 .mod-pedal-boxy{{{cns}}}.mod-boxy50 .mod-footswitch {
