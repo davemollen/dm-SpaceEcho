@@ -1,11 +1,12 @@
+use crate::float_ext::FloatExt;
 use std::f32::consts::FRAC_PI_2;
 
 pub struct Mix;
 
 impl Mix {
   pub fn run(dry: (f32, f32), wet: (f32, f32), mix: f32) -> (f32, f32) {
-    let dry_gain = (mix * FRAC_PI_2).cos();
-    let wet_gain = (mix * FRAC_PI_2).sin();
+    let dry_gain = (mix * FRAC_PI_2).fast_cos();
+    let wet_gain = (mix * FRAC_PI_2).fast_sin();
     let dry_left = dry.0 * dry_gain;
     let dry_right = dry.1 * dry_gain;
     let wet_left = wet.0 * wet_gain;

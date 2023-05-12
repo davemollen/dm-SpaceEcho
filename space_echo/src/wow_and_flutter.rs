@@ -3,8 +3,8 @@ use crate::{
   random_oscillator::RandomOscillator,
 };
 
-const MAX_FLUTTER_TIME_IN_SECS: f32 = 3.;
-const MAX_WOW_TIME_IN_SECS: f32 = 10.;
+const MAX_FLUTTER_TIME_IN_SECS: f32 = 2.5;
+const MAX_WOW_TIME_IN_SECS: f32 = 8.;
 pub const MAX_WOW_AND_FLUTTER_TIME_IN_SECS: f32 = MAX_FLUTTER_TIME_IN_SECS + MAX_WOW_TIME_IN_SECS;
 
 pub struct WowAndFlutter {

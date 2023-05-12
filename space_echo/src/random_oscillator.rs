@@ -1,4 +1,4 @@
-use crate::delta::Delta;
+use crate::{delta::Delta, float_ext::FloatExt};
 use rand::random;
 use std::f32::consts::PI;
 
@@ -18,7 +18,7 @@ impl RandomOscillator {
   }
 
   fn cosine_interp(&self, origin: f32, target: f32, mix: f32) -> f32 {
-    let cosine_mix = (1. - (mix * PI).cos()) / 2.;
+    let cosine_mix = (1. - (mix * PI).fast_cos()) / 2.;
     origin * (1. - cosine_mix) + target * cosine_mix
   }
 
