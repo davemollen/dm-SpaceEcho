@@ -4,7 +4,7 @@ use crate::{
 };
 
 const MAX_FLUTTER_TIME_IN_SECS: f32 = 2.5;
-const MAX_WOW_TIME_IN_SECS: f32 = 8.;
+const MAX_WOW_TIME_IN_SECS: f32 = 15.;
 pub const MAX_WOW_AND_FLUTTER_TIME_IN_SECS: f32 = MAX_FLUTTER_TIME_IN_SECS + MAX_WOW_TIME_IN_SECS;
 
 pub struct WowAndFlutter {
@@ -35,21 +35,22 @@ impl WowAndFlutter {
     let wow_oscillator_freq = self.wow_modulator.run(wow_modulator_phase, 1.) * 2. + 0.5;
 
     let wow_oscillator_phase = self.wow_phasor.run(wow_oscillator_freq);
-    self.wow_oscillator.run(wow_oscillator_phase, 0.2) * MAX_WOW_TIME_IN_SECS
+    self.wow_oscillator.run(wow_oscillator_phase, 0.4) * MAX_WOW_TIME_IN_SECS
   }
 
   pub fn get_flutter_oscillator(&mut self) -> f32 {
-    let flutter_oscillator_phase = self.flutter_phasor.run(27.37891);
-    self.flutter_oscillator.run(flutter_oscillator_phase, 0.9) * MAX_FLUTTER_TIME_IN_SECS
+    let flutter_oscillator_phase = self.flutter_phasor.run(24.37891);
+    self.flutter_oscillator.run(flutter_oscillator_phase, 0.95) * MAX_FLUTTER_TIME_IN_SECS
   }
 
   pub fn run(&mut self, wow_and_flutter: f32) -> f32 {
     let wow_oscillator = self.get_wow_oscillator();
     let flutter_oscillator = self.get_flutter_oscillator();
 
-    let scaled_param = wow_and_flutter.fast_pow(3.);
-    let smoothed_param = self.smooth_param.run(scaled_param, 12.);
+    let smoothed_param = self.smooth_param.run(wow_and_flutter, 12.);
+    let flutter_gain = smoothed_param.fast_pow(3.);
+    let wow_gain = smoothed_param.fast_pow(6.);
 
-    (wow_oscillator + flutter_oscillator) * smoothed_param
+    wow_oscillator * wow_gain + flutter_oscillator * flutter_gain
   }
 }

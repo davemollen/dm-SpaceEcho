@@ -2,6 +2,7 @@ use crate::{
   average::Average,
   dc_block_stereo::DcBlockStereo,
   delay_line::{DelayLine, Interpolation},
+  duck::Duck,
   float_ext::FloatExt,
   log_smooth::LogSmooth,
   mix::Mix,
@@ -25,6 +26,7 @@ pub struct SpaceEcho {
   average: Average,
   saturation_enabled: OnePoleFilter,
   reverb: Reverb,
+  duck: Duck,
   dc_block: DcBlockStereo,
   smooth_stereo: OnePoleFilter,
   log_smooth: LogSmooth,
@@ -49,6 +51,7 @@ impl SpaceEcho {
       average: Average::new(1000),
       saturation_enabled: OnePoleFilter::new(sample_rate),
       reverb: Reverb::new(sample_rate),
+      duck: Duck::new(sample_rate),
       dc_block: DcBlockStereo::new(sample_rate),
       smooth_stereo: OnePoleFilter::new(sample_rate),
       log_smooth: LogSmooth::new(sample_rate),
@@ -203,6 +206,7 @@ impl SpaceEcho {
     reverb: f32,
     decay: f32,
     stereo: f32,
+    duck: f32,
     output_level: f32,
     mix: f32,
   ) -> (f32, f32) {
@@ -234,7 +238,8 @@ impl SpaceEcho {
       reverb,
       decay,
     );
-    let space_echo_output = self.apply_gain(reverb_output, output_level);
+    let ducking_output = self.duck.run(reverb_output, input, duck);
+    let space_echo_output = self.apply_gain(ducking_output, output_level);
 
     Mix::run(input, space_echo_output, mix)
   }

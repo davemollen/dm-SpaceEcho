@@ -10,6 +10,6 @@ fn main() {
 
   Application::new(move |cx| plugin_gui(cx, Arc::clone(&params), None))
     .title("dm-SpaceEcho")
-    .inner_size((720, 360))
+    .inner_size((760, 360))
     .run();
 }

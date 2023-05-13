@@ -33,6 +33,7 @@ pub enum ParamChangeEvent {
   SetReverb(f32),
   SetDecay(f32),
   SetStereo(f32),
+  SetDuck(f32),
   SetOutput(f32),
   SetMix(f32),
 }
@@ -152,14 +153,20 @@ impl Model for UiData {
         notify_host_parameter_changed(param.index, *value, self.host);
       }
 
-      ParamChangeEvent::SetOutput(value) => {
-        let param = &self.params.output;
+      ParamChangeEvent::SetStereo(value) => {
+        let param = &self.params.stereo;
         param.set_plain_value(*value);
         notify_host_parameter_changed(param.index, *value, self.host);
       }
 
-      ParamChangeEvent::SetStereo(value) => {
-        let param = &self.params.stereo;
+      ParamChangeEvent::SetDuck(value) => {
+        let param = &self.params.duck;
+        param.set_plain_value(*value);
+        notify_host_parameter_changed(param.index, *value, self.host);
+      }
+
+      ParamChangeEvent::SetOutput(value) => {
+        let param = &self.params.output;
         param.set_plain_value(*value);
         notify_host_parameter_changed(param.index, *value, self.host);
       }

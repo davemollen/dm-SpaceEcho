@@ -35,7 +35,7 @@ A space echo effect written in Rust.
 		a lv2:InputPort, lv2:ControlPort ;
 		lv2:index 1 ;
 		lv2:symbol "channel_mode" ;
-		lv2:name "Channel mode" ;
+		lv2:name "Channel Mode" ;
 		lv2:portProperty lv2:integer;
 		lv2:portProperty lv2:enumeration ;
 		lv2:default 1 ;
@@ -47,7 +47,7 @@ A space echo effect written in Rust.
 		a lv2:InputPort, lv2:ControlPort ;
 		lv2:index 2 ;
 		lv2:symbol "time_mode" ;
-		lv2:name "Time mode" ;
+		lv2:name "Time Mode" ;
 		lv2:portProperty lv2:integer;
 		lv2:portProperty lv2:enumeration ;
 		lv2:default 1 ;
@@ -59,7 +59,7 @@ A space echo effect written in Rust.
 		a lv2:InputPort, lv2:ControlPort ;
 		lv2:index 3 ;
 		lv2:symbol "time_link" ;
-		lv2:name "Time link" ;
+		lv2:name "Link" ;
 		lv2:portProperty lv2:integer, lv2:toggled;
 		lv2:default 0 ;
 		lv2:minimum 0 ;
@@ -68,7 +68,7 @@ A space echo effect written in Rust.
 		a lv2:InputPort, lv2:ControlPort ;
 		lv2:index 4 ;
 		lv2:symbol "time_left" ;
-		lv2:name "Time left" ;
+		lv2:name "Time Left" ;
 		lv2:portProperty pprops:logarithmic , mod:tempoRelatedDynamicScalePoints ;
 		lv2:default 250.0 ;
 		lv2:minimum 1.0 ;
@@ -78,7 +78,7 @@ A space echo effect written in Rust.
 		a lv2:InputPort, lv2:ControlPort ;
 		lv2:index 5;
 		lv2:symbol "time_right" ;
-		lv2:name "Time right" ;
+		lv2:name "Time Right" ;
 		lv2:portProperty pprops:logarithmic , mod:tempoRelatedDynamicScalePoints;
 		lv2:default 250.0 ;
 		lv2:minimum 1.0 ;
@@ -97,7 +97,7 @@ A space echo effect written in Rust.
 		a lv2:InputPort, lv2:ControlPort ;
 		lv2:index 7 ;
 		lv2:symbol "wow_and_flutter" ;
-		lv2:name "Wow & flutter" ;
+		lv2:name "Wow & Flutter" ;
 		lv2:default 0.0 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 100.0 ;
@@ -163,7 +163,6 @@ A space echo effect written in Rust.
 		lv2:index 14 ;
 		lv2:symbol "stereo" ;
 		lv2:name "Stereo" ;
-		lv2:portProperty pprops:logarithmic ;
 		lv2:default 100.0 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 100.0 ;
@@ -171,6 +170,15 @@ A space echo effect written in Rust.
 	], [
 		a lv2:InputPort, lv2:ControlPort ;
 		lv2:index 15 ;
+		lv2:symbol "duck" ;
+		lv2:name "Duck" ;
+		lv2:default 0.0 ;
+		lv2:minimum 0.0 ;
+		lv2:maximum 100.0 ;
+		units:unit units:pc
+	], [
+		a lv2:InputPort, lv2:ControlPort ;
+		lv2:index 16 ;
 		lv2:symbol "output" ;
 		lv2:name "Output" ;
 		lv2:default 0.0 ;
@@ -179,7 +187,7 @@ A space echo effect written in Rust.
 		units:unit units:db
 	], [
 		a lv2:InputPort, lv2:ControlPort ;
-		lv2:index 16 ;
+		lv2:index 17 ;
 		lv2:symbol "mix" ;
 		lv2:name "Mix" ;
 		lv2:default 50.0 ;
@@ -188,22 +196,22 @@ A space echo effect written in Rust.
 		units:unit units:pc
 	], [
 		a lv2:AudioPort, lv2:InputPort ;
-		lv2:index 17 ;
+		lv2:index 18 ;
 		lv2:symbol "in_left" ;
 		lv2:name "In left"
 	], [
 		a lv2:AudioPort, lv2:InputPort ;
-		lv2:index 18 ;
+		lv2:index 19 ;
 		lv2:symbol "in_right" ;
 		lv2:name "In right"
 	] , [
 		a lv2:AudioPort, lv2:OutputPort ;
-		lv2:index 19 ;
+		lv2:index 20 ;
 		lv2:symbol "out_left" ;
 		lv2:name "Out left"
 	] , [
 		a lv2:AudioPort, lv2:OutputPort ;
-		lv2:index 20 ;
+		lv2:index 21 ;
 		lv2:symbol "out_right" ;
 		lv2:name "Out right"
 	] .

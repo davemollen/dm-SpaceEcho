@@ -2,6 +2,7 @@ mod average;
 mod dc_block_stereo;
 mod delay_line;
 mod delta;
+mod duck;
 mod float_ext;
 mod log_smooth;
 mod mix;

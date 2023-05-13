@@ -45,7 +45,7 @@ impl Plugin for DmSpaceEcho {
       version: 1,
       inputs: 2,
       outputs: 2,
-      parameters: 17,
+      parameters: 18,
       unique_id: 1358,
       f64_precision: true,
       category: Category::Effect,
@@ -67,6 +67,7 @@ impl Plugin for DmSpaceEcho {
     let decay = self.params.decay.get_value();
     let output_level = self.params.output.get_value();
     let stereo = self.params.stereo.get_value();
+    let duck = self.params.duck.get_value();
     let mix = self.params.mix.get_value();
     let channel_mode = self.params.channel_mode.get_value();
     let time_mode = self.params.time_mode.get_value();
@@ -96,6 +97,7 @@ impl Plugin for DmSpaceEcho {
         reverb,
         decay,
         stereo,
+        duck,
         output_level,
         mix,
       );

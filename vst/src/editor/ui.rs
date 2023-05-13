@@ -148,7 +148,6 @@ pub fn plugin_gui(cx: &mut Context, params: Arc<SpaceEchoParameters>, host: Opti
           |val| ParamChangeEvent::SetWowAndFlutter(val),
         );
       })
-      .top(Pixels(-32.0))
       .child_space(Stretch(1.0))
       .row_between(Pixels(10.0));
 
@@ -168,7 +167,7 @@ pub fn plugin_gui(cx: &mut Context, params: Arc<SpaceEchoParameters>, host: Opti
           |val| ParamChangeEvent::SetDecay(val),
         );
       })
-      .top(Pixels(-64.0))
+      .top(Pixels(-32.0))
       .child_space(Stretch(1.0))
       .row_between(Pixels(10.0));
 
@@ -180,6 +179,19 @@ pub fn plugin_gui(cx: &mut Context, params: Arc<SpaceEchoParameters>, host: Opti
           |params| &params.stereo,
           |val| ParamChangeEvent::SetStereo(val),
         );
+        ParamKnob::new(
+          cx,
+          UiData::params,
+          &params.duck,
+          |params| &params.duck,
+          |val| ParamChangeEvent::SetDuck(val),
+        );
+      })
+      .top(Pixels(-64.0))
+      .child_space(Stretch(1.0))
+      .row_between(Pixels(10.0));
+
+      VStack::new(cx, |cx| {
         ParamKnob::new(
           cx,
           UiData::params,
@@ -195,6 +207,7 @@ pub fn plugin_gui(cx: &mut Context, params: Arc<SpaceEchoParameters>, host: Opti
           |val| ParamChangeEvent::SetMix(val),
         );
       })
+      .top(Pixels(-96.0))
       .child_space(Stretch(1.0))
       .row_between(Pixels(10.0));
     })
@@ -203,6 +216,6 @@ pub fn plugin_gui(cx: &mut Context, params: Arc<SpaceEchoParameters>, host: Opti
     Label::new(cx, "dm-SpaceEcho")
       .class("plugin-name")
       .top(Percentage(82.0))
-      .left(Percentage(55.0));
+      .left(Percentage(66.66));
   });
 }

@@ -23,6 +23,7 @@ pub struct SpaceEchoParameters {
   pub reverb: FloatParam,
   pub decay: FloatParam,
   pub stereo: FloatParam,
+  pub duck: FloatParam,
   pub output: FloatParam,
   pub mix: FloatParam,
 }
@@ -154,10 +155,15 @@ impl Default for SpaceEchoParameters {
         .with_value_to_string(v2s_f32_percentage(2))
         .with_string_to_value(s2v_f32_percentage()),
 
+      duck: FloatParam::new("Duck", 0., 15, FloatRange::Linear { min: 0., max: 1. })
+        .with_unit(" %")
+        .with_value_to_string(v2s_f32_percentage(2))
+        .with_string_to_value(s2v_f32_percentage()),
+
       output: FloatParam::new(
         "Output",
         0.,
-        15,
+        16,
         FloatRange::SymmetricalSkewed {
           min: -100.,
           max: 12.,
@@ -175,7 +181,7 @@ impl Default for SpaceEchoParameters {
         }
       })),
 
-      mix: FloatParam::new("Mix", 0.5, 16, FloatRange::Linear { min: 0., max: 1. })
+      mix: FloatParam::new("Mix", 0.5, 17, FloatRange::Linear { min: 0., max: 1. })
         .with_unit(" %")
         .with_value_to_string(v2s_f32_percentage(2))
         .with_string_to_value(s2v_f32_percentage()),
@@ -201,8 +207,9 @@ impl PluginParameters for SpaceEchoParameters {
       12 => self.reverb.get_normalized_value(),
       13 => self.decay.get_normalized_value(),
       14 => self.stereo.get_normalized_value(),
-      15 => self.output.get_normalized_value(),
-      16 => self.mix.get_normalized_value(),
+      15 => self.duck.get_normalized_value(),
+      16 => self.output.get_normalized_value(),
+      17 => self.mix.get_normalized_value(),
       _ => 0.,
     }
   }
@@ -224,8 +231,9 @@ impl PluginParameters for SpaceEchoParameters {
       12 => self.reverb.get_display_value(true),
       13 => self.decay.get_display_value(true),
       14 => self.stereo.get_display_value(true),
-      15 => self.output.get_display_value(true),
-      16 => self.mix.get_display_value(true),
+      15 => self.duck.get_display_value(true),
+      16 => self.output.get_display_value(true),
+      17 => self.mix.get_display_value(true),
       _ => "".to_string(),
     }
   }
@@ -247,8 +255,9 @@ impl PluginParameters for SpaceEchoParameters {
       12 => self.reverb.name,
       13 => self.decay.name,
       14 => self.stereo.name,
-      15 => self.output.name,
-      16 => self.mix.name,
+      15 => self.duck.name,
+      16 => self.output.name,
+      17 => self.mix.name,
       _ => "",
     }
     .to_string()
@@ -285,8 +294,9 @@ impl PluginParameters for SpaceEchoParameters {
       12 => self.reverb.set_plain_value(val),
       13 => self.decay.set_plain_value(val),
       14 => self.stereo.set_plain_value(val),
-      15 => self.output.set_plain_value(val),
-      16 => self.mix.set_plain_value(val),
+      15 => self.duck.set_plain_value(val),
+      16 => self.output.set_plain_value(val),
+      17 => self.mix.set_plain_value(val),
       _ => (),
     }
   }
