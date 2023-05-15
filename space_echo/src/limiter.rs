@@ -1,14 +1,20 @@
-use crate::slide::Slide;
+mod boxcar_filter;
+mod slew_release;
+use boxcar_filter::BoxcarFilter;
+use slew_release::SlewRelease;
 
 const ATTACK_TIME: f32 = 3.;
-const RELEASE_TIME: f32 = 60.;
-const THRESHOLD: f32 = 0.891251;
+const HOLD_TIME: f32 = 15.;
+const RELEASE_TIME: f32 = 40.;
+const LIMIT: f32 = 1.;
 
 pub struct Limiter {
   buffer: Vec<(f32, f32)>,
-  max_gain: f32,
-  index: usize,
-  slide: Slide,
+  moving_min_temp: f32,
+  moving_min: f32,
+  buffer_index: usize,
+  box_carfilter: BoxcarFilter,
+  slew_release: SlewRelease,
 }
 
 impl Limiter {
@@ -17,63 +23,69 @@ impl Limiter {
 
     Self {
       buffer: vec![(0., 0.); buffer_length],
-      max_gain: 0.,
-      index: 0,
-      slide: Slide::new(sample_rate),
+      moving_min_temp: 1.,
+      moving_min: 1.,
+      buffer_index: 0,
+      box_carfilter: BoxcarFilter::new(buffer_length),
+      slew_release: SlewRelease::new(sample_rate),
     }
   }
 
-  fn wrap(&self, index: usize) -> usize {
+  fn wrap(&self, buffer_index: usize) -> usize {
     let buffer_len = self.buffer.len();
-    if index >= buffer_len {
-      index - buffer_len
+    if buffer_index >= buffer_len {
+      buffer_index - buffer_len
     } else {
-      index
+      buffer_index
     }
   }
 
-  fn get_max_gain(&mut self) -> f32 {
-    if self.index == 0 {
-      self.max_gain = self.buffer.iter().fold(0., |max, item| {
-        let item_max = item.0.max(item.1);
-        item_max.max(max)
-      });
-      self.max_gain
-    } else {
-      self.max_gain
-    }
+  fn get_delay_output(&self) -> (f32, f32) {
+    let output = self.buffer[self.wrap(self.buffer_index + 1)];
+    (output.0, output.1)
   }
 
-  fn get_limiter_gain(&mut self, max_gain: f32) -> f32 {
-    let limiter_gain = if max_gain > THRESHOLD {
-      THRESHOLD / max_gain
+  fn get_gain_reduction(&self, input: (f32, f32)) -> f32 {
+    let gain = input.0.abs().max(input.1.abs());
+    if gain > LIMIT {
+      LIMIT / gain
     } else {
       1.
-    };
-    // let slewed_limiter_gain = self.slew_release.run(limiter_gain, RELEASE_TIME);
-    // self.box_carfilter.run(slewed_limiter_gain)
-    self.slide.run(limiter_gain, RELEASE_TIME, ATTACK_TIME)
+    }
+  }
+
+  fn get_moving_min(&mut self, input: (f32, f32)) -> f32 {
+    /*
+    Hold on to moving_in for x samples when moving_in < 1.
+    Unless moving_min_temp < moving_in
+     */
+    let gain_reduction = self.get_gain_reduction(input);
+    self.moving_min_temp = gain_reduction.min(self.moving_min_temp);
+
+    if self.buffer_index == 0 {
+      self.moving_min = self.moving_min_temp;
+      self.moving_min_temp = 1.;
+    }
+    self.moving_min
+  }
+
+  fn apply_filters(&mut self, moving_min: f32) -> f32 {
+    let slewed_moving_min = self.slew_release.run(moving_min, RELEASE_TIME);
+    self.box_carfilter.run(slewed_moving_min)
   }
 
   fn write_to_buffer(&mut self, input: (f32, f32)) {
-    self.buffer[self.index] = input;
-    self.index = self.wrap(self.index + 1);
-  }
-
-  fn read_from_buffer(&self) -> (f32, f32) {
-    self.buffer[self.wrap(self.index + 1)]
+    self.buffer[self.buffer_index] = input;
+    self.buffer_index = self.wrap(self.buffer_index + 1);
   }
 
   pub fn run(&mut self, input: (f32, f32)) -> (f32, f32) {
-    let max_gain = self.get_max_gain();
-    let limiter_gain = self.get_limiter_gain(max_gain);
-    let delayed_input = self.read_from_buffer();
+    let delay_output = self.get_delay_output();
+    let moving_min = self.get_moving_min(input);
+    let limiter_gain = self.apply_filters(moving_min);
 
     self.write_to_buffer(input);
-    (
-      delayed_input.0 * limiter_gain,
-      delayed_input.1 * limiter_gain,
-    )
+    (delay_output.0 * limiter_gain, delay_output.1 * limiter_gain)
   }
 }
 
@@ -82,25 +94,35 @@ mod tests {
   use crate::limiter::Limiter;
 
   #[test]
-  fn get_max_gain() {
-    let mut limiter = Limiter::new(1250.);
+  fn get_moving_min() {
+    let mut limiter = Limiter::new(1000.);
     assert_eq!(limiter.buffer.len(), 4);
 
-    assert_eq!(limiter.index, 0);
-    assert_eq!(limiter.max_gain, 0.);
-    limiter.run((0., 0.));
-    limiter.run((0.3, 0.2));
-    limiter.run((0.8, 0.1));
-    limiter.run((0.3, 0.05));
-    limiter.run((0.3, 0.05));
-    assert_eq!(limiter.index, 1);
-    assert_eq!(limiter.max_gain, 0.8);
+    limiter.buffer_index = 0;
+    assert_eq!(limiter.get_moving_min((0.01, 0.01)), 1.);
 
-    limiter.run((0.8, 1.4));
-    assert_eq!(limiter.max_gain, 0.8);
-    limiter.run((0.2, 0.1));
-    limiter.run((0.2, 0.1));
-    limiter.run((0.2, 0.1));
-    assert_eq!(limiter.max_gain, 1.4);
+    limiter.buffer_index = 1;
+    assert_eq!(limiter.get_moving_min((0.3, 0.2)), 1.);
+
+    limiter.buffer_index = 2;
+    assert_eq!(limiter.get_moving_min((1.4, 0.1)), 1.);
+
+    limiter.buffer_index = 3;
+    assert_eq!(limiter.get_moving_min((0.6, 0.1)), 1.);
+
+    limiter.buffer_index = 0;
+    assert_eq!(limiter.get_moving_min((0.6, 0.04)), 1.4_f32.recip());
+
+    limiter.buffer_index = 1;
+    assert_eq!(limiter.get_moving_min((0.6, 0.04)), 1.4_f32.recip());
+
+    limiter.buffer_index = 2;
+    assert_eq!(limiter.get_moving_min((0.6, 2.8)), 1.4_f32.recip());
+
+    limiter.buffer_index = 3;
+    assert_eq!(limiter.get_moving_min((1.6, 0.3)), 1.4_f32.recip());
+
+    limiter.buffer_index = 0;
+    assert_eq!(limiter.get_moving_min((1.2, 0.3)), 2.8_f32.recip());
   }
 }

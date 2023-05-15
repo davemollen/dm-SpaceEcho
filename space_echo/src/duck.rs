@@ -1,4 +1,6 @@
-use crate::{average::Average, float_ext::FloatExt, slide::Slide};
+mod slide;
+use crate::{average::Average, float_ext::FloatExt};
+use slide::Slide;
 
 // TODO: check if replacing average with abs() works sufficiently
 
@@ -19,7 +21,6 @@ impl Duck {
     if duck == 0. {
       input
     } else {
-      // TODO: check if negative dbtoa() calls work
       let threshold = (duck * -60.).dbtoa();
       let summed_side_chain_input = (side_chain_input.0 + side_chain_input.1) * 0.5;
       let average = self.average.run(summed_side_chain_input);
