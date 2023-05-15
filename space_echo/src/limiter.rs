@@ -35,7 +35,7 @@ impl Limiter {
   fn get_max_gain(&mut self) -> f32 {
     if self.index == 0 {
       self.max_gain = self.buffer.iter().fold(0., |max, item| {
-        let item_max = item.0.max(item.1);
+        let item_max = item.0.abs().max(item.1.abs());
         item_max.max(max)
       });
       self.max_gain
@@ -50,8 +50,6 @@ impl Limiter {
     } else {
       1.
     };
-    // let slewed_limiter_gain = self.slew_release.run(limiter_gain, RELEASE_TIME);
-    // self.box_carfilter.run(slewed_limiter_gain)
     self.slide.run(limiter_gain, RELEASE_TIME, ATTACK_TIME)
   }
 
