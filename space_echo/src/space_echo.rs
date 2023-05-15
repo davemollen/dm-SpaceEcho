@@ -4,6 +4,7 @@ use crate::{
   delay_line::{DelayLine, Interpolation},
   duck::Duck,
   float_ext::FloatExt,
+  limiter::Limiter,
   log_smooth::LogSmooth,
   mix::Mix,
   one_pole_filter::OnePoleFilter,
@@ -30,6 +31,7 @@ pub struct SpaceEcho {
   dc_block: DcBlockStereo,
   smooth_stereo: OnePoleFilter,
   log_smooth: LogSmooth,
+  limiter: Limiter,
 }
 
 impl SpaceEcho {
@@ -48,13 +50,14 @@ impl SpaceEcho {
       wow_and_flutter: WowAndFlutter::new(sample_rate),
       highpass_filter: TSKFilterStereo::new(sample_rate),
       lowpass_filter: TSKFilterStereo::new(sample_rate),
-      average: Average::new(1000),
+      average: Average::new((1000. / 44100. * sample_rate) as usize),
       saturation_enabled: OnePoleFilter::new(sample_rate),
       reverb: Reverb::new(sample_rate),
       duck: Duck::new(sample_rate),
       dc_block: DcBlockStereo::new(sample_rate),
       smooth_stereo: OnePoleFilter::new(sample_rate),
       log_smooth: LogSmooth::new(sample_rate),
+      limiter: Limiter::new(sample_rate),
     }
   }
 
@@ -209,6 +212,7 @@ impl SpaceEcho {
     duck: f32,
     output_level: f32,
     mix: f32,
+    limiter: bool,
   ) -> (f32, f32) {
     let stereo = self.smooth_stereo.run(stereo, 7.);
 
@@ -240,7 +244,11 @@ impl SpaceEcho {
     );
     let ducking_output = self.duck.run(reverb_output, input, duck);
     let space_echo_output = self.apply_gain(ducking_output, output_level);
-
-    Mix::run(input, space_echo_output, mix)
+    let mix_output = Mix::run(input, space_echo_output, mix);
+    if limiter {
+      self.limiter.run(mix_output)
+    } else {
+      mix_output
+    }
   }
 }

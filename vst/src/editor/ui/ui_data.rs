@@ -36,6 +36,7 @@ pub enum ParamChangeEvent {
   SetDuck(f32),
   SetOutput(f32),
   SetMix(f32),
+  SetLimiter(bool),
 }
 
 #[derive(Lens)]
@@ -175,6 +176,16 @@ impl Model for UiData {
         let param = &self.params.mix;
         param.set_plain_value(*value);
         notify_host_parameter_changed(param.index, *value, self.host);
+      }
+
+      ParamChangeEvent::SetLimiter(value) => {
+        let param = &self.params.limiter;
+        param.set_plain_value(*value);
+        notify_host_parameter_changed(
+          param.index,
+          param.preview_normalized_value(*value),
+          self.host,
+        );
       }
     });
   }

@@ -4,6 +4,21 @@
 @import url(/fonts/questrial/stylesheet.css);
 
 
+.knob-group {
+    border-radius: 8px;
+}
+
+.knob-group.green {
+    background-color: green;
+}
+
+.output-container {
+    display: flex;
+    flex-direction: row;
+    background-color: green;
+    border-radius: 8px;
+    padding: 4px;
+}
 /* = CONTAINER
 ================================================ */
 .mod-pedal-boxy{{{cns}}} {
@@ -182,6 +197,8 @@
     margin:20px !important;
     position:relative;
     text-align:center;
+    display: flex;
+    flex-direction: row;
     z-index:30;
 }
 .mod-pedal-boxy{{{cns}}} .top {
@@ -198,7 +215,7 @@
 }
 
 .mod-pedal-boxy{{{cns}}} .mod-control-group .mod-knob {
-    overflow:hidden;
+    overflow:visible;
     position:relative;
 }
 
@@ -217,6 +234,11 @@
     right:0;
     text-transform:uppercase;
 }
+.mod-pedal-boxy{{{cns}}} .mod-control-group .mod-knob > span.mod-knob-title.two-lines {
+    height:23px;
+    bottom:-12px;
+}
+
 
 /* ONE KNOB */
 .mod-pedal-boxy{{{cns}}}.mod-one-knob .mod-control-group .mod-knob .mod-knob-image {

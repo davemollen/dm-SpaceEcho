@@ -206,8 +206,15 @@ pub fn plugin_gui(cx: &mut Context, params: Arc<SpaceEchoParameters>, host: Opti
           |params| &params.mix,
           |val| ParamChangeEvent::SetMix(val),
         );
+        ParamCheckbox::new(
+          cx,
+          UiData::params,
+          &params.limiter,
+          |params| &params.limiter,
+          |val| ParamChangeEvent::SetLimiter(val),
+        );
       })
-      .top(Pixels(-96.0))
+      .top(Pixels(-64.0))
       .child_space(Stretch(1.0))
       .row_between(Pixels(10.0));
     })

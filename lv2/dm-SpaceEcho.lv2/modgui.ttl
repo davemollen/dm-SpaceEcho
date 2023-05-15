@@ -12,8 +12,7 @@
         modgui:brand "DM" ;
         modgui:label "SpaceEcho" ;
         modgui:model "boxy" ;
-        modgui:panel "8-knobs" ;
-        modgui:color "petrol" ;
+        modgui:color "black" ;
         modgui:knob "steel" ;
         modgui:port [
             lv2:index 0 ;

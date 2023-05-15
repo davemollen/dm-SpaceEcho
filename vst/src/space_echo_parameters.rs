@@ -26,6 +26,7 @@ pub struct SpaceEchoParameters {
   pub duck: FloatParam,
   pub output: FloatParam,
   pub mix: FloatParam,
+  pub limiter: BoolParam,
 }
 
 impl Default for SpaceEchoParameters {
@@ -185,6 +186,8 @@ impl Default for SpaceEchoParameters {
         .with_unit(" %")
         .with_value_to_string(v2s_f32_percentage(2))
         .with_string_to_value(s2v_f32_percentage()),
+
+      limiter: BoolParam::new("Limiter", false, 18),
     }
   }
 }
@@ -210,6 +213,7 @@ impl PluginParameters for SpaceEchoParameters {
       15 => self.duck.get_normalized_value(),
       16 => self.output.get_normalized_value(),
       17 => self.mix.get_normalized_value(),
+      18 => self.limiter.get_normalized_value(),
       _ => 0.,
     }
   }
@@ -234,6 +238,7 @@ impl PluginParameters for SpaceEchoParameters {
       15 => self.duck.get_display_value(true),
       16 => self.output.get_display_value(true),
       17 => self.mix.get_display_value(true),
+      18 => self.limiter.get_display_value(true),
       _ => "".to_string(),
     }
   }
@@ -258,6 +263,7 @@ impl PluginParameters for SpaceEchoParameters {
       15 => self.duck.name,
       16 => self.output.name,
       17 => self.mix.name,
+      18 => self.limiter.name,
       _ => "",
     }
     .to_string()
@@ -297,6 +303,7 @@ impl PluginParameters for SpaceEchoParameters {
       15 => self.duck.set_plain_value(val),
       16 => self.output.set_plain_value(val),
       17 => self.mix.set_plain_value(val),
+      18 => self.limiter.set_normalized_value(val),
       _ => (),
     }
   }
