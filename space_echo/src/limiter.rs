@@ -13,6 +13,8 @@ pub struct Limiter {
   moving_min_temp: f32,
   moving_min: f32,
   buffer_index: usize,
+  hold_index: u32,
+  hold_length: u32,
   box_carfilter: BoxcarFilter,
   slew_release: SlewRelease,
 }
@@ -20,12 +22,15 @@ pub struct Limiter {
 impl Limiter {
   pub fn new(sample_rate: f32) -> Self {
     let buffer_length = (ATTACK_TIME * 0.001 * sample_rate + 1.) as usize;
+    let hold_length = (HOLD_TIME * 0.001 * sample_rate + 1.) as u32;
 
     Self {
       buffer: vec![(0., 0.); buffer_length],
       moving_min_temp: 1.,
       moving_min: 1.,
       buffer_index: 0,
+      hold_index: 0,
+      hold_length,
       box_carfilter: BoxcarFilter::new(buffer_length),
       slew_release: SlewRelease::new(sample_rate),
     }
@@ -55,16 +60,24 @@ impl Limiter {
   }
 
   fn get_moving_min(&mut self, input: (f32, f32)) -> f32 {
-    /*
-    Hold on to moving_in for x samples when moving_in < 1.
-    Unless moving_min_temp < moving_in
-     */
     let gain_reduction = self.get_gain_reduction(input);
     self.moving_min_temp = gain_reduction.min(self.moving_min_temp);
 
     if self.buffer_index == 0 {
-      self.moving_min = self.moving_min_temp;
-      self.moving_min_temp = 1.;
+      /*
+      Hold on to moving_in for HOLD_TIME when moving_in < 1.
+      Unless moving_min_temp < moving_in
+       */
+      if self.moving_min < 1.
+        && self.moving_min <= self.moving_min_temp
+        && self.hold_index < self.hold_length
+      {
+        self.hold_index += 1;
+      } else {
+        self.moving_min = self.moving_min_temp;
+        self.moving_min_temp = 1.;
+        self.hold_index = 0;
+      }
     }
     self.moving_min
   }
@@ -124,5 +137,38 @@ mod tests {
 
     limiter.buffer_index = 0;
     assert_eq!(limiter.get_moving_min((1.2, 0.3)), 2.8_f32.recip());
+  }
+
+  #[test]
+  fn hold() {
+    let mut limiter = Limiter::new(1000.);
+    assert_eq!(limiter.buffer.len(), 4);
+
+    limiter.buffer_index = 0;
+    assert_eq!(limiter.get_moving_min((0.01, 0.01)), 1.);
+
+    limiter.buffer_index = 1;
+    assert_eq!(limiter.get_moving_min((0.3, 0.2)), 1.);
+
+    limiter.buffer_index = 2;
+    assert_eq!(limiter.get_moving_min((1.4, 0.1)), 1.);
+
+    limiter.buffer_index = 3;
+    assert_eq!(limiter.get_moving_min((0.6, 0.1)), 1.);
+
+    limiter.buffer_index = 0;
+    assert_eq!(limiter.get_moving_min((0.6, 0.04)), 1.4_f32.recip());
+
+    limiter.buffer_index = 1;
+    assert_eq!(limiter.get_moving_min((0.6, 0.04)), 1.4_f32.recip());
+
+    limiter.buffer_index = 2;
+    assert_eq!(limiter.get_moving_min((0.6, 1.2)), 1.4_f32.recip());
+
+    limiter.buffer_index = 3;
+    assert_eq!(limiter.get_moving_min((0.6, 0.3)), 1.4_f32.recip());
+
+    limiter.buffer_index = 0;
+    assert_eq!(limiter.get_moving_min((1.2, 0.3)), 1.4_f32.recip());
   }
 }
