@@ -28,8 +28,7 @@ impl Average {
   }
 
   fn get_oldest_buffer_entry(&self) -> f32 {
-    let index = self.wrap(self.write_pointer + 1);
-    self.buffer[index]
+    self.buffer[self.write_pointer]
   }
 
   pub fn run(&mut self, input: f32) -> f32 {

@@ -11,6 +11,7 @@ mod one_pole_filter;
 mod phasor;
 mod random_oscillator;
 mod reverb;
+mod slide;
 mod space_echo;
 mod tsk_filter_stereo;
 mod variable_delay_read;

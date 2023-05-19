@@ -18,13 +18,11 @@ impl Slide {
     if difference.is_subnormal() {
       input
     } else {
-      let out = difference
+      self.z += difference
         * self
           .mstosamps(if input > self.z { slide_up } else { slide_down })
-          .recip()
-        + self.z;
-      self.z = out;
-      out
+          .recip();
+      self.z
     }
   }
 }

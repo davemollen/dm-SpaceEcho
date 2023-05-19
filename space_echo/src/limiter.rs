@@ -1,5 +1,6 @@
 mod boxcar_filter;
 mod slew_release;
+use crate::slide::Slide;
 use boxcar_filter::BoxcarFilter;
 use slew_release::SlewRelease;
 
@@ -17,12 +18,13 @@ pub struct Limiter {
   hold_length: u32,
   box_carfilter: BoxcarFilter,
   slew_release: SlewRelease,
+  slide: Slide,
 }
 
 impl Limiter {
   pub fn new(sample_rate: f32) -> Self {
-    let buffer_length = (ATTACK_TIME * 0.001 * sample_rate + 1.) as usize;
-    let hold_length = (HOLD_TIME * 0.001 * sample_rate + 1.) as u32;
+    let buffer_length = (ATTACK_TIME * 0.001 * sample_rate) as usize;
+    let hold_length = (HOLD_TIME * 0.001 * sample_rate) as u32;
 
     Self {
       buffer: vec![(0., 0.); buffer_length],
@@ -33,6 +35,7 @@ impl Limiter {
       hold_length,
       box_carfilter: BoxcarFilter::new(buffer_length),
       slew_release: SlewRelease::new(sample_rate),
+      slide: Slide::new(sample_rate),
     }
   }
 
@@ -46,7 +49,7 @@ impl Limiter {
   }
 
   fn get_delay_output(&self) -> (f32, f32) {
-    let output = self.buffer[self.wrap(self.buffer_index + 1)];
+    let output = self.buffer[self.buffer_index];
     (output.0, output.1)
   }
 
@@ -63,28 +66,27 @@ impl Limiter {
     let gain_reduction = self.get_gain_reduction(input);
     self.moving_min_temp = gain_reduction.min(self.moving_min_temp);
 
-    if self.buffer_index == 0 {
-      /*
-      Hold on to moving_in for HOLD_TIME when moving_in < 1.
-      Unless moving_min_temp < moving_in
-       */
-      if self.moving_min < 1.
-        && self.moving_min <= self.moving_min_temp
-        && self.hold_index < self.hold_length
-      {
-        self.hold_index += 1;
-      } else {
-        self.moving_min = self.moving_min_temp;
-        self.moving_min_temp = 1.;
-        self.hold_index = 0;
-      }
+    /*
+    Hold on to moving_min for HOLD_TIME when moving_min < 1.
+    Unless moving_min_temp < moving_min
+     */
+    if self.moving_min < 1.
+      && self.moving_min < self.moving_min_temp
+      && self.hold_index <= self.hold_length
+    {
+      self.hold_index += 1;
+    } else if self.buffer_index == 0 {
+      self.moving_min = self.moving_min_temp;
+      self.moving_min_temp = 1.;
+      self.hold_index = 0;
     }
     self.moving_min
   }
 
   fn apply_filters(&mut self, moving_min: f32) -> f32 {
-    let slewed_moving_min = self.slew_release.run(moving_min, RELEASE_TIME);
-    self.box_carfilter.run(slewed_moving_min)
+    // let slewed_moving_min = self.slew_release.run(moving_min, RELEASE_TIME);
+    // self.box_carfilter.run(slewed_moving_min)
+    self.slide.run(moving_min, RELEASE_TIME, 0.5)
   }
 
   fn write_to_buffer(&mut self, input: (f32, f32)) {
