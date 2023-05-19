@@ -1,15 +1,15 @@
-pub struct Average {
+pub struct BoxcarFilter {
   buffer: Vec<f32>,
   write_pointer: usize,
-  previous_mean: f32,
+  previous_sum: f32,
 }
 
-impl Average {
+impl BoxcarFilter {
   pub fn new(length: usize) -> Self {
     Self {
       buffer: vec![0.0; length],
       write_pointer: 0,
-      previous_mean: 0.,
+      previous_sum: 0.,
     }
   }
 
@@ -33,15 +33,10 @@ impl Average {
 
   pub fn run(&mut self, input: f32) -> f32 {
     let n = self.buffer.len();
-    let rdiv = (n as f32).recip();
+    let sum = input + self.previous_sum - self.get_oldest_buffer_entry();
+    self.previous_sum = sum;
+    self.write(input);
 
-    let squared = input * input;
-    let oldest_buffer_entry = self.get_oldest_buffer_entry();
-    let mean = squared + self.previous_mean - oldest_buffer_entry;
-
-    self.previous_mean = mean;
-    self.write(squared);
-
-    (mean * rdiv).sqrt()
+    sum / n as f32
   }
 }
