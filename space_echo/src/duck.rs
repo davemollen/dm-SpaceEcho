@@ -1,7 +1,6 @@
 use crate::{float_ext::FloatExt, slide::Slide};
 
 // TODO: check if replacing average with abs() works sufficiently
-
 pub struct Duck {
   // average: Average,
   slide: Slide,
@@ -27,7 +26,7 @@ impl Duck {
       } else {
         1.
       };
-      let duck_gain = self.slide.run(slide_input, 120., 1.);
+      let duck_gain = self.slide.run(slide_input, 60., 1.);
       (input.0 * duck_gain, input.1 * duck_gain)
     }
   }

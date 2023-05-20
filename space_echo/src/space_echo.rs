@@ -91,8 +91,8 @@ impl SpaceEcho {
 
     match time_mode {
       0 => {
-        let time_left = self.log_smooth.run(time_left, 0.333);
-        let time_right = self.log_smooth.run(time_right, 0.333);
+        let time_left = self.log_smooth.run(time_left, 0.4);
+        let time_right = self.log_smooth.run(time_right, 0.4);
 
         let delay_out_left = self
           .delay_line_left
