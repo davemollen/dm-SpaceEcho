@@ -11,9 +11,6 @@
         modgui:javascript <modgui/javascript.js> ;
         modgui:brand "DM" ;
         modgui:label "SpaceEcho" ;
-        modgui:model "boxy" ;
-        modgui:color "black" ;
-        modgui:knob "steel" ;
         modgui:port [
             lv2:index 0 ;
             lv2:symbol "input" ;
@@ -21,15 +18,15 @@
         ] , [
             lv2:index 1 ;
             lv2:symbol "channel_mode" ;
-            lv2:name "Channel Mode" ;
+            lv2:name "Chnnel Mode" ;
         ] , [
             lv2:index 2 ;
             lv2:symbol "time_mode" ;
-            lv2:name "Time mode" ;
+            lv2:name "Time Mode" ;
         ] , [
             lv2:index 3 ;
             lv2:symbol "time_link" ;
-            lv2:name "Link" ;
+            lv2:name "Time Link" ;
         ] , [
             lv2:index 4 ;
             lv2:symbol "time_left" ;
@@ -49,19 +46,19 @@
         ] , [
             lv2:index 8 ;
             lv2:symbol "highpass_freq" ;
-            lv2:name "Highpass" ;
+            lv2:name "Highpass Freq" ;
         ] , [
             lv2:index 9 ;
             lv2:symbol "highpass_res" ;
-            lv2:name "Res" ;
+            lv2:name "Highpass Res" ;
         ] , [
             lv2:index 10 ;
             lv2:symbol "lowpass_freq" ;
-            lv2:name "Lowpass" ;
+            lv2:name "Lowpass Freq" ;
         ] , [
             lv2:index 11 ;
             lv2:symbol "lowpass_res" ;
-            lv2:name "Res" ;
+            lv2:name "Lowpass Res" ;
         ] , [
             lv2:index 12 ;
             lv2:symbol "reverb" ;
@@ -86,5 +83,9 @@
             lv2:index 17 ;
             lv2:symbol "mix" ;
             lv2:name "Mix" ;
+        ] , [
+            lv2:index 18 ;
+            lv2:symbol "limiter" ;
+            lv2:name "Limiter" ;
         ] ;
     ] .

@@ -1,189 +1,248 @@
 <div
-  class="mod-pedal mod-pedal-boxy{{{cns}}} mod-eight-knobs mod-boxy100 mod-{{color}} {{color}}"
+  class="mod-pedal{{{cns}}}"
 >
   <div mod-role="drag-handle" class="mod-drag-handle"></div>
-  <div class="mod-plugin-brand"><h1>{{brand}}</h1></div>
-  <div class="mod-plugin-name"><h1>{{label}}</h1></div>
-  <div class="mod-light on" mod-role="bypass-light"></div>
-  <div class="mod-control-group mod-{{knob}} clearfix">
-    <div class="knob-group">
-      <div class="mod-knob">
-        <div
-          class="mod-knob-image"
-          mod-role="input-control-port"
-          mod-port-symbol="input"
-        />
-        <span class="mod-knob-title">Input</span>
-      </div>
+  
+  <section class="input mod-control-group">
+    <div class="mod-knob">
+      <div
+        class="mod-knob-image"
+        mod-role="input-control-port"
+        mod-port-symbol="input"
+      ></div>
+      <div class="mod-param-title">Input</div>
     </div>
+  </section>
 
-    <div class="knob-group">
-      <div class="mod-knob">
-        <div
-          class="mod-knob-image"
-          mod-role="input-control-port"
-          mod-port-symbol="channel_mode"
-        />
-        <span class="mod-knob-title">Channel Mode</span>
+  <section class="delay-time">
+    <div class="row mod-control-group">
+      <div class="mod-toggle">
+        <div class="mod-light-container">
+          <div class="mod-light"></div>
+          <div
+            class="mod-toggle-image"
+            mod-role="input-control-port"
+            mod-port-symbol="time_link"
+          >
+          </div>
+        </div>
+        <div class="mod-param-title">Link</div>
       </div>
-      <div class="mod-knob">
-        <div
-          class="mod-knob-image"
-          mod-role="input-control-port"
-          mod-port-symbol="time_mode"
-        />
-        <span class="mod-knob-title">Time Mode</span>
-      </div>
-    </div>
-
-    <div class="knob-group">
-      <div class="mod-knob">
-        <div
-          class="mod-knob-image"
-          mod-role="input-control-port"
-          mod-port-symbol="time_link"
-        />
-        <span class="mod-knob-title">Time Link</span>
-      </div>
-    </div>
-
-    <div class="knob-group green">
+    
       <div class="mod-knob">
         <div
           class="mod-knob-image"
           mod-role="input-control-port"
           mod-port-symbol="time_left"
-        />
-        <span class="mod-knob-title">Time Left</span>
+        ></div>
+        <div class="mod-param-title">Time Left</div>
       </div>
+      
       <div class="mod-knob">
         <div
           class="mod-knob-image"
           mod-role="input-control-port"
           mod-port-symbol="time_right"
-        />
-        <span class="mod-knob-title">Time Right</span>
+        ></div>
+        <div class="mod-param-title">Time Right</div>
       </div>
-    </div>
-
-    <div class="knob-group">
+      
       <div class="mod-knob">
         <div
           class="mod-knob-image"
           mod-role="input-control-port"
           mod-port-symbol="feedback"
-        />
-        <span class="mod-knob-title">Feedback</span>
+        ></div>
+        <div class="mod-param-title">Feedback</div>
       </div>
+    </div>
+
+    <div class="row mod-control-group">
+      <!-- <div class="mod-knob">
+        <div
+          class="mod-knob-image"
+          mod-role="input-control-port"
+          mod-port-symbol="crosstalk"
+        ></div>
+        <div class="mod-param-title">Cross-talk</div>
+      </div> -->
+      <div class="row mod-control-group">
+        <div class="mod-enumeration">
+          <div 
+            class="mod-enumerated" 
+            mod-role="input-control-port" 
+            mod-port-symbol="channel_mode" 
+            mod-widget="custom-select"
+          >
+            <div mod-role="enumeration-option" mod-port-value="1">
+              Stereo
+            </div>
+            <div mod-role="enumeration-option" mod-port-value="2">
+              Ping-pong
+            </div>
+          </div>
+          <div class="mod-param-title">Channel Mode</div>
+        </div>
+      </div>
+      
       <div class="mod-knob">
         <div
           class="mod-knob-image"
           mod-role="input-control-port"
           mod-port-symbol="wow_and_flutter"
-        />
-        <span class="mod-knob-title two-lines">Wow & Flutter</span>
+        ></div>
+        <div class="mod-param-title">Wow & Flutter</div>
       </div>
     </div>
 
-    <div class="knob-group">
-      <div class="mod-knob">
-        <div
-          class="mod-knob-image"
-          mod-role="input-control-port"
-          mod-port-symbol="highpass_freq"
-        />
-        <span class="mod-knob-title">Highpass</span>
-      </div>
-      <div class="mod-knob">
-        <div
-          class="mod-knob-image"
-          mod-role="input-control-port"
-          mod-port-symbol="highpass_res"
-        />
-        <span class="mod-knob-title">Res</span>
-      </div>
-    </div>
-
-    <div class="knob-group">
-      <div class="mod-knob">
-        <div
-          class="mod-knob-image"
-          mod-role="input-control-port"
-          mod-port-symbol="lowpass_freq"
-        />
-        <span class="mod-knob-title">Lowpass</span>
-      </div>
-      <div class="mod-knob">
-        <div
-          class="mod-knob-image"
-          mod-role="input-control-port"
-          mod-port-symbol="lowpass_res"
-        />
-        <span class="mod-knob-title">Res</span>
+    <div class="row mod-control-group">
+      <div class="mod-enumeration">
+        <div 
+          class="mod-enumerated" 
+          mod-role="input-control-port" 
+          mod-port-symbol="time_mode" 
+          mod-widget="custom-select"
+        >
+          <div mod-role="enumeration-option" mod-port-value="1">
+            Repitch
+          </div>
+          <div mod-role="enumeration-option" mod-port-value="2">
+            Fade
+          </div>
+        </div>
+        <div class="mod-param-title">Time Mode</div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <div class="mod-control-group mod-{{knob}} clearfix">
-    <div class="knob-group">
+  <section class="reverb-and-filters">
+    <div class="row mod-control-group">
       <div class="mod-knob">
         <div
           class="mod-knob-image"
           mod-role="input-control-port"
           mod-port-symbol="reverb"
-        />
-        <span class="mod-knob-title">Reverb</span>
+        ></div>
+        <div class="mod-param-title">Reverb</div>
       </div>
+      
       <div class="mod-knob">
         <div
           class="mod-knob-image"
           mod-role="input-control-port"
           mod-port-symbol="decay"
-        />
-        <span class="mod-knob-title">Decay</span>
+        ></div>
+        <div class="mod-param-title">Decay</div>
       </div>
     </div>
 
-    <div class="knob-group">
+    <div class="row mod-control-group">
       <div class="mod-knob">
         <div
           class="mod-knob-image"
           mod-role="input-control-port"
-          mod-port-symbol="stereo"
-        />
-        <span class="mod-knob-title">Stereo</span>
+          mod-port-symbol="highpass_freq"
+        ></div>
+        <div class="mod-param-title">Highpass</div>
       </div>
+    
+    
       <div class="mod-knob">
         <div
           class="mod-knob-image"
           mod-role="input-control-port"
-          mod-port-symbol="duck"
-        />
-        <span class="mod-knob-title">Duck</span>
+          mod-port-symbol="lowpass_freq"
+        ></div>
+        <div class="mod-param-title">Lowpass</div>
       </div>
     </div>
 
-    <div class="knob-group">
+    <div class="row mod-control-group">
+      <div class="mod-knob">
+        <div
+          class="mod-knob-image"
+          mod-role="input-control-port"
+          mod-port-symbol="highpass_res"
+        ></div>
+        <div class="mod-param-title">Res</div>
+      </div>
+    
+      <div class="mod-knob">
+        <div
+          class="mod-knob-image"
+          mod-role="input-control-port"
+          mod-port-symbol="lowpass_res"
+        ></div>
+        <div class="mod-param-title">Res</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="output">
+    <div class="row mod-control-group">
       <div class="mod-knob">
         <div
           class="mod-knob-image"
           mod-role="input-control-port"
           mod-port-symbol="output"
-        />
-        <span class="mod-knob-title">Output</span>
+        ></div>
+        <div class="mod-param-title">Output</div>
       </div>
+      
       <div class="mod-knob">
         <div
           class="mod-knob-image"
           mod-role="input-control-port"
           mod-port-symbol="mix"
-        />
-        <span class="mod-knob-title">Mix</span>
+        ></div>
+        <div class="mod-param-title">Mix</div>
+      </div>
+
+      <div class="mod-toggle">
+        <div class="mod-light-container vertical">
+          <div class="mod-light"></div>
+          <div
+            class="mod-toggle-image"
+            mod-role="input-control-port"
+            mod-port-symbol="limiter"
+          >
+          </div>
+        </div>
+        <div class="mod-param-title">Limiter</div>
       </div>
     </div>
-  </div>
+    
+    <div class="row mod-control-group">
+      <div class="mod-knob">
+        <div
+        class="mod-knob-image"
+        mod-role="input-control-port"
+        mod-port-symbol="duck"
+        ></div>
+        <div class="mod-param-title">Duck</div>
+      </div>
+      <div class="mod-knob">
+        <div
+        class="mod-knob-image"
+        mod-role="input-control-port"
+        mod-port-symbol="stereo"
+        ></div>
+        <div class="mod-param-title">Stereo</div>
+      </div>
+    </div>
 
-  <div class="mod-footswitch" mod-role="bypass"></div>
+    <div class="logo">
+      <div class="mod-plugin-brand"><h1>{{brand}}</h1></div>
+      <div class="mod-footswitch-container">
+        <div class="mod-footswitch" mod-role="bypass"></div>
+        <div class="power-on-background">
+          <div class="mod-light on" mod-role="bypass-light"></div>
+        </div>
+      </div>
+      <div class="mod-plugin-name"><h1>{{label}}</h1></div>
+    </div>
+  </section>
+
   <div class="mod-pedal-input">
     {{#effect.ports.audio.input}}
     <div

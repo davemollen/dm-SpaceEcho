@@ -59,7 +59,7 @@ A space echo effect written in Rust.
 		a lv2:InputPort, lv2:ControlPort ;
 		lv2:index 3 ;
 		lv2:symbol "time_link" ;
-		lv2:name "Link" ;
+		lv2:name "Time Link" ;
 		lv2:portProperty lv2:integer, lv2:toggled;
 		lv2:default 0 ;
 		lv2:minimum 0 ;
@@ -106,7 +106,7 @@ A space echo effect written in Rust.
 		a lv2:InputPort, lv2:ControlPort ;
 		lv2:index 8 ;
 		lv2:symbol "highpass_freq" ;
-		lv2:name "Highpass" ;
+		lv2:name "Highpass Freq" ;
 		lv2:portProperty pprops:logarithmic ;
 		lv2:default 0.0 ;
 		lv2:minimum 20.0 ;
@@ -116,7 +116,7 @@ A space echo effect written in Rust.
 		a lv2:InputPort, lv2:ControlPort ;
 		lv2:index 9 ;
 		lv2:symbol "highpass_res" ;
-		lv2:name "Res" ;
+		lv2:name "Highpass Res" ;
 		lv2:default 0.0 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 100.0 ;
@@ -125,7 +125,7 @@ A space echo effect written in Rust.
 		a lv2:InputPort, lv2:ControlPort ;
 		lv2:index 10 ;
 		lv2:symbol "lowpass_freq" ;
-		lv2:name "Lowpass" ;
+		lv2:name "Lowpass Freq" ;
 		lv2:portProperty pprops:logarithmic ;
 		lv2:default 20000.0 ;
 		lv2:minimum 20.0 ;
@@ -135,7 +135,7 @@ A space echo effect written in Rust.
 		a lv2:InputPort, lv2:ControlPort ;
 		lv2:index 11 ;
 		lv2:symbol "lowpass_res" ;
-		lv2:name "Res" ;
+		lv2:name "Lowpass Res" ;
 		lv2:default 0.0 ;
 		lv2:minimum 0.0 ;
 		lv2:maximum 100.0 ;
@@ -195,23 +195,32 @@ A space echo effect written in Rust.
 		lv2:maximum 100.0 ;
 		units:unit units:pc
 	], [
-		a lv2:AudioPort, lv2:InputPort ;
+		a lv2:InputPort, lv2:ControlPort ;
 		lv2:index 18 ;
+		lv2:symbol "limiter" ;
+		lv2:name "Limiter" ;
+		lv2:portProperty lv2:integer, lv2:toggled;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 1 ;
+	], [
+		a lv2:AudioPort, lv2:InputPort ;
+		lv2:index 19 ;
 		lv2:symbol "in_left" ;
 		lv2:name "In left"
 	], [
 		a lv2:AudioPort, lv2:InputPort ;
-		lv2:index 19 ;
+		lv2:index 20 ;
 		lv2:symbol "in_right" ;
 		lv2:name "In right"
 	] , [
 		a lv2:AudioPort, lv2:OutputPort ;
-		lv2:index 20 ;
+		lv2:index 21 ;
 		lv2:symbol "out_left" ;
 		lv2:name "Out left"
 	] , [
 		a lv2:AudioPort, lv2:OutputPort ;
-		lv2:index 21 ;
+		lv2:index 22 ;
 		lv2:symbol "out_right" ;
 		lv2:name "Out right"
 	] .
