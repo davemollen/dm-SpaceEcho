@@ -54,8 +54,8 @@ impl Plugin for DmSpaceEcho {
   // iterates over.
   fn run(&mut self, ports: &mut Ports, _features: &mut (), _sample_count: u32) {
     let input_level = *ports.input;
-    let channel_mode = *ports.channel_mode as i32;
-    let time_mode = *ports.time_mode as i32;
+    let channel_mode = *ports.channel_mode as i32 - 1;
+    let time_mode = *ports.time_mode as i32 - 1;
     let time_left = *ports.time_left;
     let time_right = *ports.time_right;
     let feedback = *ports.feedback * 0.01;
@@ -70,7 +70,7 @@ impl Plugin for DmSpaceEcho {
     let duck = *ports.duck * 0.01;
     let output_level = *ports.output;
     let mix = *ports.mix * 0.01;
-    let limiter = *ports.limiter == 1;
+    let limiter = *ports.limiter == 1.;
 
     let input_channels = ports.input_left.iter().zip(ports.input_right.iter());
     let output_channels = ports
