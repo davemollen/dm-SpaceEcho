@@ -20,8 +20,10 @@ struct Ports {
   reverb: InputPort<Control>,
   decay: InputPort<Control>,
   stereo: InputPort<Control>,
+  duck: InputPort<Control>,
   output: InputPort<Control>,
   mix: InputPort<Control>,
+  limiter: InputPort<Control>,
   input_left: InputPort<Audio>,
   input_right: InputPort<Audio>,
   output_left: OutputPort<Audio>,
@@ -65,8 +67,10 @@ impl Plugin for DmSpaceEcho {
     let reverb = *ports.reverb * 0.01;
     let decay = *ports.decay * 0.01;
     let stereo = *ports.stereo * 0.01;
+    let duck = *ports.duck * 0.01;
     let output_level = *ports.output;
     let mix = *ports.mix * 0.01;
+    let limiter = *ports.limiter == 1;
 
     let input_channels = ports.input_left.iter().zip(ports.input_right.iter());
     let output_channels = ports
@@ -93,8 +97,10 @@ impl Plugin for DmSpaceEcho {
         reverb,
         decay,
         stereo,
+        duck,
         output_level,
         mix,
+        limiter,
       );
       *output_left = space_echo_output.0;
       *output_right = space_echo_output.1;
