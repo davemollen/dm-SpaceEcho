@@ -1,15 +1,12 @@
 use crate::{float_ext::FloatExt, slide::Slide};
 
-// TODO: check if replacing average with abs() works sufficiently
 pub struct Duck {
-  // average: Average,
   slide: Slide,
 }
 
 impl Duck {
   pub fn new(sample_rate: f32) -> Self {
     Self {
-      // average: Average::new((sample_rate * 0.1) as usize),
       slide: Slide::new(sample_rate),
     }
   }

@@ -29,8 +29,16 @@ pub struct SpaceEcho {
   reverb: Reverb,
   duck: Duck,
   dc_block: DcBlockStereo,
+  smooth_input_level: OnePoleFilter,
+  smooth_feedback: OnePoleFilter,
+  smooth_wow_and_flutter: OnePoleFilter,
+  smooth_reverb: OnePoleFilter,
+  smooth_decay: OnePoleFilter,
   smooth_stereo: OnePoleFilter,
-  log_smooth: LogSmooth,
+  smooth_output_level: OnePoleFilter,
+  smooth_mix: OnePoleFilter,
+  smooth_time_left: LogSmooth,
+  smooth_time_right: LogSmooth,
   limiter: Limiter,
 }
 
@@ -55,10 +63,51 @@ impl SpaceEcho {
       reverb: Reverb::new(sample_rate),
       duck: Duck::new(sample_rate),
       dc_block: DcBlockStereo::new(sample_rate),
+      smooth_input_level: OnePoleFilter::new(sample_rate),
+      smooth_feedback: OnePoleFilter::new(sample_rate),
+      smooth_wow_and_flutter: OnePoleFilter::new(sample_rate),
+      smooth_reverb: OnePoleFilter::new(sample_rate),
+      smooth_decay: OnePoleFilter::new(sample_rate),
       smooth_stereo: OnePoleFilter::new(sample_rate),
-      log_smooth: LogSmooth::new(sample_rate),
+      smooth_output_level: OnePoleFilter::new(sample_rate),
+      smooth_mix: OnePoleFilter::new(sample_rate),
+      smooth_time_left: LogSmooth::new(sample_rate),
+      smooth_time_right: LogSmooth::new(sample_rate),
       limiter: Limiter::new(sample_rate),
     }
+  }
+
+  fn get_smoothed_parameters(
+    &mut self,
+    input_level: f32,
+    feedback: f32,
+    wow_and_flutter: f32,
+    reverb: f32,
+    decay: f32,
+    stereo: f32,
+    output_level: f32,
+    mix: f32,
+  ) -> (f32, f32, f32, f32, f32, f32, f32, f32) {
+    // TODO: check if filters need smoothing
+    let input_level = self.smooth_input_level.run(input_level, 7.);
+    let feedback = self.smooth_feedback.run(feedback, 7.);
+    let wow_and_flutter = self.smooth_wow_and_flutter.run(wow_and_flutter, 7.);
+    let reverb = self.smooth_reverb.run(reverb, 7.);
+    let decay = self.smooth_decay.run(decay, 7.);
+    let stereo = self.smooth_stereo.run(stereo, 7.);
+    let output_level = self.smooth_output_level.run(output_level, 7.);
+    let mix = self.smooth_mix.run(mix, 7.);
+
+    (
+      input_level,
+      feedback,
+      wow_and_flutter,
+      reverb,
+      decay,
+      stereo,
+      output_level,
+      mix,
+    )
   }
 
   fn apply_gain(&self, input: (f32, f32), level: f32) -> (f32, f32) {
@@ -91,8 +140,8 @@ impl SpaceEcho {
 
     match time_mode {
       0 => {
-        let time_left = self.log_smooth.run(time_left, 0.4);
-        let time_right = self.log_smooth.run(time_right, 0.4);
+        let time_left = self.smooth_time_left.run(time_left, 0.333);
+        let time_right = self.smooth_time_right.run(time_right, 0.333);
 
         let delay_out_left = self
           .delay_line_left
@@ -214,7 +263,17 @@ impl SpaceEcho {
     mix: f32,
     limiter: bool,
   ) -> (f32, f32) {
-    let stereo = self.smooth_stereo.run(stereo, 7.);
+    let (input_level, feedback, wow_and_flutter, reverb, decay, stereo, output_level, mix) = self
+      .get_smoothed_parameters(
+        input_level,
+        feedback,
+        wow_and_flutter,
+        reverb,
+        decay,
+        stereo,
+        output_level,
+        mix,
+      );
 
     let delay_input = self.get_delay_input(input, channel_mode, input_level);
     let delay_output =
