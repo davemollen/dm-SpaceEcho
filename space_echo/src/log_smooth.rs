@@ -9,8 +9,13 @@ impl LogSmooth {
   }
 
   pub fn run(&mut self, input: f32, factor: f32) -> f32 {
-    let ad = 0.693147 / (factor * self.sample_rate).max(1.);
-    self.z = ((input - self.z) * ad) + self.z;
-    self.z
+    let difference = input - self.z;
+    if difference.is_subnormal() {
+      input
+    } else {
+      let ad = 0.693147 / (factor * self.sample_rate).max(1.);
+      self.z = (difference * ad) + self.z;
+      self.z
+    }
   }
 }
