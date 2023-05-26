@@ -29,6 +29,28 @@ function(event, {set_port_value}) {
               set_port_value("time_left", value);
             }
             break;
+        case "hold":
+            const hold = event.icon.find("[mod-port-symbol=hold]");
+            if(value == 1) {
+              hold.addClass("on");
+            } else {
+              hold.removeClass("on");
+            }
+            break;
+        case "crosstalk":
+            const stereo = event.icon.find(".stereo");
+            const ping_pong = event.icon.find(".ping-pong");
+            if(value == 0.) { 
+              stereo.addClass("on");
+              ping_pong.removeClass("on");
+            } else if(value == 100.) {
+              stereo.removeClass("on");
+              ping_pong.addClass("on");
+            } else {
+              stereo.removeClass("on");
+              ping_pong.removeClass("on");
+            }
+            break;
         default:
             break;
     }
