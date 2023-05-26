@@ -87,5 +87,9 @@
             lv2:index 18 ;
             lv2:symbol "limiter" ;
             lv2:name "Limiter" ;
+        ] , [
+            lv2:index 19 ;
+            lv2:symbol "hold" ;
+            lv2:name "Hold" ;
         ] ;
     ] .

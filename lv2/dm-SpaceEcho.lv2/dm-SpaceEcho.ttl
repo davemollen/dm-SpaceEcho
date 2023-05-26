@@ -204,23 +204,32 @@ A space echo effect written in Rust.
 		lv2:minimum 0 ;
 		lv2:maximum 1 ;
 	], [
-		a lv2:AudioPort, lv2:InputPort ;
+		a lv2:InputPort, lv2:ControlPort ;
 		lv2:index 19 ;
+		lv2:symbol "hold" ;
+		lv2:name "Hold" ;
+		lv2:portProperty lv2:integer, lv2:toggled;
+		lv2:default 0 ;
+		lv2:minimum 0 ;
+		lv2:maximum 1 ;
+	], [
+		a lv2:AudioPort, lv2:InputPort ;
+		lv2:index 20 ;
 		lv2:symbol "in_left" ;
 		lv2:name "In left"
 	], [
 		a lv2:AudioPort, lv2:InputPort ;
-		lv2:index 20 ;
+		lv2:index 21 ;
 		lv2:symbol "in_right" ;
 		lv2:name "In right"
 	] , [
 		a lv2:AudioPort, lv2:OutputPort ;
-		lv2:index 21 ;
+		lv2:index 22 ;
 		lv2:symbol "out_left" ;
 		lv2:name "Out left"
 	] , [
 		a lv2:AudioPort, lv2:OutputPort ;
-		lv2:index 22 ;
+		lv2:index 23 ;
 		lv2:symbol "out_right" ;
 		lv2:name "Out right"
 	] .

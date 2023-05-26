@@ -45,7 +45,7 @@ impl Plugin for DmSpaceEcho {
       version: 1,
       inputs: 2,
       outputs: 2,
-      parameters: 19,
+      parameters: 20,
       unique_id: 1358,
       f64_precision: true,
       category: Category::Effect,
@@ -72,6 +72,7 @@ impl Plugin for DmSpaceEcho {
     let channel_mode = self.params.channel_mode.get_value();
     let time_mode = self.params.time_mode.get_value();
     let limiter = self.params.limiter.get_value();
+    let hold = self.params.hold.get_value();
 
     let (input_channels, mut output_channels) = buffer.split();
     let zipped_input_channels = input_channels.get(0).iter().zip(input_channels.get(1));
@@ -102,6 +103,7 @@ impl Plugin for DmSpaceEcho {
         output_level,
         mix,
         limiter,
+        hold,
       );
       *output_left = space_echo_left;
       *output_right = space_echo_right;

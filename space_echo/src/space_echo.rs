@@ -87,10 +87,13 @@ impl SpaceEcho {
     stereo: f32,
     output_level: f32,
     mix: f32,
+    hold: bool,
   ) -> (f32, f32, f32, f32, f32, f32, f32, f32) {
     // TODO: check if filters need smoothing
     let input_level = self.smooth_input_level.run(input_level, 7.);
-    let feedback = self.smooth_feedback.run(feedback, 7.);
+    let feedback = self
+      .smooth_feedback
+      .run(if hold { 1. } else { feedback }, 7.);
     let wow_and_flutter = self.smooth_wow_and_flutter.run(wow_and_flutter, 7.);
     let reverb = self.smooth_reverb.run(reverb, 7.);
     let decay = self.smooth_decay.run(decay, 7.);
@@ -262,6 +265,7 @@ impl SpaceEcho {
     output_level: f32,
     mix: f32,
     limiter: bool,
+    hold: bool,
   ) -> (f32, f32) {
     let (input_level, feedback, wow_and_flutter, reverb, decay, stereo, output_level, mix) = self
       .get_smoothed_parameters(
@@ -273,6 +277,7 @@ impl SpaceEcho {
         stereo,
         output_level,
         mix,
+        hold,
       );
 
     let delay_input = self.get_delay_input(input, channel_mode, input_level);

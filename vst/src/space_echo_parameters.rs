@@ -27,6 +27,7 @@ pub struct SpaceEchoParameters {
   pub output: FloatParam,
   pub mix: FloatParam,
   pub limiter: BoolParam,
+  pub hold: BoolParam,
 }
 
 impl Default for SpaceEchoParameters {
@@ -188,6 +189,8 @@ impl Default for SpaceEchoParameters {
         .with_string_to_value(s2v_f32_percentage()),
 
       limiter: BoolParam::new("Limiter", false, 18),
+
+      hold: BoolParam::new("Hold", false, 19),
     }
   }
 }

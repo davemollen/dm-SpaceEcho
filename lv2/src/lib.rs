@@ -24,6 +24,7 @@ struct Ports {
   output: InputPort<Control>,
   mix: InputPort<Control>,
   limiter: InputPort<Control>,
+  hold: InputPort<Control>,
   input_left: InputPort<Audio>,
   input_right: InputPort<Audio>,
   output_left: OutputPort<Audio>,
@@ -71,6 +72,7 @@ impl Plugin for DmSpaceEcho {
     let output_level = *ports.output;
     let mix = *ports.mix * 0.01;
     let limiter = *ports.limiter == 1.;
+    let hold = *ports.hold == 1.;
 
     let input_channels = ports.input_left.iter().zip(ports.input_right.iter());
     let output_channels = ports
@@ -101,6 +103,7 @@ impl Plugin for DmSpaceEcho {
         output_level,
         mix,
         limiter,
+        hold,
       );
       *output_left = space_echo_output.0;
       *output_right = space_echo_output.1;
