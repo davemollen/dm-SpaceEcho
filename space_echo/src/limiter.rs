@@ -99,7 +99,10 @@ impl Limiter {
     let limiter_gain = self.apply_filters(moving_min);
 
     self.write_to_buffer(input);
-    (delay_output.0 * limiter_gain, delay_output.1 * limiter_gain)
+    (
+      (delay_output.0 * limiter_gain).clamp(-LIMIT, LIMIT),
+      (delay_output.1 * limiter_gain).clamp(-LIMIT, LIMIT),
+    )
   }
 }
 

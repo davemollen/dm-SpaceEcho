@@ -155,7 +155,6 @@ section.output > .logo {
 .crosstalk-container > .lights-container {
     display: flex;
     flex-direction: row;
-    align-items: center;
     height: 20px;
     border-radius: 4px;
     background-color: white;
