@@ -45,6 +45,13 @@ pub fn plugin_gui(cx: &mut Context, params: Arc<SpaceEchoParameters>, host: Opti
       .row_between(Pixels(10.0));
 
       VStack::new(cx, |cx| {
+        ParamCheckbox::new(
+          cx,
+          UiData::params,
+          &params.hold,
+          |params| &params.hold,
+          |val| ParamChangeEvent::SetHold(val),
+        );
         ParamRadioButton::new(
           cx,
           UiData::params,

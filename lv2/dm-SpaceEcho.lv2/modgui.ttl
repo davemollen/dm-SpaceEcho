@@ -17,8 +17,8 @@
             lv2:name "Input" ;
         ] , [
             lv2:index 1 ;
-            lv2:symbol "crosstalk" ;
-            lv2:name "Crosstalk" ;
+            lv2:symbol "channel_mode" ;
+            lv2:name "Channel Mode" ;
         ] , [
             lv2:index 2 ;
             lv2:symbol "time_mode" ;

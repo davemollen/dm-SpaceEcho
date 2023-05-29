@@ -37,6 +37,7 @@ pub enum ParamChangeEvent {
   SetOutput(f32),
   SetMix(f32),
   SetLimiter(bool),
+  SetHold(bool),
 }
 
 #[derive(Lens)]
@@ -180,6 +181,16 @@ impl Model for UiData {
 
       ParamChangeEvent::SetLimiter(value) => {
         let param = &self.params.limiter;
+        param.set_plain_value(*value);
+        notify_host_parameter_changed(
+          param.index,
+          param.preview_normalized_value(*value),
+          self.host,
+        );
+      }
+
+      ParamChangeEvent::SetHold(value) => {
+        let param = &self.params.hold;
         param.set_plain_value(*value);
         notify_host_parameter_changed(
           param.index,

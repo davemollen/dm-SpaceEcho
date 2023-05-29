@@ -32,6 +32,10 @@ pub struct SpaceEcho {
   smooth_input_level: OnePoleFilter,
   smooth_feedback: OnePoleFilter,
   smooth_wow_and_flutter: OnePoleFilter,
+  smooth_highpass_freq: OnePoleFilter,
+  smooth_highpass_res: OnePoleFilter,
+  smooth_lowpass_freq: OnePoleFilter,
+  smooth_lowpass_res: OnePoleFilter,
   smooth_reverb: OnePoleFilter,
   smooth_decay: OnePoleFilter,
   smooth_stereo: OnePoleFilter,
@@ -66,6 +70,10 @@ impl SpaceEcho {
       smooth_input_level: OnePoleFilter::new(sample_rate),
       smooth_feedback: OnePoleFilter::new(sample_rate),
       smooth_wow_and_flutter: OnePoleFilter::new(sample_rate),
+      smooth_highpass_freq: OnePoleFilter::new(sample_rate),
+      smooth_highpass_res: OnePoleFilter::new(sample_rate),
+      smooth_lowpass_freq: OnePoleFilter::new(sample_rate),
+      smooth_lowpass_res: OnePoleFilter::new(sample_rate),
       smooth_reverb: OnePoleFilter::new(sample_rate),
       smooth_decay: OnePoleFilter::new(sample_rate),
       smooth_stereo: OnePoleFilter::new(sample_rate),
@@ -82,19 +90,26 @@ impl SpaceEcho {
     input_level: f32,
     feedback: f32,
     wow_and_flutter: f32,
+    highpass_freq: f32,
+    highpass_res: f32,
+    lowpass_freq: f32,
+    lowpass_res: f32,
     reverb: f32,
     decay: f32,
     stereo: f32,
     output_level: f32,
     mix: f32,
     hold: bool,
-  ) -> (f32, f32, f32, f32, f32, f32, f32, f32) {
-    // TODO: check if filters need smoothing
+  ) -> (f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32) {
     let input_level = self.smooth_input_level.run(input_level, 7.);
     let feedback = self
       .smooth_feedback
       .run(if hold { 1. } else { feedback }, 7.);
     let wow_and_flutter = self.smooth_wow_and_flutter.run(wow_and_flutter, 7.);
+    let highpass_freq = self.smooth_highpass_freq.run(highpass_freq, 7.);
+    let highpass_res = self.smooth_highpass_res.run(highpass_res, 7.);
+    let lowpass_freq = self.smooth_lowpass_freq.run(lowpass_freq, 7.);
+    let lowpass_res = self.smooth_lowpass_res.run(lowpass_res, 7.);
     let reverb = self.smooth_reverb.run(reverb, 7.);
     let decay = self.smooth_decay.run(decay, 7.);
     let stereo = self.smooth_stereo.run(stereo, 7.);
@@ -105,6 +120,10 @@ impl SpaceEcho {
       input_level,
       feedback,
       wow_and_flutter,
+      highpass_freq,
+      highpass_res,
+      lowpass_freq,
+      lowpass_res,
       reverb,
       decay,
       stereo,
@@ -121,7 +140,7 @@ impl SpaceEcho {
   fn get_delay_input(&self, input: (f32, f32), channel_mode: i32, input_level: f32) -> (f32, f32) {
     self.apply_gain(
       match channel_mode {
-        1 => (input.0, 0.),
+        1 => ((input.0 + input.1) * 0.5, 0.),
         _ => input,
       },
       input_level,
@@ -207,8 +226,8 @@ impl SpaceEcho {
     let saturation_gain_compensation = (1. + SATURATION_THRESHOLD - average).clamp(0.25, 1.);
 
     (
-      input.0.fast_tanh1() * factor + input.0 * inverted_factor,
-      input.1.fast_tanh1() * factor + input.1 * inverted_factor,
+      input.0.tanh() * factor + input.0 * inverted_factor,
+      input.1.tanh() * factor + input.1 * inverted_factor,
       saturation_gain_compensation,
     )
   }
@@ -267,18 +286,34 @@ impl SpaceEcho {
     limiter: bool,
     hold: bool,
   ) -> (f32, f32) {
-    let (input_level, feedback, wow_and_flutter, reverb, decay, stereo, output_level, mix) = self
-      .get_smoothed_parameters(
-        input_level,
-        feedback,
-        wow_and_flutter,
-        reverb,
-        decay,
-        stereo,
-        output_level,
-        mix,
-        hold,
-      );
+    let (
+      input_level,
+      feedback,
+      wow_and_flutter,
+      highpass_freq,
+      highpass_res,
+      lowpass_freq,
+      lowpass_res,
+      reverb,
+      decay,
+      stereo,
+      output_level,
+      mix,
+    ) = self.get_smoothed_parameters(
+      input_level,
+      feedback,
+      wow_and_flutter,
+      highpass_freq,
+      highpass_res,
+      lowpass_freq,
+      lowpass_res,
+      reverb,
+      decay,
+      stereo,
+      output_level,
+      mix,
+      hold,
+    );
 
     let delay_input = self.get_delay_input(input, channel_mode, input_level);
     let delay_output =
