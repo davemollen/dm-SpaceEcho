@@ -3,7 +3,6 @@
 @import url(/fonts/nexa/stylesheet.css);
 @import url(/fonts/questrial/stylesheet.css);
 
-
 section.input {
     display: flex;
     flex-direction: row;
@@ -329,7 +328,7 @@ section.output > .logo {
     margin:0 auto;
 }
 
-/* = KNOBS
+/* = ENUMERATION
 ================================================ */
 .mod-pedal{{{cns}}} .mod-enumeration {
     display:flex;
