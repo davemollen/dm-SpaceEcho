@@ -3,7 +3,7 @@
 @import url(/fonts/nexa/stylesheet.css);
 @import url(/fonts/questrial/stylesheet.css);
 
-section.input {
+.mod-pedal{{{cns}}} section.input {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -15,7 +15,7 @@ section.input {
     border-bottom: 2px solid #2d5f4f;
 }
 
-section.delay-time {
+.mod-pedal{{{cns}}} section.delay-time {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -26,7 +26,7 @@ section.delay-time {
     margin-top: 16px;
 }
 
-section.delay-time::before {
+.mod-pedal{{{cns}}} section.delay-time::before {
     position: absolute;
     background-color: #2d5f4f;
     border-radius: 8px;
@@ -38,7 +38,7 @@ section.delay-time::before {
     content: "";
 }
 
-section.delay-time::after {
+.mod-pedal{{{cns}}} section.delay-time::after {
     position: absolute;
     background-color: transparent;
     top: 90px;
@@ -52,8 +52,8 @@ section.delay-time::after {
     content: "";
 }
 
-section.delay-time > .row,
-section.reverb-and-filters > .row {
+.mod-pedal{{{cns}}} section.delay-time > .row,
+.mod-pedal{{{cns}}} section.reverb-and-filters > .row {
     display: flex;
     flex-direction: row;
     gap: 12px;
@@ -61,7 +61,7 @@ section.reverb-and-filters > .row {
     align-items: flex-end;
 }
 
-section.reverb-and-filters {
+.mod-pedal{{{cns}}} section.reverb-and-filters {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -76,7 +76,7 @@ section.reverb-and-filters {
     align-items: flex-end;
 }
 
-section.reverb-and-filters::before {
+.mod-pedal{{{cns}}} section.reverb-and-filters::before {
     position: absolute;
     background-color: #2d5f4f;
     border-top-left-radius: 8px;
@@ -88,7 +88,7 @@ section.reverb-and-filters::before {
     content: "";
 }
 
-section.reverb-and-filters::after {
+.mod-pedal{{{cns}}} section.reverb-and-filters::after {
     position: absolute;
     background-color: transparent;
     top: 90px;
@@ -101,7 +101,7 @@ section.reverb-and-filters::after {
     content: "";
 }
 
-section.output {
+.mod-pedal{{{cns}}} section.output {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -117,7 +117,7 @@ section.output {
     height: 100%;
 }
 
-section.output > .row {
+.mod-pedal{{{cns}}} section.output > .row {
     display: flex;
     flex-direction: row;
     align-self: flex-start;
@@ -127,11 +127,11 @@ section.output > .row {
     align-items: flex-end;
 }
 
-section.output > .row:first-child {
+.mod-pedal{{{cns}}} section.output > .row:first-child {
     margin-top: 16px;
 }
 
-section.output > .logo {
+.mod-pedal{{{cns}}} section.output > .logo {
     margin-top: 16px;
     display: flex;
     flex-direction: column;
@@ -139,7 +139,7 @@ section.output > .logo {
     gap: 4px;
 }
 
-.two-lines-space {
+.mod-pedal{{{cns}}} .two-lines-space {
     padding-bottom: 12px;
 }
 
