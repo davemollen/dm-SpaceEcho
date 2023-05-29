@@ -132,13 +132,17 @@ impl SpaceEcho {
     )
   }
 
-  fn apply_gain(&self, input: (f32, f32), level: f32) -> (f32, f32) {
+  fn apply_linear_gain(&self, input: (f32, f32), gain: f32) -> (f32, f32) {
+    (input.0 * gain, input.1 * gain)
+  }
+
+  fn apply_db_gain(&self, input: (f32, f32), level: f32) -> (f32, f32) {
     let gain = level.dbtoa();
     (input.0 * gain, input.1 * gain)
   }
 
   fn get_delay_input(&self, input: (f32, f32), channel_mode: i32, input_level: f32) -> (f32, f32) {
-    self.apply_gain(
+    self.apply_db_gain(
       match channel_mode {
         1 => ((input.0 + input.1) * 0.5, 0.),
         _ => input,
@@ -226,8 +230,8 @@ impl SpaceEcho {
     let saturation_gain_compensation = (1. + SATURATION_THRESHOLD - average).clamp(0.25, 1.);
 
     (
-      input.0.tanh() * factor + input.0 * inverted_factor,
-      input.1.tanh() * factor + input.1 * inverted_factor,
+      input.0.fast_tanh1() * factor + input.0 * inverted_factor,
+      input.1.fast_tanh1() * factor + input.1 * inverted_factor,
       saturation_gain_compensation,
     )
   }
@@ -337,12 +341,12 @@ impl SpaceEcho {
 
     let stereo_output = self.apply_stereo_amount(filter_output, stereo);
     let reverb_output = self.reverb.run(
-      self.apply_gain(stereo_output, saturation_gain_compensation),
+      self.apply_linear_gain(stereo_output, saturation_gain_compensation),
       reverb,
       decay,
     );
     let ducking_output = self.duck.run(reverb_output, input, duck);
-    let space_echo_output = self.apply_gain(ducking_output, output_level);
+    let space_echo_output = self.apply_db_gain(ducking_output, output_level);
     let mix_output = Mix::run(input, space_echo_output, mix);
     if limiter {
       self.limiter.run(mix_output)
