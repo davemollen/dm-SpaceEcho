@@ -1,8 +1,4 @@
-// mod boxcar_filter;
-// mod slew_release;
 use crate::slide::Slide;
-// use boxcar_filter::BoxcarFilter;
-// use slew_release::SlewRelease;
 
 const ATTACK_TIME: f32 = 3.;
 const HOLD_TIME: f32 = 15.;
@@ -16,8 +12,6 @@ pub struct Limiter {
   buffer_index: usize,
   hold_index: u32,
   hold_length: u32,
-  // box_carfilter: BoxcarFilter,
-  // slew_release: SlewRelease,
   slide: Slide,
 }
 
@@ -33,8 +27,6 @@ impl Limiter {
       buffer_index: 0,
       hold_index: 0,
       hold_length,
-      // box_carfilter: BoxcarFilter::new(buffer_length),
-      // slew_release: SlewRelease::new(sample_rate),
       slide: Slide::new(sample_rate),
     }
   }
@@ -83,8 +75,6 @@ impl Limiter {
   }
 
   fn apply_filters(&mut self, moving_min: f32) -> f32 {
-    // let slewed_moving_min = self.slew_release.run(moving_min, RELEASE_TIME);
-    // self.box_carfilter.run(slewed_moving_min)
     self.slide.run(moving_min, RELEASE_TIME, 0.5)
   }
 

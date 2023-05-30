@@ -217,7 +217,8 @@ impl SpaceEcho {
     )
   }
 
-  fn apply_saturation(&mut self, input: (f32, f32), average: f32) -> (f32, f32, f32) {
+  fn apply_saturation(&mut self, input: (f32, f32)) -> (f32, f32, f32) {
+    let average = self.average.run((input.0 + input.1) * 0.5);
     let factor = self.saturation_enabled.run(
       if average > SATURATION_THRESHOLD {
         1.
@@ -329,9 +330,8 @@ impl SpaceEcho {
       lowpass_freq,
       lowpass_res,
     );
-    let average = self.average.run((filter_output.0 + filter_output.1) * 0.5);
     let (saturation_output_left, saturation_output_right, saturation_gain_compensation) =
-      self.apply_saturation(filter_output, average);
+      self.apply_saturation(filter_output);
     let feedback_matrix_output = self.apply_channel_mode(
       (saturation_output_left, saturation_output_right),
       channel_mode,
