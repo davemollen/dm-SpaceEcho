@@ -141,10 +141,17 @@ impl SpaceEcho {
     (input.0 * gain, input.1 * gain)
   }
 
-  fn get_delay_input(&self, input: (f32, f32), channel_mode: i32, input_level: f32) -> (f32, f32) {
+  fn get_delay_input(
+    &self,
+    input: (f32, f32),
+    channel_mode: i32,
+    hold: bool,
+    input_level: f32,
+  ) -> (f32, f32) {
     self.apply_db_gain(
-      match channel_mode {
-        1 => ((input.0 + input.1) * 0.5, 0.),
+      match (hold, channel_mode) {
+        (true, _) => (0., 0.),
+        (false, 1) => ((input.0 + input.1) * 0.5, 0.),
         _ => input,
       },
       input_level,
@@ -320,7 +327,7 @@ impl SpaceEcho {
       hold,
     );
 
-    let delay_input = self.get_delay_input(input, channel_mode, input_level);
+    let delay_input = self.get_delay_input(input, channel_mode, hold, input_level);
     let delay_output =
       self.read_from_delay_lines(time_left, time_right, time_mode, wow_and_flutter);
     let filter_output = self.apply_filter(
@@ -348,10 +355,6 @@ impl SpaceEcho {
     let ducking_output = self.duck.run(reverb_output, input, duck);
     let space_echo_output = self.apply_db_gain(ducking_output, output_level);
     let mix_output = Mix::run(input, space_echo_output, mix);
-    if limiter {
-      self.limiter.run(mix_output)
-    } else {
-      mix_output
-    }
+    self.limiter.run(mix_output, limiter)
   }
 }

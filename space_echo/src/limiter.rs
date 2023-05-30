@@ -83,16 +83,20 @@ impl Limiter {
     self.buffer_index = self.wrap(self.buffer_index + 1);
   }
 
-  pub fn run(&mut self, input: (f32, f32)) -> (f32, f32) {
-    let delay_output = self.get_delay_output();
-    let moving_min = self.get_moving_min(input);
-    let limiter_gain = self.apply_filters(moving_min);
+  pub fn run(&mut self, input: (f32, f32), is_on: bool) -> (f32, f32) {
+    if is_on {
+      let delay_output = self.get_delay_output();
+      let moving_min = self.get_moving_min(input);
+      let limiter_gain = self.apply_filters(moving_min);
 
-    self.write_to_buffer(input);
-    (
-      (delay_output.0 * limiter_gain).clamp(-LIMIT, LIMIT),
-      (delay_output.1 * limiter_gain).clamp(-LIMIT, LIMIT),
-    )
+      self.write_to_buffer(input);
+      (
+        (delay_output.0 * limiter_gain).clamp(-LIMIT, LIMIT),
+        (delay_output.1 * limiter_gain).clamp(-LIMIT, LIMIT),
+      )
+    } else {
+      input
+    }
   }
 }
 
