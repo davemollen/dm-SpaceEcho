@@ -3,15 +3,13 @@ use crate::{
   random_oscillator::RandomOscillator,
 };
 
-const MAX_FLUTTER_TIME_IN_SECS: f32 = 2.5;
+const MAX_FLUTTER_TIME_IN_SECS: f32 = 2.;
 const MAX_WOW_TIME_IN_SECS: f32 = 15.;
 pub const MAX_WOW_AND_FLUTTER_TIME_IN_SECS: f32 = MAX_FLUTTER_TIME_IN_SECS + MAX_WOW_TIME_IN_SECS;
 
 pub struct WowAndFlutter {
   wow_phasor: Phasor,
   wow_oscillator: RandomOscillator,
-  wow_modulator_phasor: Phasor,
-  wow_modulator: RandomOscillator,
   flutter_phasor: Phasor,
   flutter_oscillator: RandomOscillator,
   smooth_param: OnePoleFilter,
@@ -22,8 +20,6 @@ impl WowAndFlutter {
     Self {
       wow_phasor: Phasor::new(sample_rate),
       wow_oscillator: RandomOscillator::new(),
-      wow_modulator_phasor: Phasor::new(sample_rate),
-      wow_modulator: RandomOscillator::new(),
       flutter_phasor: Phasor::new(sample_rate),
       flutter_oscillator: RandomOscillator::new(),
       smooth_param: OnePoleFilter::new(sample_rate),
@@ -31,10 +27,7 @@ impl WowAndFlutter {
   }
 
   pub fn get_wow_oscillator(&mut self) -> f32 {
-    let wow_modulator_phase = self.wow_modulator_phasor.run(0.2);
-    let wow_oscillator_freq = self.wow_modulator.run(wow_modulator_phase, 1.) * 2. + 0.5;
-
-    let wow_oscillator_phase = self.wow_phasor.run(wow_oscillator_freq);
+    let wow_oscillator_phase = self.wow_phasor.run(2.1);
     self.wow_oscillator.run(wow_oscillator_phase, 0.4) * MAX_WOW_TIME_IN_SECS
   }
 
