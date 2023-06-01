@@ -33,7 +33,6 @@ impl Average {
 
   pub fn run(&mut self, input: f32) -> f32 {
     let n = self.buffer.len();
-    let rdiv = (n as f32).recip();
 
     let squared = input * input;
     let oldest_buffer_entry = self.get_oldest_buffer_entry();
@@ -42,6 +41,11 @@ impl Average {
     self.previous_mean = mean;
     self.write(squared);
 
-    (mean * rdiv).sqrt()
+    let average = (mean / n as f32).sqrt();
+    if average.is_nan() {
+      0.
+    } else {
+      average
+    }
   }
 }
