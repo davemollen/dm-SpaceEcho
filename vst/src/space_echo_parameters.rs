@@ -152,6 +152,7 @@ impl Default for SpaceEchoParameters {
         .with_value_to_string(v2s_f32_percentage(2))
         .with_string_to_value(s2v_f32_percentage()),
 
+      // TODO: rename to width
       stereo: FloatParam::new("Stereo", 1., 14, FloatRange::Linear { min: 0., max: 1. })
         .with_unit(" %")
         .with_value_to_string(v2s_f32_percentage(2))
