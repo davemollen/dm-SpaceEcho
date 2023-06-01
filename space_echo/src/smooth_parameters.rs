@@ -70,11 +70,18 @@ impl SmoothParameters {
     let input_level = self.smooth_input_level.run(input_level, 7.);
     let feedback = self
       .smooth_feedback
-      .run(if hold { 1. } else { feedback }, 7.);
+      .run(if hold { 1. } else { feedback }, 3.);
+
     let wow_and_flutter = self.smooth_wow_and_flutter.run(wow_and_flutter, 7.);
-    let highpass_freq = self.smooth_highpass_freq.run(highpass_freq, 7.);
+    let highpass_freq = self
+      .smooth_highpass_freq
+      .run(if hold { 20. } else { highpass_freq }, 7.);
+
     let highpass_res = self.smooth_highpass_res.run(highpass_res, 7.);
-    let lowpass_freq = self.smooth_lowpass_freq.run(lowpass_freq, 7.);
+    let lowpass_freq = self
+      .smooth_lowpass_freq
+      .run(if hold { 20000. } else { lowpass_freq }, 7.);
+
     let lowpass_res = self.smooth_lowpass_res.run(lowpass_res, 7.);
     let reverb = self.smooth_reverb.run(reverb, 7.);
     let decay = self.smooth_decay.run(decay, 7.);

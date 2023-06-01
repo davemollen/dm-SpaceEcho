@@ -19,7 +19,7 @@ impl Saturation {
       .enabled
       .run(if average > threshold { 1. } else { 0. }, 7.);
     let inverted_factor = 1. - factor;
-    let saturation_gain_compensation = (1. + threshold - average).clamp(0.5, 1.);
+    let saturation_gain_compensation = (1. + threshold - average).clamp(0.4, 1.);
 
     (
       input.0.fast_tanh1() * factor + input.0 * inverted_factor,
