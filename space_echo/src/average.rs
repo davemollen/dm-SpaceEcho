@@ -41,11 +41,10 @@ impl Average {
     self.previous_mean = mean;
     self.write(squared);
 
-    let average = (mean / n as f32).sqrt();
-    if average.is_nan() {
+    if mean <= 0. {
       0.
     } else {
-      average
+      (mean / n as f32).sqrt()
     }
   }
 }
