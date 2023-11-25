@@ -7,6 +7,7 @@ function(event, {set_port_value}) {
         case "time_link":
             if(value == 1) {
               time_link.addClass("on");
+              set_port_value("time_right", time_left);
             } else {
               time_link.removeClass("on");
             }
@@ -20,6 +21,8 @@ function(event, {set_port_value}) {
           }
           break;
         case "time_left":
+            time_left = value;
+
             if(is_time_linked) {
               set_port_value("time_right", value);
             }
