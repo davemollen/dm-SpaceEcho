@@ -5,8 +5,8 @@ pub use ui::plugin_gui;
 use vizia::{prelude::WindowSize, Application, ParentWindow};
 use vst::{editor::Editor, prelude::HostCallback};
 
-const WINDOW_SIZE: WindowSize = WindowSize {
-  width: 760,
+pub const WINDOW_SIZE: WindowSize = WindowSize {
+  width: 800,
   height: 360,
 };
 

@@ -13,7 +13,7 @@ knob .track {
 }
 
 textbox {
-  font-size: 14px;
+  font-size: 12px;
   width: 72px;
   color: #c2c2c2;
   background-color: transparent;
@@ -65,12 +65,4 @@ button.inactive {
 
 button.inactive label {
   color: white;
-}
-
-label.plugin-name {
-  font-size: 32px;
-  font-weight: bold;
-  border-radius: 4px;
-  border-width: 1px;
-  text-decoration: underline;
 }

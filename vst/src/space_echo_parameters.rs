@@ -2,7 +2,7 @@ use std::sync::Arc;
 use vst::plugin::PluginParameters;
 mod formatters;
 use formatters::{
-  s2v_f32_hz_then_khz, s2v_f32_percentage, v2s_f32_digits, v2s_f32_hz_then_khz, v2s_f32_percentage,
+  s2v_f32_hz_then_khz, s2v_f32_percentage, v2s_f32_digits, v2s_f32_hz_then_khz, v2s_f32_percentage
 };
 mod params;
 pub use params::{BoolParam, FloatParam, FloatRange, IntParam, IntRange, Params};
@@ -72,7 +72,7 @@ impl Default for SpaceEchoParameters {
         FloatRange::Skewed {
           min: 1.,
           max: 2500.,
-          factor: 0.3333333,
+          factor: 0.3,
         },
       )
       .with_unit(" ms")
@@ -85,7 +85,7 @@ impl Default for SpaceEchoParameters {
         FloatRange::Skewed {
           min: 1.,
           max: 2500.,
-          factor: 0.3333333,
+          factor: 0.3,
         },
       )
       .with_unit(" ms")
@@ -113,7 +113,7 @@ impl Default for SpaceEchoParameters {
         FloatRange::Skewed {
           min: 20.,
           max: 20000.,
-          factor: 0.3333333,
+          factor: 0.2,
         },
       )
       .with_value_to_string(v2s_f32_hz_then_khz(2))
@@ -131,7 +131,7 @@ impl Default for SpaceEchoParameters {
         FloatRange::Skewed {
           min: 20.,
           max: 20000.,
-          factor: 0.3333333,
+          factor: 0.2,
         },
       )
       .with_value_to_string(v2s_f32_hz_then_khz(2))
@@ -280,7 +280,12 @@ impl PluginParameters for SpaceEchoParameters {
       0 => self.input.set_plain_value(val),
       1 => self.channel_mode.set_normalized_value(val),
       2 => self.time_mode.set_normalized_value(val),
-      3 => self.time_link.set_normalized_value(val),
+      3 => {
+        if val == 1. {
+          self.time_right.set_plain_value(self.time_left.get_normalized_value());
+        }
+        self.time_link.set_normalized_value(val)
+      },
       4 => {
         if self.time_link.get_value() {
           self.time_left.set_plain_value(val);

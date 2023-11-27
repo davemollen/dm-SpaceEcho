@@ -104,6 +104,7 @@ impl Plugin for DmSpaceEcho {
         mix,
         limiter,
         hold,
+        0.25
       );
       *output_left = space_echo_left;
       *output_right = space_echo_right;

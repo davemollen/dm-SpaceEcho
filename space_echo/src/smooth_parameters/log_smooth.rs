@@ -4,8 +4,8 @@ pub struct LogSmooth {
 }
 
 impl LogSmooth {
-  pub fn new(sample_rate: f32) -> Self {
-    Self { sample_rate, z: 0. }
+  pub fn new(sample_rate: f32, initial_value: f32) -> Self {
+    Self { sample_rate, z: initial_value }
   }
 
   pub fn run(&mut self, input: f32, factor: f32) -> f32 {

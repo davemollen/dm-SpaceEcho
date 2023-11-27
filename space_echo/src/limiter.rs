@@ -1,6 +1,6 @@
 use crate::slide::Slide;
 
-const ATTACK_TIME: f32 = 3.;
+const ATTACK_TIME: f32 = 1.;
 const HOLD_TIME: f32 = 15.;
 const RELEASE_TIME: f32 = 40.;
 const LIMIT: f32 = 1.;
@@ -74,8 +74,9 @@ impl Limiter {
     self.moving_min
   }
 
+  // TODO: make slide_down linear and remove the clipper
   fn apply_filters(&mut self, moving_min: f32) -> f32 {
-    self.slide.run(moving_min, RELEASE_TIME, 0.5)
+    self.slide.run(moving_min, RELEASE_TIME, 0.4)
   }
 
   fn write_to_buffer(&mut self, input: (f32, f32)) {

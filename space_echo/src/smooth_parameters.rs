@@ -34,8 +34,8 @@ impl SmoothParameters {
       smooth_stereo: OnePoleFilter::new(sample_rate),
       smooth_output_level: OnePoleFilter::new(sample_rate),
       smooth_mix: OnePoleFilter::new(sample_rate),
-      smooth_time_left: LogSmooth::new(sample_rate),
-      smooth_time_right: LogSmooth::new(sample_rate),
+      smooth_time_left: LogSmooth::new(sample_rate, 250.0),
+      smooth_time_right: LogSmooth::new(sample_rate, 250.0),
     }
   }
 
@@ -71,18 +71,15 @@ impl SmoothParameters {
     let feedback = self
       .smooth_feedback
       .run(if hold { 1. } else { feedback }, 3.);
-
     let wow_and_flutter = self.smooth_wow_and_flutter.run(wow_and_flutter, 7.);
     let highpass_freq = self
       .smooth_highpass_freq
       .run(if hold { 20. } else { highpass_freq }, 7.);
-
-    let highpass_res = self.smooth_highpass_res.run(highpass_res, 7.);
+    let highpass_res = self.smooth_highpass_res.run(if hold { 0. } else { highpass_res }, 7.);
     let lowpass_freq = self
       .smooth_lowpass_freq
       .run(if hold { 20000. } else { lowpass_freq }, 7.);
-
-    let lowpass_res = self.smooth_lowpass_res.run(lowpass_res, 7.);
+    let lowpass_res = self.smooth_lowpass_res.run(if hold { 0. } else { lowpass_res }, 7.);
     let reverb = self.smooth_reverb.run(reverb, 7.);
     let decay = self.smooth_decay.run(decay, 7.);
     let stereo = self.smooth_stereo.run(stereo, 7.);
