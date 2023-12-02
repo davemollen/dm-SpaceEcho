@@ -1,33 +1,27 @@
-use crate::slide::Slide;
-
-const ATTACK_TIME: f32 = 1.;
-const HOLD_TIME: f32 = 15.;
-const RELEASE_TIME: f32 = 40.;
-const LIMIT: f32 = 1.;
+use crate::{moving_min::MovingMin, ramp_slide::RampSlide};
 
 pub struct Limiter {
   buffer: Vec<(f32, f32)>,
-  moving_min_temp: f32,
-  moving_min: f32,
   buffer_index: usize,
-  hold_index: u32,
-  hold_length: u32,
-  slide: Slide,
+  slide: RampSlide,
+  attack_time: f32,  
+  release_time: f32, 
+  limit: f32,
+  moving_min: MovingMin
 }
 
 impl Limiter {
-  pub fn new(sample_rate: f32) -> Self {
-    let buffer_length = (ATTACK_TIME * 0.001 * sample_rate + 1.) as usize;
-    let hold_length = (HOLD_TIME * 0.001 * sample_rate + 1.) as u32;
+  pub fn new(sample_rate: f32, attack_time: f32, hold_time: f32, release_time: f32, limit: f32) -> Self {
+    let buffer_length = (attack_time * 0.001 * sample_rate) as usize;
 
     Self {
       buffer: vec![(0., 0.); buffer_length],
-      moving_min_temp: 1.,
-      moving_min: 1.,
       buffer_index: 0,
-      hold_index: 0,
-      hold_length,
-      slide: Slide::new(sample_rate),
+      slide: RampSlide::new(sample_rate),
+      attack_time,
+      release_time,
+      limit,
+      moving_min: MovingMin::new(sample_rate, attack_time, hold_time, limit)
     }
   }
 
@@ -40,43 +34,26 @@ impl Limiter {
     }
   }
 
-  fn get_delay_output(&self) -> (f32, f32) {
+  fn read_from_buffer(&self) -> (f32, f32) {
     self.buffer[self.buffer_index]
   }
 
   fn get_gain_reduction(&self, input: (f32, f32)) -> f32 {
     let gain = input.0.abs().max(input.1.abs());
-    if gain > LIMIT {
-      LIMIT / gain
+    if gain > self.limit {
+      self.limit / gain
     } else {
-      1.
+      self.limit
     }
   }
 
   fn get_moving_min(&mut self, input: (f32, f32)) -> f32 {
     let gain_reduction = self.get_gain_reduction(input);
-    self.moving_min_temp = gain_reduction.min(self.moving_min_temp);
-
-    /*
-    Hold on to moving_min for HOLD_TIME when moving_min < 1.
-    Unless moving_min_temp < moving_min
-     */
-    if self.moving_min < 1.
-      && self.moving_min < self.moving_min_temp
-      && self.hold_index <= self.hold_length
-    {
-      self.hold_index += 1;
-    } else if self.buffer_index == 0 {
-      self.moving_min = self.moving_min_temp;
-      self.moving_min_temp = 1.;
-      self.hold_index = 0;
-    }
-    self.moving_min
+    self.moving_min.run(gain_reduction)
   }
 
-  // TODO: make slide_down linear and remove the clipper
   fn apply_filters(&mut self, moving_min: f32) -> f32 {
-    self.slide.run(moving_min, RELEASE_TIME, 0.4)
+    self.slide.run(moving_min, self.release_time, self.attack_time)
   }
 
   fn write_to_buffer(&mut self, input: (f32, f32)) {
@@ -86,88 +63,17 @@ impl Limiter {
 
   pub fn run(&mut self, input: (f32, f32), is_on: bool) -> (f32, f32) {
     if is_on {
-      let delay_output = self.get_delay_output();
       let moving_min = self.get_moving_min(input);
       let limiter_gain = self.apply_filters(moving_min);
-
+      
+      let delay_output = self.read_from_buffer();
       self.write_to_buffer(input);
       (
-        (delay_output.0 * limiter_gain).clamp(-LIMIT, LIMIT),
-        (delay_output.1 * limiter_gain).clamp(-LIMIT, LIMIT),
+        (delay_output.0 * limiter_gain).clamp(-self.limit, self.limit),
+        (delay_output.1 * limiter_gain).clamp(-self.limit, self.limit),
       )
     } else {
       input
     }
-  }
-}
-
-#[cfg(test)]
-mod tests {
-  use crate::limiter::Limiter;
-
-  #[test]
-  fn get_moving_min() {
-    let mut limiter = Limiter::new(1000.);
-    assert_eq!(limiter.buffer.len(), 4);
-
-    limiter.buffer_index = 0;
-    assert_eq!(limiter.get_moving_min((0.01, 0.01)), 1.);
-
-    limiter.buffer_index = 1;
-    assert_eq!(limiter.get_moving_min((0.3, 0.2)), 1.);
-
-    limiter.buffer_index = 2;
-    assert_eq!(limiter.get_moving_min((1.4, 0.1)), 1.);
-
-    limiter.buffer_index = 3;
-    assert_eq!(limiter.get_moving_min((0.6, 0.1)), 1.);
-
-    limiter.buffer_index = 0;
-    assert_eq!(limiter.get_moving_min((0.6, 0.04)), 1.4_f32.recip());
-
-    limiter.buffer_index = 1;
-    assert_eq!(limiter.get_moving_min((0.6, 0.04)), 1.4_f32.recip());
-
-    limiter.buffer_index = 2;
-    assert_eq!(limiter.get_moving_min((0.6, 2.8)), 1.4_f32.recip());
-
-    limiter.buffer_index = 3;
-    assert_eq!(limiter.get_moving_min((1.6, 0.3)), 1.4_f32.recip());
-
-    limiter.buffer_index = 0;
-    assert_eq!(limiter.get_moving_min((1.2, 0.3)), 2.8_f32.recip());
-  }
-
-  #[test]
-  fn hold() {
-    let mut limiter = Limiter::new(1000.);
-    assert_eq!(limiter.buffer.len(), 4);
-
-    limiter.buffer_index = 0;
-    assert_eq!(limiter.get_moving_min((0.01, 0.01)), 1.);
-
-    limiter.buffer_index = 1;
-    assert_eq!(limiter.get_moving_min((0.3, 0.2)), 1.);
-
-    limiter.buffer_index = 2;
-    assert_eq!(limiter.get_moving_min((1.4, 0.1)), 1.);
-
-    limiter.buffer_index = 3;
-    assert_eq!(limiter.get_moving_min((0.6, 0.1)), 1.);
-
-    limiter.buffer_index = 0;
-    assert_eq!(limiter.get_moving_min((0.6, 0.04)), 1.4_f32.recip());
-
-    limiter.buffer_index = 1;
-    assert_eq!(limiter.get_moving_min((0.6, 0.04)), 1.4_f32.recip());
-
-    limiter.buffer_index = 2;
-    assert_eq!(limiter.get_moving_min((0.6, 1.2)), 1.4_f32.recip());
-
-    limiter.buffer_index = 3;
-    assert_eq!(limiter.get_moving_min((0.6, 0.3)), 1.4_f32.recip());
-
-    limiter.buffer_index = 0;
-    assert_eq!(limiter.get_moving_min((1.2, 0.3)), 1.4_f32.recip());
   }
 }

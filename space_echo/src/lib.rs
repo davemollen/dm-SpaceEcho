@@ -17,5 +17,7 @@ mod space_echo;
 mod tsk_filter_stereo;
 mod variable_delay_read;
 mod wow_and_flutter;
+mod ramp_slide;
+mod moving_min;
 
 pub use self::space_echo::SpaceEcho;

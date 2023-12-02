@@ -49,7 +49,7 @@ impl SpaceEcho {
       reverb: Reverb::new(sample_rate),
       duck: Duck::new(sample_rate),
       dc_block: DcBlockStereo::new(sample_rate),
-      limiter: Limiter::new(sample_rate),
+      limiter: Limiter::new(sample_rate, 2., 10., 40., 0.966051),
       smooth_parameters: SmoothParameters::new(sample_rate),
     }
   }
