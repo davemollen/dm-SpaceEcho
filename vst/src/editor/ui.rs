@@ -121,9 +121,9 @@ pub fn plugin_gui(cx: &mut Context, params: Arc<SpaceEchoParameters>, host: Opti
     })
       .layout_type(LayoutType::Grid)
       .grid_cols(vec![Pixels(152.0); 5])
-      .grid_rows(vec![Pixels(176.0); 3])
+      .grid_rows(vec![Pixels(184.0); 3])
       .width(Pixels(76.0 * 5.0))
-      .top(Pixels(76.0));
+      .top(Pixels(60.0));
 
     HStack::new(cx, |cx| {
       ZStack::new(cx, |_| {})
@@ -188,9 +188,9 @@ pub fn plugin_gui(cx: &mut Context, params: Arc<SpaceEchoParameters>, host: Opti
     })
       .layout_type(LayoutType::Grid)
       .grid_cols(vec![Pixels(152.0); 2])
-      .grid_rows(vec![Pixels(176.0); 3])
+      .grid_rows(vec![Pixels(184.0); 3])
       .width(Pixels(76.0 * 2.0))
-      .top(Pixels(76.0))
+      .top(Pixels(60.0))
       .left(Pixels(24.0));
 
     HStack::new(cx, |cx| {
@@ -236,13 +236,13 @@ pub fn plugin_gui(cx: &mut Context, params: Arc<SpaceEchoParameters>, host: Opti
       VStack::new(cx, |cx| {
         Label::new(cx, "DM")
           .font_size(32.0)
-          .border_color("2d5f4f")
-          .border_radius(Pixels(16.0))
-          .border_width(Pixels(3.0))
+          .border_color("#2d5f4f")
+          .border_radius(Pixels(24.0))
+          .border_width(Pixels(4.0))
           .child_top(Pixels(2.0))
           .child_bottom(Pixels(2.0))
-          .child_left(Pixels(8.0))
-          .child_right(Pixels(8.0));
+          .child_left(Pixels(12.0))
+          .child_right(Pixels(12.0));
         Label::new(cx, "SpaceEcho")
           .font_size(22.0);
       })
@@ -258,7 +258,7 @@ pub fn plugin_gui(cx: &mut Context, params: Arc<SpaceEchoParameters>, host: Opti
       .grid_cols(vec![Pixels(152.0); 3])
       .grid_rows(vec![Pixels(176.0); 4])
       .border_color("#2d5f4f")
-      .border_width(Pixels(2.0))
+      .border_width(Pixels(3.0))
       .border_radius_top_left(Pixels(8.0))
       .width(Percentage(110.0))
       .height(Percentage(110.0))

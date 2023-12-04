@@ -46,7 +46,7 @@ impl ParamCheckbox {
         });
       });
     })
-    .child_top(Pixels(2.5))
+    .child_top(Pixels(4.0))
     .child_left(Stretch(1.0))
     .child_right(Stretch(1.0))
     .row_between(Pixels(8.0))
