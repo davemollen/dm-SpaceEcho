@@ -1,7 +1,7 @@
 ## dm-SpaceEcho
 
 A space echo effect written in Rust.
-The effect can be compiled to a [lv2](./lv2) or [vst](./vst) plugin.
+The effect can be compiled to a [lv2](./lv2), [vst](./vst) or [vst3/CLAP](./vst3) plugin.
 This plugin has been written primarily to run on [Mod devices](https://moddevices.com/). And because I mainly use this for guitar it's just mono to stereo for now.
 
 ## Table of contents:
@@ -9,28 +9,25 @@ This plugin has been written primarily to run on [Mod devices](https://moddevice
 - [Mod devices installation](#Mod-devices-installation)
 - [LV2 installation](#LV2-installation)
 - [VST installation](#VST-installation)
+- [VST3 installation](#VST3-installation)
+- [CLAP installation](#CLAP-installation)
 
 ## Mod devices installation
 
 You can find the plugin for the Mod Dwarf [here](./lv2/dm-SpaceEcho.lv2/).
 
-For Mod Duo, follow the [lv2 instructions](#LV2-installation) first. Then finish the instructions below.
+To build the plugin for your MOD device see these [instructions](https://github.com/moddevices/mod-plugin-builder).
 
-- Copy the .lv2 folder into your Mod:
+## LV2 installation
+Run `cd lv2 && cargo build --release`.
 
-  ```
-  scp -rp <path to dm-SpaceEcho.lv2> root@192.168.51.1:/root/.lv2
-  ```
+If you want to build for a specific architecture you can add a specific build target:
+1. You can list all available targets with this command: `rustup target list`
+2. You can add a target like this: `rustup target add <target>` (e.g. `rustup target add armv7-unknown-linux-gnueabihf`)
+3. Then build for this target by running `cd lv2 && cargo build --release --target <target>`
 
-- Enter Mod password
-- Reboot Mod
-
-## LV2 installation (for Mod)
-
-In order to build the binaries you need to have Docker installed. If so, proceed with the following steps:
-
-- Run `./scripts/build-lv2-for-mod.sh` in the root directory.
-- Copy/paste the binary of the target platform from the `./lv2/out` directory into `./lv2/<plugin name>.lv2`
+DISCLAIMER:
+I don't use this plugin format myself. So if someone wants to try this, please let me know how that goes. Let me know when you run into issues and if I can add some instruction to this README. 
 
 ## VST installation
 
@@ -52,3 +49,12 @@ M1 Mac:
 Mac:
 
 - Run: `./scripts/build-vst3-for-mac.sh`
+
+## CLAP installation
+This plugin can be compiled to a CLAP plugin aswell. 
+
+Run `cd vst3 && cargo xtask bundle dm_space_echo --release`.
+Then look for the compiled CLAP plugin at [./vst3/target/bundled/dm_space_echo.clap](./vst3/target/bundled/dm_space_echo.clap). Then copy this file to the required location.
+
+DISCLAIMER:
+I don't use this plugin format myself. So if someone wants to try this, please let me know how that goes. Let me know when you run into issues and if I can add some instruction to this README. 
