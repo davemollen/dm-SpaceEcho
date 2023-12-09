@@ -6,7 +6,6 @@ use vizia::{
   views::{Knob, Label, TextEvent, Textbox, VStack}, handle::Handle, modifiers::TextModifiers,
 };
 
-
 pub struct ParamKnob;
 
 impl ParamKnob {

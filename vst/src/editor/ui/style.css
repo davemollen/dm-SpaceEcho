@@ -1,6 +1,6 @@
 label {
   font-size: 14px;
-  color: #c2c2c2;
+  color: #E1D9D1;
 }
 
 knob {
@@ -9,20 +9,14 @@ knob {
 }
 
 knob .track {
-  background-color: #ffb74d;
+  background-color: #ffb433;
 }
 
 textbox {
   font-size: 12px;
   width: 72px;
-  color: #c2c2c2;
+  color: #E1D9D1;
   background-color: transparent;
-  border-width: 0px;
-  outline-color: none;
-}
-
-textbox:focus {
-  background-color: #6d6d6d;
   border-width: 0px;
   outline-color: none;
 }
@@ -31,38 +25,4 @@ textbox:hover {
   background-color: transparent;
   border-width: 0px;
   outline-color: none;
-}
-
-textbox:focus,
-textbox:hover {
-  background-color: #6d6d6d;
-  border-width: 0px;
-  outline-color: none;
-}
-
-button {
-  background-color: #6d6d6d;
-  outline-color: none;
-}
-
-button label {
-  font-size: 12px;
-}
-
-button.active {
-  background-color: #ffb74d;
-  outline-color: none;
-}
-
-button.active label {
-  color: black;
-}
-
-button.inactive {
-  background-color: #6d6d6d;
-  outline-color: none;
-}
-
-button.inactive label {
-  color: white;
 }
