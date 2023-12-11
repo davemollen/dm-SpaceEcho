@@ -9,13 +9,14 @@ use vizia::{
 pub struct ParamRadioButton;
 
 impl ParamRadioButton {
-  pub fn new<L, P, F, M, C>(
-    cx: &mut Context,
+  pub fn new<'a, L, P, F, M, C>(
+    cx: &'a mut Context,
     lens: L,
     param_ptr: ParamPtr,
     params_to_param: F,
     on_change: C,
-  ) -> Handle<'_, VStack> 
+    variants: &'static [&'static str],
+  ) -> Handle<'a, VStack> 
   where
     L: 'static + Lens + Copy + Send + Sync,
     <L as Lens>::Source: 'static,
@@ -33,15 +34,15 @@ impl ParamRadioButton {
         .child_space(Stretch(1.0));
   
       Binding::new(cx, lens, move |cx, params| {
-        let param_name = unsafe { param_ptr.name() };
-        let step_count = unsafe { param_ptr.step_count() }.unwrap();
-
         VStack::new(cx, |cx| {
-          for i in 0..step_count+1 {
-            let normalized_option = i as f32 / step_count as f32;
-            let option = unsafe { param_ptr.normalized_value_to_string(normalized_option, false) };
+          let param_name = unsafe { param_ptr.name() };
+
+          variants.iter().for_each(|variant| {
+            let variant = *variant;
 
             HStack::new(cx, |cx| {
+              let normalized_option = unsafe { param_ptr.string_to_normalized_value(variant)}.unwrap();
+
               RadioButton::new(
                 cx,
                 params.map(move |params| params_to_param(params).modulated_normalized_value() == normalized_option)
@@ -49,15 +50,15 @@ impl ParamRadioButton {
               .on_select(move |cx| {
                 cx.emit(on_change(param_ptr, normalized_option))
               })
-              .id(format!("{param_name}_{i}"));
+              .id(format!("{param_name}_{variant}"));
 
-              Label::new(cx, &option)
+              Label::new(cx, variant)
                 .font_size(12.0)
-                .describing(format!("{param_name}_{i}"));
-            })
-            .col_between(Pixels(8.0))
-            .child_space(Pixels(2.0));
-          }
+                .describing(format!("{param_name}_{variant}"));
+              })
+              .col_between(Pixels(8.0))
+              .child_space(Pixels(2.0));
+          });
         });
       })
     })

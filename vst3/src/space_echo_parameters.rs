@@ -1,12 +1,23 @@
 use std::sync::Arc;
 use nih_plug::{
   formatters::{s2v_f32_percentage, v2s_f32_percentage, v2s_f32_hz_then_khz, s2v_f32_hz_then_khz},
-  prelude::{BoolParam, FloatParam, FloatRange, Params}, params::{IntParam, range::IntRange},
+  prelude::{BoolParam, FloatParam, FloatRange, Params}, params::{EnumParam, enums::Enum},
 };
 mod custom_formatters;
 use custom_formatters::v2s_f32_digits;
 
-use self::custom_formatters::{v2s_channel_mode, s2v_channel_mode, v2s_time_mode, s2v_time_mode};
+#[derive(Enum, PartialEq)]
+pub enum ChannelMode { 
+  Stereo,
+  #[name = "Ping Pong"]
+  PingPong,
+}
+
+#[derive(Enum, PartialEq)]
+pub enum TimeMode {
+  Repitch,
+  Fade
+}
 
 #[derive(Params)]
 pub struct SpaceEchoParameters {
@@ -14,10 +25,10 @@ pub struct SpaceEchoParameters {
   pub input: FloatParam,
 
   #[id = "channel_mode"]
-  pub channel_mode: IntParam,
+  pub channel_mode: EnumParam<ChannelMode>,
 
   #[id = "time_mode"]
-  pub time_mode: IntParam,
+  pub time_mode: EnumParam<TimeMode>,
 
   #[id = "time_link"]
   pub time_link: BoolParam,
@@ -85,21 +96,15 @@ impl Default for SpaceEchoParameters {
       .with_unit(" dB")
       .with_value_to_string(v2s_f32_digits(2)),
 
-      channel_mode: IntParam::new(
+      channel_mode: EnumParam::new(
         "Channel Mode",
-        0,
-        IntRange::Linear { min: 0, max: 1 }
-      )
-      .with_value_to_string(v2s_channel_mode())
-      .with_string_to_value(s2v_channel_mode()),
+        ChannelMode::Stereo,
+      ),
 
-      time_mode: IntParam::new(
+      time_mode: EnumParam::new(
         "Time Mode",
-        0,
-        IntRange::Linear { min: 0, max: 1 }
-      )
-      .with_value_to_string(v2s_time_mode())
-      .with_string_to_value(s2v_time_mode()),
+        TimeMode::Repitch
+      ),
 
       time_link: BoolParam::new("Link", true),
 

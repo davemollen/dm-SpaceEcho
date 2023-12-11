@@ -15,8 +15,8 @@ use vizia::{
   },
   views::{HStack, ZStack}, handle::Handle
 };
-use nih_plug::params::Param;
-use crate::space_echo_parameters::SpaceEchoParameters;
+use nih_plug::{params::Param, prelude::Enum};
+use crate::space_echo_parameters::{SpaceEchoParameters, TimeMode, ChannelMode};
 use super::{UiData, ParamChangeEvent};
 
 pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStack> {
@@ -85,6 +85,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
       params.time_mode.as_ptr(),
       |params| &params.time_mode,
       |param_ptr, val| ParamChangeEvent::SetParam(param_ptr, val),
+      TimeMode::variants()
     ).row_index(2 as usize).col_index(1 as usize).col_span(2 as usize);
     ParamRadioButton::new(
       cx,
@@ -92,6 +93,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
       params.channel_mode.as_ptr(),
       |params| &params.channel_mode,
       |param_ptr, val| ParamChangeEvent::SetParam(param_ptr, val),
+      ChannelMode::variants()
     ).row_index(2 as usize).col_index(3 as usize).col_span(2 as usize);
   }).container_style()
 }

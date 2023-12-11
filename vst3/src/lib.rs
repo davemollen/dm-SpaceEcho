@@ -90,8 +90,8 @@ impl Plugin for DmSpaceEcho {
     let stereo = self.params.stereo.value();
     let duck = self.params.duck.value();
     let mix = self.params.mix.value();
-    let channel_mode = self.params.channel_mode.value();
-    let time_mode = self.params.time_mode.value();
+    let channel_mode = self.params.channel_mode.value() as i32;
+    let time_mode = self.params.time_mode.value() as i32;
     let limiter = self.params.limiter.value();
     let hold = self.params.hold.value();
 

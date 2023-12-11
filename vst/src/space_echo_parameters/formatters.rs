@@ -76,7 +76,7 @@ pub fn v2s_time_mode() -> Arc<dyn Fn(i32) -> String + Send + Sync> {
 pub fn s2v_time_mode() -> Arc<dyn Fn(&str) -> Option<i32> + Send + Sync> {
   Arc::new(move |value| {
     match value {
-      "Stereo" => Some(0),
+      "Repitch" => Some(0),
       _ => Some(1)
     }
   })
