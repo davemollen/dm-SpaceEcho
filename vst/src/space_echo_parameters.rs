@@ -2,7 +2,8 @@ use std::sync::Arc;
 use vst::plugin::PluginParameters;
 mod formatters;
 use formatters::{
-  s2v_f32_hz_then_khz, s2v_f32_percentage, v2s_f32_digits, v2s_f32_hz_then_khz, v2s_f32_percentage
+  s2v_f32_hz_then_khz, s2v_f32_percentage, v2s_f32_digits, v2s_f32_hz_then_khz, v2s_f32_percentage, 
+  v2s_channel_mode, s2v_channel_mode, v2s_time_mode, s2v_time_mode
 };
 mod params;
 pub use params::{BoolParam, FloatParam, FloatRange, IntParam, IntRange, Params};
@@ -50,9 +51,11 @@ impl Default for SpaceEchoParameters {
         0,
         1,
         IntRange::Options {
-          names: vec!["Stereo", "Ping pong"],
+          names: vec!["Stereo", "Ping Pong"],
         },
-      ),
+      )
+      .with_value_to_string(v2s_channel_mode())
+      .with_string_to_value(s2v_channel_mode()),
 
       time_mode: IntParam::new(
         "Time Mode",
@@ -61,7 +64,9 @@ impl Default for SpaceEchoParameters {
         IntRange::Options {
           names: vec!["Repitch", "Fade"],
         },
-      ),
+      )
+      .with_value_to_string(v2s_time_mode())
+      .with_string_to_value(s2v_time_mode()),
 
       time_link: BoolParam::new("Link", true, 3),
 
@@ -91,10 +96,18 @@ impl Default for SpaceEchoParameters {
       .with_unit(" ms")
       .with_value_to_string(v2s_f32_digits(2)),
 
-      feedback: FloatParam::new("Feedback", 0.5, 6, FloatRange::Linear { min: 0., max: 1.5 })
-        .with_unit(" %")
-        .with_value_to_string(v2s_f32_percentage(2))
-        .with_string_to_value(s2v_f32_percentage()),
+      feedback: FloatParam::new(
+        "Feedback", 
+        0.5, 
+        6, 
+        FloatRange::Linear { 
+          min: 0., 
+          max: 1.5 
+        }
+      )
+      .with_unit(" %")
+      .with_value_to_string(v2s_f32_percentage(2))
+      .with_string_to_value(s2v_f32_percentage()),
 
       wow_and_flutter: FloatParam::new(
         "Flutter",
@@ -119,10 +132,18 @@ impl Default for SpaceEchoParameters {
       .with_value_to_string(v2s_f32_hz_then_khz(2))
       .with_string_to_value(s2v_f32_hz_then_khz()),
 
-      highpass_res: FloatParam::new("Res", 0., 9, FloatRange::Linear { min: 0., max: 1. })
-        .with_unit(" %")
-        .with_value_to_string(v2s_f32_percentage(2))
-        .with_string_to_value(s2v_f32_percentage()),
+      highpass_res: FloatParam::new(
+        "Res", 
+        0., 
+        9, 
+        FloatRange::Linear { 
+          min: 0., 
+          max: 1. 
+        }
+      )
+      .with_unit(" %")
+      .with_value_to_string(v2s_f32_percentage(2))
+      .with_string_to_value(s2v_f32_percentage()),
 
       lowpass_freq: FloatParam::new(
         "Lowpass",
@@ -137,36 +158,76 @@ impl Default for SpaceEchoParameters {
       .with_value_to_string(v2s_f32_hz_then_khz(2))
       .with_string_to_value(s2v_f32_hz_then_khz()),
 
-      lowpass_res: FloatParam::new("Res", 0., 11, FloatRange::Linear { min: 0., max: 1. })
-        .with_unit(" %")
-        .with_value_to_string(v2s_f32_percentage(2))
-        .with_string_to_value(s2v_f32_percentage()),
+      lowpass_res: FloatParam::new(
+        "Res", 
+        0., 
+        11, 
+        FloatRange::Linear { 
+          min: 0., 
+          max: 1. 
+        }
+      )
+      .with_unit(" %")
+      .with_value_to_string(v2s_f32_percentage(2))
+      .with_string_to_value(s2v_f32_percentage()),
 
-      reverb: FloatParam::new("Reverb", 0., 12, FloatRange::Linear { min: 0., max: 1. })
-        .with_unit(" %")
-        .with_value_to_string(v2s_f32_percentage(2))
-        .with_string_to_value(s2v_f32_percentage()),
+      reverb: FloatParam::new(
+        "Reverb", 
+        0., 
+        12, 
+        FloatRange::Linear { 
+          min: 0., 
+          max: 1. 
+        }
+      )
+      .with_unit(" %")
+      .with_value_to_string(v2s_f32_percentage(2))
+      .with_string_to_value(s2v_f32_percentage()),
 
-      decay: FloatParam::new("Decay", 0.5, 13, FloatRange::Linear { min: 0., max: 1. })
-        .with_unit(" %")
-        .with_value_to_string(v2s_f32_percentage(2))
-        .with_string_to_value(s2v_f32_percentage()),
+      decay: FloatParam::new(
+        "Decay", 
+        0.5, 
+        13, 
+        FloatRange::Linear { 
+          min: 0., 
+          max: 1. 
+        }
+      )
+      .with_unit(" %")
+      .with_value_to_string(v2s_f32_percentage(2))
+      .with_string_to_value(s2v_f32_percentage()),
 
-      stereo: FloatParam::new("Stereo", 1., 14, FloatRange::Linear { min: 0., max: 1. })
-        .with_unit(" %")
-        .with_value_to_string(v2s_f32_percentage(2))
-        .with_string_to_value(s2v_f32_percentage()),
+      stereo: FloatParam::new(
+        "Stereo", 
+        1., 
+        14, 
+        FloatRange::Linear { 
+          min: 0., 
+          max: 1. 
+        }
+      )
+      .with_unit(" %")
+      .with_value_to_string(v2s_f32_percentage(2))
+      .with_string_to_value(s2v_f32_percentage()),
 
-      duck: FloatParam::new("Duck", 0., 15, FloatRange::Linear { min: 0., max: 1. })
-        .with_unit(" %")
-        .with_value_to_string(v2s_f32_percentage(2))
-        .with_string_to_value(s2v_f32_percentage()),
+      duck: FloatParam::new(
+        "Duck", 
+        0., 
+        15, 
+        FloatRange::Linear { 
+          min: 0., 
+          max: 1. 
+        }
+      )
+      .with_unit(" %")
+      .with_value_to_string(v2s_f32_percentage(2))
+      .with_string_to_value(s2v_f32_percentage()),
 
       output: FloatParam::new(
         "Output",
         0.,
         16,
-        FloatRange::SymmetricalSkewed {
+        FloatRange::AsymmetricalSkewed {
           min: -100.,
           max: 12.,
           center: 0.,
@@ -183,10 +244,18 @@ impl Default for SpaceEchoParameters {
         }
       })),
 
-      mix: FloatParam::new("Mix", 0.5, 17, FloatRange::Linear { min: 0., max: 1. })
-        .with_unit(" %")
-        .with_value_to_string(v2s_f32_percentage(2))
-        .with_string_to_value(s2v_f32_percentage()),
+      mix: FloatParam::new(
+        "Mix", 
+        0.5, 
+        17, 
+        FloatRange::Linear { 
+          min: 0., 
+          max: 1. 
+        }
+      )
+      .with_unit(" %")
+      .with_value_to_string(v2s_f32_percentage(2))
+      .with_string_to_value(s2v_f32_percentage()),
 
       limiter: BoolParam::new("Limiter", false, 18),
 

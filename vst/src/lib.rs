@@ -13,6 +13,8 @@ use vst::{
   prelude::HostCallback,
 };
 
+const TIME_SMOOTHING_FACTOR: f32 = 0.25;
+
 struct DmSpaceEcho {
   params: Arc<SpaceEchoParameters>,
   space_echo: SpaceEcho,
@@ -104,7 +106,7 @@ impl Plugin for DmSpaceEcho {
         mix,
         limiter,
         hold,
-        0.25
+        TIME_SMOOTHING_FACTOR
       );
       *output_left = space_echo_left;
       *output_right = space_echo_right;

@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use vst::util::AtomicFloat;
-mod float_range;
 use super::Params;
+mod float_range;
 pub use float_range::FloatRange;
 
 pub struct FloatParam {

@@ -8,7 +8,7 @@ pub enum FloatRange {
     max: f32,
     factor: f32,
   },
-  SymmetricalSkewed {
+  AsymmetricalSkewed {
     min: f32,
     max: f32,
     center: f32,
@@ -24,7 +24,7 @@ impl FloatRange {
       FloatRange::Skewed { min, max, factor } => {
         ((value.clamp(*min, *max) - min) / (max - min)).powf(*factor)
       }
-      FloatRange::SymmetricalSkewed {
+      FloatRange::AsymmetricalSkewed {
         min,
         max,
         center,
@@ -51,7 +51,7 @@ impl FloatRange {
     match self {
       FloatRange::Linear { min, max } => (value * (max - min)) + min,
       FloatRange::Skewed { min, max, factor } => (value.powf(factor.recip()) * (max - min)) + min,
-      FloatRange::SymmetricalSkewed {
+      FloatRange::AsymmetricalSkewed {
         min,
         max,
         center,

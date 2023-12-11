@@ -71,7 +71,7 @@ impl SmoothParameters {
     let feedback = self
       .smooth_feedback
       .run(if hold { 1. } else { feedback }, 3.);
-    let wow_and_flutter = self.smooth_wow_and_flutter.run(wow_and_flutter, 7.);
+    let wow_and_flutter = self.smooth_wow_and_flutter.run(if hold { 0. } else { wow_and_flutter }, 7.);
     let highpass_freq = self
       .smooth_highpass_freq
       .run(if hold { 20. } else { highpass_freq }, 7.);

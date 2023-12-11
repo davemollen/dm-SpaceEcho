@@ -1,0 +1,28 @@
+label {
+  font-size: 14px;
+  color: #E1D9D1;
+}
+
+knob {
+  width: 40px;
+  height: 40px;
+}
+
+knob .track {
+  background-color: #ffb433;
+}
+
+textbox {
+  font-size: 12px;
+  width: 72px;
+  color: #E1D9D1;
+  background-color: transparent;
+  border-width: 0px;
+  outline-color: none;
+}
+
+textbox:hover {
+  background-color: transparent;
+  border-width: 0px;
+  outline-color: none;
+}
