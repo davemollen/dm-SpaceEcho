@@ -62,27 +62,12 @@ impl Plugin for DmSpaceEcho {
     let time_mode = *ports.time_mode as i32 - 1;
     let channel_mode = *ports.channel_mode as i32 - 1;
     let time_link = *ports.time_link as i32;
-    if time_link == 1 {
-      let time_left_changed = (self.time_left - *ports.time_left).abs() > 0.;
-      let time_right_changed = (self.time_right - *ports.time_right).abs() > 0.;
-      match (time_left_changed, time_right_changed) {
-        (true, false) => {
-          self.time_left = *ports.time_left;
-          self.time_right = *ports.time_left;
-        }
-        (false, true) => {
-          self.time_left = *ports.time_right;
-          self.time_right = *ports.time_right;
-        }
-        _ => {
-          self.time_left = *ports.time_left;
-          self.time_right = *ports.time_right;
-        }
-      }
+    let time_left = *ports.time_left;
+    let time_right = if time_link {
+      time_left
     } else {
-      self.time_left = *ports.time_left;
-      self.time_right = *ports.time_right;
-    }
+      *ports.time_right
+    };
     let feedback = *ports.feedback * 0.01;
     let wow_and_flutter = *ports.wow_and_flutter * 0.01;
     let highpass_freq = *ports.highpass_freq;

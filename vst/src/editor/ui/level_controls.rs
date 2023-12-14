@@ -21,31 +21,31 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
 
     ParamKnob::new(
       cx,
+      params.output.name,
       UiData::params,
-      &params.output,
       |params| &params.output,
       |val| ParamChangeEvent::SetOutput(val),
     ).row_index(0 as usize).col_index(0 as usize);
     ParamKnob::new(
       cx,
+      params.mix.name,
       UiData::params,
-      &params.mix,
       |params| &params.mix,
       |val| ParamChangeEvent::SetMix(val),
     ).row_index(0 as usize).col_index(1 as usize);
 
     ParamKnob::new(
       cx,
+      params.duck.name,
       UiData::params,
-      &params.duck,
       |params| &params.duck,
       |val| ParamChangeEvent::SetDuck(val),
     ).row_index(1 as usize).col_index(0 as usize);
     
     ParamKnob::new(
       cx,
+      params.stereo.name,
       UiData::params,
-      &params.stereo,
       |params| &params.stereo,
       |val| ParamChangeEvent::SetStereo(val),
     ).row_index(1 as usize).col_index(1 as usize);

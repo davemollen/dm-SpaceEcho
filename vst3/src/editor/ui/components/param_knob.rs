@@ -9,13 +9,14 @@ use vizia::{
 pub struct ParamKnob {}
 
 impl ParamKnob {
-  pub fn new<L, P, F, M, C>(
-    cx: &mut Context,
+  pub fn new<'a, L, P, F, M, C>(
+    cx: &'a mut Context,
+    name: &'a str,
     lens: L,
     param_ptr: ParamPtr,
     params_to_param: F,
     on_change: C,
-  ) -> Handle<'_, VStack> 
+  ) -> Handle<'a, VStack> 
   where
     L: 'static + Lens + Copy + Send + Sync,
     <L as Lens>::Source: 'static,
@@ -26,7 +27,7 @@ impl ParamKnob {
     C: 'static + Fn(ParamPtr, f32) -> M + Copy + Send + Sync,
   {
     VStack::new(cx, |cx| {
-      Label::new(cx, unsafe { param_ptr.name() })
+      Label::new(cx, name)
         .font_size(13.0)
         .font_weight(Weight::SEMIBOLD)
         .text_wrap(false)

@@ -1,35 +1,28 @@
-function(event, {set_port_value}) {
+function(event) {
   function handle_event(symbol, value) {
-    const time_link = event.icon.find("[mod-port-symbol=time_link]");
-    const is_time_linked = time_link.hasClass("on");
     
     switch (symbol) {
-        case "time_link":
+      case "time_link":
+            const time_link = event.icon.find("[mod-port-symbol=time_link]");
+            const time_right = event.icon.find("[mod-port-symbol=time_right]");
+            const synced_time_right = event.icon.find(".synced-time-knob");
+
             if(value == 1) {
               time_link.addClass("on");
-              set_port_value("time_right", time_left);
+              time_right.addClass("hide");
+              synced_time_right.removeClass("hide");
             } else {
               time_link.removeClass("on");
+              time_right.removeClass("hide");
+              synced_time_right.addClass("hide");
             }
             break;
         case "limiter":
-          const limiter = event.icon.find("[mod-port-symbol=limiter]");
-          if(value == 1) {
-            limiter.addClass("on");
-          } else {
-            limiter.removeClass("on");
-          }
-          break;
-        case "time_left":
-            time_left = value;
-
-            if(is_time_linked) {
-              set_port_value("time_right", value);
-            }
-            break;
-        case "time_right":
-            if(is_time_linked) {
-              set_port_value("time_left", value);
+            const limiter = event.icon.find("[mod-port-symbol=limiter]");
+            if(value == 1) {
+              limiter.addClass("on");
+            } else {
+              limiter.removeClass("on");
             }
             break;
         case "hold":

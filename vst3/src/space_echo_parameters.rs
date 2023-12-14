@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use nih_plug::{
   formatters::{s2v_f32_percentage, v2s_f32_percentage, v2s_f32_hz_then_khz, s2v_f32_hz_then_khz},
-  prelude::{BoolParam, FloatParam, FloatRange, Params}, params::{EnumParam, enums::Enum},
+  prelude::{BoolParam, FloatParam, FloatRange, Params}, params::{EnumParam, enums::Enum}
 };
 mod custom_formatters;
 use custom_formatters::v2s_f32_digits;
@@ -79,7 +79,7 @@ pub struct SpaceEchoParameters {
   pub limiter: BoolParam,
 
   #[id = "hold"]
-  pub hold: BoolParam,
+  pub hold: BoolParam
 }
 
 impl Default for SpaceEchoParameters {

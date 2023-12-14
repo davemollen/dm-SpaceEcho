@@ -13,7 +13,7 @@ use vizia::{
     Context, LayoutModifiers, StyleModifiers,
     Units::Pixels, LayoutType,
   },
-  views::{HStack, ZStack}, handle::Handle
+  views::{HStack, ZStack}, handle::Handle, state::LensExt
 };
 use nih_plug::{params::Param, prelude::Enum};
 use crate::space_echo_parameters::{SpaceEchoParameters, TimeMode, ChannelMode};
@@ -25,6 +25,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
 
     ParamKnob::new(
       cx,
+      params.input.name(),
       UiData::params,
       params.input.as_ptr(),
       |params| &params.input,
@@ -42,22 +43,45 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
       |params| &params.time_link,
       |param_ptr, val| ParamChangeEvent::SetParam(param_ptr, val),
     ).row_index(0 as usize).col_index(1 as usize);
+
     ParamKnob::new(
       cx,
+      params.time_left.name(),
       UiData::params,
       params.time_left.as_ptr(),
       |params| &params.time_left,
       |param_ptr, val| ParamChangeEvent::SetParam(param_ptr, val),
     ).row_index(0 as usize).col_index(2 as usize);
+
+    // show when time_link is on
     ParamKnob::new(
       cx,
+      params.time_right.name(),
+      UiData::params,
+      params.time_left.as_ptr(),
+      |params| &params.time_left,
+      |param_ptr, val| ParamChangeEvent::SetParam(param_ptr, val),
+    )
+    .row_index(0 as usize)
+    .col_index(3 as usize)
+    .toggle_class("hide", UiData::params.map(|p| !p.time_link.value()));
+
+    // show when time_link is off
+    ParamKnob::new(
+      cx,
+      params.time_right.name(),
       UiData::params,
       params.time_right.as_ptr(),
       |params| &params.time_right,
       |param_ptr, val| ParamChangeEvent::SetParam(param_ptr, val),
-    ).row_index(0 as usize).col_index(3 as usize);
+    )
+    .row_index(0 as usize)
+    .col_index(3 as usize)
+    .toggle_class("hide", UiData::params.map(|p| p.time_link.value()));
+
     ParamKnob::new(
       cx,
+      params.feedback.name(),
       UiData::params,
       params.feedback.as_ptr(),
       |params| &params.feedback,
@@ -73,6 +97,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
     ).row_index(1 as usize).col_index(3 as usize);
     ParamKnob::new(
       cx,
+      params.wow_and_flutter.name(),
       UiData::params,
       params.wow_and_flutter.as_ptr(),
       |params| &params.wow_and_flutter,

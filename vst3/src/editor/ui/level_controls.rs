@@ -22,6 +22,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
 
     ParamKnob::new(
       cx,
+      params.output.name(),
       UiData::params,
       params.output.as_ptr(),
       |params| &params.output,
@@ -29,6 +30,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
     ).row_index(0 as usize).col_index(0 as usize);
     ParamKnob::new(
       cx,
+      params.mix.name(),
       UiData::params,
       params.mix.as_ptr(),
       |params| &params.mix,
@@ -37,6 +39,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
 
     ParamKnob::new(
       cx,
+      params.duck.name(),
       UiData::params,
       params.duck.as_ptr(),
       |params| &params.duck,
@@ -45,6 +48,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
     
     ParamKnob::new(
       cx,
+      params.stereo.name(),
       UiData::params,
       params.stereo.as_ptr(),
       |params| &params.stereo,

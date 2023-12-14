@@ -57,8 +57,13 @@ impl Plugin for DmSpaceEcho {
 
   fn process(&mut self, buffer: &mut AudioBuffer<f32>) {
     let input_level = self.params.input.get_value();
+    let time_link = self.params.time_link.get_value();
     let time_left = self.params.time_left.get_value();
-    let time_right = self.params.time_right.get_value();
+    let time_right = if time_link {
+      time_left
+    } else {
+      self.params.time_right.get_value()
+    };
     let feedback = self.params.feedback.get_value();
     let wow_and_flutter = self.params.wow_and_flutter.get_value();
     let highpass_freq = self.params.highpass_freq.get_value();

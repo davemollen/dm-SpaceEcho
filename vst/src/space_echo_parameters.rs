@@ -349,28 +349,9 @@ impl PluginParameters for SpaceEchoParameters {
       0 => self.input.set_plain_value(val),
       1 => self.channel_mode.set_normalized_value(val),
       2 => self.time_mode.set_normalized_value(val),
-      3 => {
-        if val == 1. {
-          self.time_right.set_plain_value(self.time_left.get_normalized_value());
-        }
-        self.time_link.set_normalized_value(val)
-      },
-      4 => {
-        if self.time_link.get_value() {
-          self.time_left.set_plain_value(val);
-          self.time_right.set_plain_value(val);
-        } else {
-          self.time_left.set_plain_value(val)
-        }
-      }
-      5 => {
-        if self.time_link.get_value() {
-          self.time_left.set_plain_value(val);
-          self.time_right.set_plain_value(val);
-        } else {
-          self.time_right.set_plain_value(val)
-        }
-      }
+      3 => self.time_link.set_normalized_value(val),
+      4 => self.time_left.set_plain_value(val),
+      5 => self.time_right.set_plain_value(val),
       6 => self.feedback.set_plain_value(val),
       7 => self.wow_and_flutter.set_plain_value(val),
       8 => self.highpass_freq.set_plain_value(val),

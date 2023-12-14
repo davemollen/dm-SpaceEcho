@@ -24,10 +24,8 @@ impl ParamCheckbox {
     M: Any + Send,
     C: 'static + Fn(bool) -> M + Copy + Send + Sync,
   {
-    let name = param.name;
-
     VStack::new(cx, |cx| {
-      Label::new(cx, name)
+      Label::new(cx, param.name)
         .font_size(13.0)
         .font_weight(Weight::SEMIBOLD)
         .text_wrap(true)

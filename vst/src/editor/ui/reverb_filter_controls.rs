@@ -18,45 +18,45 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
 
     ParamKnob::new(
       cx,
+      params.reverb.name,
       UiData::params,
-      &params.reverb,
       |params| &params.reverb,
       |val| ParamChangeEvent::SetReverb(val),
     ).row_index(0 as usize).col_index(0 as usize);
     ParamKnob::new(
       cx,
+      params.decay.name,
       UiData::params,
-      &params.decay,
       |params| &params.decay,
       |val| ParamChangeEvent::SetDecay(val),
     ).row_index(0 as usize).col_index(1 as usize);
     
     ParamKnob::new(
       cx,
+      params.highpass_freq.name,
       UiData::params,
-      &params.highpass_freq,
       |params| &params.highpass_freq,
       |val| ParamChangeEvent::SetHighpassFreq(val),
     ).row_index(1 as usize).col_index(0 as usize);
     ParamKnob::new(
       cx,
+      params.lowpass_freq.name,
       UiData::params,
-      &params.lowpass_freq,
       |params| &params.lowpass_freq,
       |val| ParamChangeEvent::SetLowpassFreq(val),
     ).row_index(1 as usize).col_index(1 as usize);
 
     ParamKnob::new(
       cx,
+      params.highpass_res.name,
       UiData::params,
-      &params.highpass_res,
       |params| &params.highpass_res,
       |val| ParamChangeEvent::SetHighpassRes(val),
     ).row_index(2 as usize).col_index(0 as usize);
     ParamKnob::new(
       cx,
+      params.lowpass_res.name,
       UiData::params,
-      &params.lowpass_res,
       |params| &params.lowpass_res,
       |val| ParamChangeEvent::SetLowpassRes(val),
     ).row_index(2 as usize).col_index(1 as usize);

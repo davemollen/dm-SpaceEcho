@@ -26,3 +26,7 @@ textbox:hover {
   border-width: 0px;
   outline-color: none;
 }
+
+.hide {
+  display: none;
+}

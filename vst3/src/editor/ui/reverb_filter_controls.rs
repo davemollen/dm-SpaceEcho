@@ -19,6 +19,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
 
     ParamKnob::new(
       cx,
+      params.reverb.name(),
       UiData::params,
       params.reverb.as_ptr(),
       |params| &params.reverb,
@@ -26,6 +27,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
     ).row_index(0 as usize).col_index(0 as usize);
     ParamKnob::new(
       cx,
+      params.decay.name(),
       UiData::params,
       params.decay.as_ptr(),
       |params| &params.decay,
@@ -34,6 +36,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
     
     ParamKnob::new(
       cx,
+      params.highpass_freq.name(),
       UiData::params,
       params.highpass_freq.as_ptr(),
       |params| &params.highpass_freq,
@@ -41,6 +44,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
     ).row_index(1 as usize).col_index(0 as usize);
     ParamKnob::new(
       cx,
+      params.lowpass_freq.name(),
       UiData::params,
       params.lowpass_freq.as_ptr(),
       |params| &params.lowpass_freq,
@@ -49,6 +53,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
 
     ParamKnob::new(
       cx,
+      params.highpass_res.name(),
       UiData::params,
       params.highpass_res.as_ptr(),
       |params| &params.highpass_res,
@@ -56,6 +61,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
     ).row_index(2 as usize).col_index(0 as usize);
     ParamKnob::new(
       cx,
+      params.lowpass_res.name(),
       UiData::params,
       params.lowpass_res.as_ptr(),
       |params| &params.lowpass_res,

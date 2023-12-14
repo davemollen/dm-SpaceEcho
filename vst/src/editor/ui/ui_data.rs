@@ -86,22 +86,12 @@ impl Model for UiData {
       }
 
       ParamChangeEvent::SetTimeLeft(value) => {
-        if self.params.time_link.get_value() {
-          let param = &self.params.time_right;
-          param.set_plain_value(*value);
-          notify_host_parameter_changed(param.index, *value, self.host);
-        }
         let param = &self.params.time_left;
         param.set_plain_value(*value);
         notify_host_parameter_changed(param.index, *value, self.host);
       }
 
       ParamChangeEvent::SetTimeRight(value) => {
-        if self.params.time_link.get_value() {
-          let param = &self.params.time_left;
-          param.set_plain_value(*value);
-          notify_host_parameter_changed(param.index, *value, self.host);
-        }
         let param = &self.params.time_right;
         param.set_plain_value(*value);
         notify_host_parameter_changed(param.index, *value, self.host);

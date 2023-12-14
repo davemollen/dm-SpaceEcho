@@ -11,8 +11,8 @@ pub struct ParamKnob;
 impl ParamKnob {
   pub fn new<'a, L, F, M, C>(
     cx: &'a mut Context,
+    name: &'a str,
     lens: L,
-    param: &FloatParam,
     params_to_param: F,
     on_change: C,
   ) -> Handle<'a, VStack> 
@@ -25,7 +25,7 @@ impl ParamKnob {
     C: 'static + Fn(f32) -> M + Copy + Send + Sync,
   {
     VStack::new(cx, |cx| {
-      Label::new(cx, param.name)
+      Label::new(cx, name)
         .font_size(13.0)
         .font_weight(Weight::SEMIBOLD)
         .text_wrap(false)
