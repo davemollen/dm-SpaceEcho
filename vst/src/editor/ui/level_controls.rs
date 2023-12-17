@@ -52,8 +52,8 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
 
     ParamCheckbox::new(
       cx,
+      params.limiter.name,
       UiData::params,
-      &params.limiter,
       |params| &params.limiter,
       |val| ParamChangeEvent::SetLimiter(val),
     ).row_index(0 as usize).col_index(2 as usize);

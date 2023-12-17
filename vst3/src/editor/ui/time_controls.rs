@@ -38,6 +38,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
 
     ParamCheckbox::new(
       cx,
+      params.time_link.name(),
       UiData::params,
       params.time_link.as_ptr(),
       |params| &params.time_link,
@@ -90,6 +91,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
 
     ParamCheckbox::new(
       cx,
+      params.hold.name(),
       UiData::params,
       params.hold.as_ptr(),
       |params| &params.hold,
@@ -106,6 +108,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
 
     ParamRadioButton::new(
       cx,
+      params.time_mode.name(),
       UiData::params,
       params.time_mode.as_ptr(),
       |params| &params.time_mode,
@@ -114,6 +117,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
     ).row_index(2 as usize).col_index(1 as usize).col_span(2 as usize);
     ParamRadioButton::new(
       cx,
+      params.channel_mode.name(),
       UiData::params,
       params.channel_mode.as_ptr(),
       |params| &params.channel_mode,

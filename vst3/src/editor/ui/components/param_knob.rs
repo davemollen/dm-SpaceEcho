@@ -2,7 +2,7 @@ use nih_plug::prelude::{Param, ParamPtr};
 use std::any::Any;
 use vizia::{
   prelude::{ActionModifiers, LayoutModifiers, Context, EmitContext, LensExt, StyleModifiers, Units::{Stretch, Pixels}, Weight},
-  state::{Binding, Data, Lens},
+  state::{Data, Lens},
   views::{Knob, Label, TextEvent, Textbox, VStack}, handle::Handle, modifiers::TextModifiers,
 };
 
@@ -33,43 +33,40 @@ impl ParamKnob {
         .text_wrap(false)
         .child_space(Stretch(1.0));
 
-      Binding::new(cx, lens, move |cx, params| {
-        Knob::new(
-          cx,
-          params.map(move |params| params_to_param(params).default_normalized_value()),
-          params.map(move |params| {
-            params_to_param(params)
-              .preview_normalized(params_to_param(params).modulated_plain_value())
-          }),
-          false,
-        )
-        .on_changing(move |cx, val| {
-          cx.emit(on_change(param_ptr, val));
-        });
+      Knob::new(
+        cx,
+        lens.map(move |p| params_to_param(p).default_normalized_value()),
+        lens.map(move |p| {
+          params_to_param(p).preview_normalized(params_to_param(p).modulated_plain_value())
+        }),
+        false,
+      )
+      .on_changing(move |cx, val| {
+        cx.emit(on_change(param_ptr, val));
+      });
 
-        Textbox::new(
-          cx,
-          params.map(move |params| {
-            params_to_param(params)
-              .normalized_value_to_string(params_to_param(params).modulated_normalized_value(), true)
-          }),
-        )
-        .on_mouse_down(|cx, _| {
-          cx.emit(TextEvent::StartEdit);
-          cx.emit(TextEvent::ResetText("".to_string()));
-        })
-        .on_submit(move |cx, text, success| {
-          if success {
-            let normalized_value =
-              params.map(move |params| params_to_param(params).string_to_normalized_value(&text));
-            match normalized_value.get(cx) {
-              Some(val) => cx.emit(on_change(param_ptr, val)),
-              _ => (),
-            };
-          }
-        })
-        .class("align_center");
+      Textbox::new(
+        cx,
+        lens.map(move |p| {
+          params_to_param(p)
+            .normalized_value_to_string(params_to_param(p).modulated_normalized_value(), true)
+        }),
+      )
+      .on_mouse_down(|cx, _| {
+        cx.emit(TextEvent::StartEdit);
+        cx.emit(TextEvent::ResetText("".to_string()));
       })
+      .on_submit(move |cx, text, success| {
+        if success {
+          let val =
+            lens.map(move |p| {
+              params_to_param(p).string_to_normalized_value(&text)
+          }).get(cx).unwrap();
+          
+          cx.emit(on_change(param_ptr, val));
+        }
+      })
+      .class("align_center");
     })
     .child_space(Stretch(1.0))
     .row_between(Pixels(4.0))
