@@ -147,7 +147,10 @@ impl Default for SpaceEchoParameters {
       wow_and_flutter: FloatParam::new(
         "Flutter",
         0.,
-        FloatRange::Linear { min: 0., max: 1. },
+        FloatRange::Linear { 
+          min: 0., 
+          max: 1. 
+        },
       )
       .with_unit(" %")
       .with_value_to_string(v2s_f32_percentage(2))
