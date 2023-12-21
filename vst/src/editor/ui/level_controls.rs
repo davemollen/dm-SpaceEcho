@@ -63,7 +63,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
 fn background(cx: &mut Context) {
   VStack::new(cx, |cx| {
     Label::new(cx, "DM")
-      .font_size(32.0)
+      .font_size(24.0)
       .border_color("#2d5f4f")
       .border_radius(Pixels(24.0))
       .border_width(Pixels(4.0))

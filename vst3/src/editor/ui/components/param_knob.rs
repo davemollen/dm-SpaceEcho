@@ -57,6 +57,8 @@ impl ParamKnob {
         cx.emit(TextEvent::ResetText("".to_string()));
       })
       .on_submit(move |cx, text, success| {
+        cx.emit(TextEvent::EndEdit);
+
         if success {
           let val =
             lens.map(move |p| {

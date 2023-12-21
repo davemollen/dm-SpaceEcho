@@ -50,6 +50,8 @@ impl ParamKnob {
         cx.emit(TextEvent::ResetText("".to_string()));
       })
       .on_submit(move |cx, text, success| {
+        cx.emit(TextEvent::EndEdit);
+
         if success {
           let normalized_value =
             lens.map(move |p| params_to_param(p).string_to_normalized_value(&text));
