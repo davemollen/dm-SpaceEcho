@@ -1,9 +1,10 @@
 use crate::space_echo_parameters::SpaceEchoParameters;
 use nih_plug::prelude::{GuiContext, ParamPtr};
 use std::sync::Arc;
-use vizia::{
-  prelude::{Event, EventContext, Lens},
-  state::{Model, Wrapper},
+use nih_plug_vizia::vizia::{
+  prelude::{Lens, Wrapper, Event}, 
+  context::EventContext, 
+  state::Model
 };
 
 pub enum ParamChangeEvent {

@@ -5,6 +5,8 @@ use nih_plug::{
 };
 mod custom_formatters;
 use custom_formatters::v2s_f32_digits;
+use nih_plug_vizia::ViziaState;
+use crate::editor;
 
 #[derive(Enum, PartialEq)]
 pub enum ChannelMode { 
@@ -21,6 +23,9 @@ pub enum TimeMode {
 
 #[derive(Params)]
 pub struct SpaceEchoParameters {
+  #[persist = "editor-state"]
+  pub editor_state: Arc<ViziaState>,
+
   #[id = "input"]
   pub input: FloatParam,
 
@@ -85,6 +90,8 @@ pub struct SpaceEchoParameters {
 impl Default for SpaceEchoParameters {
   fn default() -> Self {
     Self {
+      editor_state: editor::default_state(),
+
       input: FloatParam::new(
         "Input",
         0.,

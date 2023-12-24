@@ -5,7 +5,7 @@ use param_checkbox::ParamCheckbox;
 mod param_knob;
 use param_knob::ParamKnob;
 use std::sync::Arc;
-use vizia::{
+use nih_plug_vizia::vizia::{
   prelude::{
     Context, LayoutModifiers, StyleModifiers, TextModifiers,
     Units::{Pixels, Percentage, Stretch}, LayoutType,

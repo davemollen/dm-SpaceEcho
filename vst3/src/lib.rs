@@ -2,9 +2,8 @@ use nih_plug::prelude::*;
 use space_echo::SpaceEcho;
 mod space_echo_parameters;
 use space_echo_parameters::SpaceEchoParameters;
-use std::sync::{atomic::AtomicBool, Arc};
+use std::sync::Arc;
 mod editor;
-use editor::SpaceEchoEditor;
 
 const TIME_SMOOTHING_FACTOR: f32 = 0.25;
 
@@ -26,15 +25,15 @@ impl Default for DmSpaceEcho {
 impl Plugin for DmSpaceEcho {
   const NAME: &'static str = "dm-SpaceEcho";
   const VENDOR: &'static str = "DM";
-  // You can use `env!("CARGO_PKG_HOMEPAGE")` to reference the homepage field from the
-  // `Cargo.toml` file here
   const URL: &'static str = "https://github.com/davemollen/dm-SpaceEcho";
   const EMAIL: &'static str = "davemollen@gmail.com";
   const VERSION: &'static str = env!("CARGO_PKG_VERSION");
-  const DEFAULT_INPUT_CHANNELS: u32 = 2;
-  const DEFAULT_OUTPUT_CHANNELS: u32 = 2;
-  const DEFAULT_AUX_INPUTS: Option<AuxiliaryIOConfig> = None;
-  const DEFAULT_AUX_OUTPUTS: Option<AuxiliaryIOConfig> = None;
+
+  const AUDIO_IO_LAYOUTS: &'static [AudioIOLayout] = &[AudioIOLayout {
+    main_input_channels: NonZeroU32::new(2),
+    main_output_channels: NonZeroU32::new(2),
+    ..AudioIOLayout::const_default()
+  }];
   const MIDI_INPUT: MidiConfig = MidiConfig::None;
   const SAMPLE_ACCURATE_AUTOMATION: bool = true;
 
@@ -42,26 +41,19 @@ impl Plugin for DmSpaceEcho {
   // documentation for more information. `()` means that the plugin does not have any background
   // tasks.
   type BackgroundTask = ();
+  type SysExMessage = ();
 
   fn params(&self) -> Arc<dyn Params> {
     self.params.clone()
   }
 
-  fn accepts_bus_config(&self, config: &BusConfig) -> bool {
-    // This works with any symmetrical IO layout
-    config.num_input_channels == config.num_output_channels && config.num_input_channels > 0
-  }
-
-  fn editor(&self, _async_executor: AsyncExecutor<Self>) -> Option<Box<dyn Editor>> {
-    Some(Box::new(SpaceEchoEditor {
-      params: self.params.clone(),
-      emit_parameters_changed_event: Arc::new(AtomicBool::new(false)),
-    }))
+  fn editor(&mut self, _async_executor: AsyncExecutor<Self>) -> Option<Box<dyn Editor>> {
+    editor::create(self.params.clone(), self.params.editor_state.clone())
   }
 
   fn initialize(
     &mut self,
-    _: &BusConfig,
+    _audio_io_layout: &AudioIOLayout,
     buffer_config: &BufferConfig,
     _context: &mut impl InitContext<Self>,
   ) -> bool {
@@ -157,8 +149,12 @@ impl ClapPlugin for DmSpaceEcho {
 }
 
 impl Vst3Plugin for DmSpaceEcho {
-  const VST3_CLASS_ID: [u8; 16] = *b"DM-SpaceEchoPlug";
-  const VST3_CATEGORIES: &'static str = "Fx|Delay";
+  const VST3_CLASS_ID: [u8; 16] = *b"dm-SpaceEcho....";
+  const VST3_SUBCATEGORIES: &'static [Vst3SubCategory] = &[
+    Vst3SubCategory::Fx, 
+    Vst3SubCategory::Delay, 
+    Vst3SubCategory::Reverb
+  ];
 }
 
 nih_export_clap!(DmSpaceEcho);

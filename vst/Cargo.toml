@@ -8,7 +8,7 @@ edition = "2021"
 
 [dependencies]
 vst = "0.3.0"
-vizia = {git = "https://github.com/vizia/vizia", branch = "main", features = ["baseview"], default-features = false}
+vizia = { git = "https://github.com/robbert-vdh/vizia.git", branch = "patched", default_features = false, features = ["baseview", "clipboard", "x11"] }
 space_echo = { path = "../space_echo" }
 
 [lib]

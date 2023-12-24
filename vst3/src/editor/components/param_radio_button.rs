@@ -1,6 +1,6 @@
 use std::any::Any;
 use nih_plug::params::{internals::ParamPtr, Param};
-use vizia::{
+use nih_plug_vizia::vizia::{
   prelude::{Context, TextModifiers, LayoutModifiers, LensExt, StyleModifiers, Units::{Pixels, Stretch}, Weight},
   state::{Data, Lens},
   views::{HStack, Label, RadioButton, VStack}, handle::Handle, context::EmitContext,

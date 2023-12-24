@@ -8,7 +8,7 @@ use param_knob::ParamKnob;
 mod param_radio_button;
 use param_radio_button::ParamRadioButton;
 use std::sync::Arc;
-use vizia::{
+use nih_plug_vizia::vizia::{
   prelude::{
     Context, LayoutModifiers, StyleModifiers,
     Units::Pixels, LayoutType,

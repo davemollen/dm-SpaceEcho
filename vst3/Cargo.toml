@@ -8,10 +8,9 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-nih_plug = { git = "https://github.com/robbert-vdh/nih-plug", branch = "master", features = ["assert_process_allocs"] }
-vizia = {git = "https://github.com/vizia/vizia", branch = "main", features = ["baseview"], default-features = false}
+nih_plug = { git = "https://github.com/robbert-vdh/nih-plug", features = ["assert_process_allocs"] }
+nih_plug_vizia = { git = "https://github.com/robbert-vdh/nih-plug.git" }
 space_echo = { path = "../space_echo" }
-baseview = { git = "https://github.com/RustAudio/baseview.git", rev = "7001c2521fa1a439a01967cb881b411cd75d9ee0", features = ["opengl"] }
 
 [workspace]
 members = ["xtask"]
