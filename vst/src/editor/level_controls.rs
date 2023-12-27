@@ -65,12 +65,12 @@ fn background(cx: &mut Context) {
     Label::new(cx, "DM")
       .font_size(24.0)
       .border_color("#2d5f4f")
-      .border_radius(Pixels(24.0))
+      .border_radius(Pixels(16.0))
       .border_width(Pixels(4.0))
       .child_top(Pixels(2.0))
       .child_bottom(Pixels(2.0))
-      .child_left(Pixels(12.0))
-      .child_right(Pixels(12.0));
+      .child_left(Pixels(8.0))
+      .child_right(Pixels(8.0));
     Label::new(cx, "SpaceEcho")
       .font_size(22.0);
   })
