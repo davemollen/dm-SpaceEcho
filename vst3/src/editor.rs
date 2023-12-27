@@ -7,7 +7,7 @@ mod level_controls;
 mod ui_data;
 pub use ui_data::{UiData, ParamChangeEvent};
 use nih_plug::prelude::Editor;
-use nih_plug_vizia::{ViziaState, ViziaTheming, create_vizia_editor, widgets::ResizeHandle};
+use nih_plug_vizia::{ViziaState, ViziaTheming, create_vizia_editor};
 use nih_plug_vizia::vizia::{
   views::HStack, 
   modifiers::StyleModifiers, 
