@@ -13,17 +13,36 @@ impl Saturation {
     }
   }
 
-  pub fn run(&mut self, input: (f32, f32), threshold: f32) -> (f32, f32, f32) {
+  fn get_saturation_output(&self, input: f32, saturation_gain: f32, feedback: f32) -> f32 {
+    let clean_gain = 1. - saturation_gain;
+    let clean_output = match (clean_gain > 0., feedback >= 1.) {
+      (true, true) => (input * clean_gain).clamp(-1., 1.),
+      (true, false) => input * clean_gain,
+      _ => 0.
+    };
+
+    let saturation_output = match saturation_gain > 0. {
+      true => input.fast_tanh1() * saturation_gain,
+      false => 0.
+    };
+
+    clean_output + saturation_output
+  }
+
+  pub fn run(&mut self, input: (f32, f32), feedback: f32, threshold: f32) -> (f32, f32, f32) {
     let average = self.average.run((input.0 + input.1) * 0.5);
     let factor = self
       .enabled
       .run(if average > threshold { 1. } else { 0. }, 7.);
-    let inverted_factor = 1. - factor;
     let saturation_gain_compensation = (1. + threshold - average).clamp(0.4, 1.);
 
+    let (saturation_output_left, saturation_output_right) = (
+      self.get_saturation_output(input.0, factor, feedback),
+      self.get_saturation_output(input.1, factor, feedback),
+    );
     (
-      input.0.fast_tanh1() * factor + input.0 * inverted_factor,
-      input.1.fast_tanh1() * factor + input.1 * inverted_factor,
+      saturation_output_left,
+      saturation_output_right,
       saturation_gain_compensation,
     )
   }

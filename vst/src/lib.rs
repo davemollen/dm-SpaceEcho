@@ -59,11 +59,7 @@ impl Plugin for DmSpaceEcho {
     let input_level = self.params.input.get_value();
     let time_link = self.params.time_link.get_value();
     let time_left = self.params.time_left.get_value();
-    let time_right = if time_link {
-      time_left
-    } else {
-      self.params.time_right.get_value()
-    };
+    let time_right = self.params.time_right.get_value();
     let feedback = self.params.feedback.get_value();
     let wow_and_flutter = self.params.wow_and_flutter.get_value();
     let highpass_freq = self.params.highpass_freq.get_value();
@@ -97,6 +93,7 @@ impl Plugin for DmSpaceEcho {
         time_mode,
         time_left,
         time_right,
+        time_link,
         feedback,
         wow_and_flutter,
         highpass_freq,

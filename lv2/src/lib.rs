@@ -33,8 +33,6 @@ struct Ports {
 
 #[uri("https://github.com/davemollen/dm-SpaceEcho")]
 struct DmSpaceEcho {
-  time_left: f32,
-  time_right: f32,
   space_echo: SpaceEcho,
 }
 
@@ -49,8 +47,6 @@ impl Plugin for DmSpaceEcho {
   // Create a new instance of the plugin; Trivial in this case.
   fn new(_plugin_info: &PluginInfo, _features: &mut ()) -> Option<Self> {
     Some(Self {
-      time_left: 250.0,
-      time_right: 250.0,
       space_echo: SpaceEcho::new(_plugin_info.sample_rate() as f32),
     })
   }
@@ -61,13 +57,9 @@ impl Plugin for DmSpaceEcho {
     let input_level = *ports.input;
     let time_mode = *ports.time_mode as i32 - 1;
     let channel_mode = *ports.channel_mode as i32 - 1;
-    let time_link = *ports.time_link as i32;
+    let time_link = *ports.time_link as i32 == 1;
     let time_left = *ports.time_left;
-    let time_right = if time_link {
-      time_left
-    } else {
-      *ports.time_right
-    };
+    let time_right = *ports.time_right;
     let feedback = *ports.feedback * 0.01;
     let wow_and_flutter = *ports.wow_and_flutter * 0.01;
     let highpass_freq = *ports.highpass_freq;
@@ -97,8 +89,9 @@ impl Plugin for DmSpaceEcho {
         input_level,
         channel_mode,
         time_mode,
-        self.time_left,
-        self.time_right,
+        time_left,
+        time_right,
+        time_link,
         feedback,
         wow_and_flutter,
         highpass_freq,

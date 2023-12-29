@@ -84,6 +84,7 @@ impl SpaceEcho {
     &mut self,
     time_left: f32,
     time_right: f32,
+    time_link: bool,
     time_mode: i32,
     wow_and_flutter_param: f32,
     time_smoothing_factor: f32
@@ -98,7 +99,7 @@ impl SpaceEcho {
       0 => {
         let (time_left, time_right) = self
           .smooth_parameters
-          .get_time_parameters(time_left, time_right, time_smoothing_factor);
+          .get_time_parameters(time_left, time_right, time_link, time_smoothing_factor);
 
         let delay_out_left = self
           .delay_line_left
@@ -187,6 +188,7 @@ impl SpaceEcho {
     time_mode: i32,
     time_left: f32,
     time_right: f32,
+    time_link: bool,
     feedback: f32,
     wow_and_flutter: f32,
     highpass_freq: f32,
@@ -234,10 +236,10 @@ impl SpaceEcho {
 
     let delay_input = self.get_delay_input(input, channel_mode, hold, input_level);
     let delay_output =
-      self.read_from_delay_lines(time_left, time_right, time_mode, wow_and_flutter, time_smoothing_factor);
+      self.read_from_delay_lines(time_left, time_right, time_link, time_mode, wow_and_flutter, time_smoothing_factor);
 
     let (saturation_output_left, saturation_output_right, saturation_gain_compensation) =
-      self.saturation.run(delay_output, 0.15);
+      self.saturation.run(delay_output, feedback, 0.15);
 
     let filter_output = self.apply_filter(
       (saturation_output_left, saturation_output_right),

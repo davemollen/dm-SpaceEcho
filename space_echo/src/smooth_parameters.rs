@@ -43,12 +43,22 @@ impl SmoothParameters {
     &mut self,
     time_left: f32,
     time_right: f32,
+    time_link: bool,
     smoothing_factor: f32,
   ) -> (f32, f32) {
-    (
-      self.smooth_time_left.run(time_left, smoothing_factor),
-      self.smooth_time_right.run(time_right, smoothing_factor),
-    )
+    let time_left = self.smooth_time_left.run(time_left, smoothing_factor);
+    
+    if time_link {
+      (
+        time_left,
+        time_left
+      )
+    } else {
+      (
+        time_left,
+        self.smooth_time_right.run(time_right, smoothing_factor),
+      )
+    }
   }
 
   pub fn get_parameters(
