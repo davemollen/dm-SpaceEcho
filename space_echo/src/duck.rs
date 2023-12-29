@@ -18,7 +18,7 @@ impl Duck {
     if duck == 0. {
       input
     } else {
-      let threshold = (duck * -50.).dbtoa();
+      let threshold = (duck * -40.).dbtoa();
       let summed_side_chain_input = (side_chain_input.0 + side_chain_input.1) * 0.5;
       let slide_input = if summed_side_chain_input.abs() > threshold {
         0.14285714
