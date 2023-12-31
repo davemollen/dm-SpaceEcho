@@ -6,7 +6,8 @@ BINARY_NAME="lib$PACKAGE_NAME.dylib"
 
 cd vst
 cargo build --release
-../scripts/osx_vst_bundler.sh $NAME target/release/$BINARY_NAME 
+cd target/release
+../../../scripts/osx_vst_bundler.sh $NAME $BINARY_NAME 
 
 if [ -d "$MOVE_TO" ]; then
     rm -r "$MOVE_TO"

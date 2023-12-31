@@ -11,12 +11,14 @@ cargo build --release --target x86_64-apple-darwin
 cargo build --release --target aarch64-apple-darwin
 lipo -create target/x86_64-apple-darwin/release/$BINARY_NAME target/aarch64-apple-darwin/release/$BINARY_NAME -output target/release/$BINARY_NAME
 file target/release/$BINARY_NAME
-../scripts/osx_vst_bundler.sh $NAME target/release/$BINARY_NAME 
+
+cd target/release
+../../../scripts/osx_vst_bundler.sh $NAME $BINARY_NAME 
 
 if [ -d "$MOVE_TO" ]; then
-    sudo rm -r "$MOVE_TO"
+    rm -r "$MOVE_TO"
 fi
 
-if sudo mv "$VST_NAME" "$MOVE_TO"; then
+if mv "$VST_NAME" "$MOVE_TO"; then
     echo "Copied VST bundle to $MOVE_TO"
 fi
