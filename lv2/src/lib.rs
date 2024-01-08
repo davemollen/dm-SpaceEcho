@@ -6,13 +6,14 @@ use space_echo::SpaceEcho;
 #[derive(PortCollection)]
 struct Ports {
   input: InputPort<Control>,
-  channel_mode: InputPort<Control>,
-  time_mode: InputPort<Control>,
   time_link: InputPort<Control>,
   time_left: InputPort<Control>,
   time_right: InputPort<Control>,
   feedback: InputPort<Control>,
+  hold: InputPort<Control>,
   wow_and_flutter: InputPort<Control>,
+  channel_mode: InputPort<Control>,
+  time_mode: InputPort<Control>,
   highpass_freq: InputPort<Control>,
   highpass_res: InputPort<Control>,
   lowpass_freq: InputPort<Control>,
@@ -24,7 +25,6 @@ struct Ports {
   output: InputPort<Control>,
   mix: InputPort<Control>,
   limiter: InputPort<Control>,
-  hold: InputPort<Control>,
   input_left: InputPort<Audio>,
   input_right: InputPort<Audio>,
   output_left: OutputPort<Audio>,
@@ -55,13 +55,14 @@ impl Plugin for DmSpaceEcho {
   // iterates over.
   fn run(&mut self, ports: &mut Ports, _features: &mut (), _sample_count: u32) {
     let input_level = *ports.input;
-    let time_mode = *ports.time_mode as i32 - 1;
-    let channel_mode = *ports.channel_mode as i32 - 1;
     let time_link = *ports.time_link as i32 == 1;
     let time_left = *ports.time_left;
     let time_right = *ports.time_right;
     let feedback = *ports.feedback * 0.01;
+    let hold = *ports.hold as i32 == 1;
     let wow_and_flutter = *ports.wow_and_flutter * 0.01;
+    let time_mode = *ports.time_mode as i32 - 1;
+    let channel_mode = *ports.channel_mode as i32 - 1;
     let highpass_freq = *ports.highpass_freq;
     let highpass_res = *ports.highpass_res * 0.01;
     let lowpass_freq = *ports.lowpass_freq;
@@ -72,8 +73,7 @@ impl Plugin for DmSpaceEcho {
     let duck = *ports.duck * 0.01;
     let output_level = *ports.output;
     let mix = *ports.mix * 0.01;
-    let limiter = *ports.limiter == 1.;
-    let hold = *ports.hold == 1.;
+    let limiter = *ports.limiter as i32 == 1;
 
     let input_channels = ports.input_left.iter().zip(ports.input_right.iter());
     let output_channels = ports
@@ -84,7 +84,7 @@ impl Plugin for DmSpaceEcho {
     for ((input_left, input_right), (output_left, output_right)) in
       input_channels.zip(output_channels)
     {
-      let space_echo_output = self.space_echo.run(
+      let (space_echo_left, space_echo_right) = self.space_echo.run(
         (*input_left, *input_right),
         input_level,
         channel_mode,
@@ -108,8 +108,8 @@ impl Plugin for DmSpaceEcho {
         hold,
         0.3333
       );
-      *output_left = space_echo_output.0;
-      *output_right = space_echo_output.1;
+      *output_left = space_echo_left;
+      *output_right = space_echo_right;
     }
   }
 }
