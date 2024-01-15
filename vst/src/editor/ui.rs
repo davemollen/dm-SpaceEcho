@@ -4,8 +4,8 @@ use vizia::{
   prelude::{
     Context, StyleModifiers,
   },
-  state::Model,
-  views::HStack,
+  views::HStack, 
+  model::Model
 };
 use vst::prelude::HostCallback;
 #[path="ui_data.rs"]
@@ -21,7 +21,7 @@ mod level_controls;
 const STYLE: &str = include_str!("style.css");
 
 pub fn plugin_gui(cx: &mut Context, params: Arc<SpaceEchoParameters>, host: Option<HostCallback>) {
-  cx.add_theme(STYLE);
+  let _ = cx.add_stylesheet(STYLE);
 
   UiData {
     params: params.clone(),

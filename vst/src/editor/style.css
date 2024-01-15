@@ -6,10 +6,29 @@ label {
 knob {
   width: 40px;
   height: 40px;
+  bottom: 0px;
 }
 
-knob .track {
-  background-color: #ffb433;
+knob .knob-track {
+  color: #ffb433;
+  background-color: #363636;
+}
+
+knob .knob-head {
+  display: none;
+}
+
+checkbox {
+  width: 28px;
+  height: 28px;
+  border-radius: 2px;
+  border-width: 0px;
+  background-color: #363636;
+  top: 10px;
+}
+
+checkbox:hover {
+  background-color: #E1D9D1;
 }
 
 textbox {
@@ -19,12 +38,17 @@ textbox {
   background-color: transparent;
   border-width: 0px;
   outline-color: none;
+  child-space: 1s;
 }
 
 textbox:hover {
   background-color: transparent;
   border-width: 0px;
   outline-color: none;
+}
+
+textbox:checked.caret {
+  caret-color: #E1D9D1;
 }
 
 .hide {

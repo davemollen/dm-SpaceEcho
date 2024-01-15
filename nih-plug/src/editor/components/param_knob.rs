@@ -1,10 +1,27 @@
 use nih_plug::prelude::{Param, ParamPtr};
 use std::any::Any;
 use nih_plug_vizia::vizia::{
-  prelude::{ActionModifiers, LayoutModifiers, Context, EmitContext, LensExt, StyleModifiers, Units::{Stretch, Pixels}, Weight},
-  state::{Data, Lens},
-  views::{Knob, Label, TextEvent, Textbox, VStack}, handle::Handle, modifiers::TextModifiers,
+  prelude::{ActionModifiers, LayoutModifiers, Context, EmitContext, LensExt, Units, Units::{Stretch, Pixels}},
+  view::Handle,
+  binding::Lens,
+  views::{Knob, Label, TextEvent, Textbox, VStack}, modifiers::TextModifiers, style::FontWeightKeyword, layout::Units::Auto,
 };
+
+pub enum ParamKnobSize {
+  Small,
+  Regular,
+  Large,
+}
+
+impl ParamKnobSize {
+  fn get_value(&self) -> Units {
+    match self {
+      ParamKnobSize::Small => Pixels(32.),
+      ParamKnobSize::Regular => Pixels(44.),
+      ParamKnobSize::Large => Pixels(68.)
+    }
+  }
+}
 
 pub struct ParamKnob {}
 
@@ -16,11 +33,11 @@ impl ParamKnob {
     param_ptr: ParamPtr,
     params_to_param: F,
     on_change: C,
+    size: ParamKnobSize
   ) -> Handle<'a, VStack> 
   where
     L: 'static + Lens + Copy + Send + Sync,
     <L as Lens>::Source: 'static,
-    <L as Lens>::Target: Data,
     P: Param,
     F: 'static + Fn(&<L as Lens>::Target) -> &P + Copy + Send + Sync,
     M: Any + Send,
@@ -29,7 +46,7 @@ impl ParamKnob {
     VStack::new(cx, |cx| {
       Label::new(cx, name)
         .font_size(13.0)
-        .font_weight(Weight::SEMIBOLD)
+        .font_weight(FontWeightKeyword::SemiBold)
         .text_wrap(false)
         .child_space(Stretch(1.0));
 
@@ -43,7 +60,8 @@ impl ParamKnob {
       )
       .on_changing(move |cx, val| {
         cx.emit(on_change(param_ptr, val));
-      });
+      })
+      .size(size.get_value());
 
       Textbox::new(
         cx,
@@ -54,7 +72,7 @@ impl ParamKnob {
       )
       .on_mouse_down(|cx, _| {
         cx.emit(TextEvent::StartEdit);
-        cx.emit(TextEvent::ResetText("".to_string()));
+        cx.emit(TextEvent::Clear);
       })
       .on_submit(move |cx, text, success| {
         cx.emit(TextEvent::EndEdit);
@@ -68,8 +86,10 @@ impl ParamKnob {
           cx.emit(on_change(param_ptr, val));
         }
       })
-      .class("align_center");
+      .font_size(12.0)
+      .top(Pixels(-4.0));
     })
+    .size(Auto)
     .child_space(Stretch(1.0))
     .row_between(Pixels(4.0))
   }

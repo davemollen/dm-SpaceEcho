@@ -1,9 +1,10 @@
 use nih_plug::prelude::{Param, ParamPtr};
 use std::any::Any;
 use nih_plug_vizia::vizia::{
-  prelude::{ActionModifiers, LayoutModifiers, Context, EmitContext, LensExt, Units::{Stretch, Pixels}, Weight},
-  state::{Data, Lens},
-  views::{Checkbox, Label, VStack}, handle::Handle, modifiers::TextModifiers,
+  prelude::{ActionModifiers, LayoutModifiers, Context, EmitContext, LensExt, Units::{Stretch, Pixels}},
+  view::Handle,
+  binding::Lens,
+  views::{Checkbox, Label, VStack}, modifiers::TextModifiers, style::FontWeightKeyword, layout::Units::Auto
 };
 
 pub struct ParamCheckbox {}
@@ -20,7 +21,6 @@ impl ParamCheckbox {
   where
     L: 'static + Lens + Copy + Send + Sync,
     <L as Lens>::Source: 'static,
-    <L as Lens>::Target: Data,
     P: Param<Plain = bool>,
     F: 'static + Fn(&<L as Lens>::Target) -> &P + Copy + Send + Sync,
     M: Any + Send,
@@ -29,7 +29,7 @@ impl ParamCheckbox {
     VStack::new(cx, |cx| {
       Label::new(cx, name)
         .font_size(13.0)
-        .font_weight(Weight::SEMIBOLD)
+        .font_weight(FontWeightKeyword::SemiBold)
         .text_wrap(true)
         .child_space(Stretch(1.0));
       
@@ -44,7 +44,7 @@ impl ParamCheckbox {
         cx.emit(on_change(param_ptr, 1. - current_normalized_value));
       });
     })
-    .child_top(Pixels(4.0))
+    .size(Auto)
     .child_left(Stretch(1.0))
     .child_right(Stretch(1.0))
     .row_between(Pixels(8.0))

@@ -1,9 +1,11 @@
 use crate::space_echo_parameters::{IntParam, Params};
 use std::any::Any;
 use vizia::{
-  prelude::{Context, EmitContext, LayoutModifiers, LensExt, StyleModifiers, Units::{Pixels, Stretch}, Weight},
-  state::{Data, Lens},
-  views::{HStack, Label, RadioButton, VStack}, handle::Handle, modifiers::TextModifiers,
+  prelude::{Context, EmitContext, LayoutModifiers, LensExt, StyleModifiers, Units::{Pixels, Stretch}},
+  views::{HStack, Label, RadioButton, VStack}, modifiers::TextModifiers,
+  view::Handle, 
+  binding::Lens, 
+  style::FontWeightKeyword, layout::Units::Auto
 };
 
 pub struct ParamRadioButton;
@@ -19,7 +21,6 @@ impl ParamRadioButton {
   where
     L: 'static + Lens + Copy + Send + Sync,
     <L as Lens>::Source: 'static,
-    <L as Lens>::Target: Data,
     F: 'static + Fn(&<L as Lens>::Target) -> &IntParam + Copy + Send + Sync,
     M: Any + Send,
     C: 'static + Fn(i32) -> M + Copy + Send + Sync,
@@ -27,8 +28,8 @@ impl ParamRadioButton {
     VStack::new(cx, |cx| {
       Label::new(cx, name)
       .font_size(13.0)
-      .font_weight(Weight::SEMIBOLD)
-      .text_wrap(true)
+      .font_weight(FontWeightKeyword::SemiBold)
+      .text_wrap(false)
       .child_space(Stretch(1.0));
     
     
@@ -52,13 +53,14 @@ impl ParamRadioButton {
               .font_size(12.0)
               .describing(format!("{name}_{i}"));
           })
+          .size(Auto)
           .col_between(Pixels(8.0))
-          .child_space(Pixels(2.0));
+          .child_space(Pixels(4.0));
         }
-      });
+      }).size(Auto);
     })
+    .size(Auto)
     .child_space(Stretch(1.0))
-    .child_top(Pixels(4.0))
-    .row_between(Pixels(4.0))
+    .row_between(Pixels(6.0))
   }
 }

@@ -2,7 +2,8 @@ use crate::space_echo_parameters::{Params, SpaceEchoParameters};
 use std::sync::Arc;
 use vizia::{
   prelude::{Event, EventContext, Lens},
-  state::{Model, Wrapper},
+  model::Model,
+  binding::Wrapper,
 };
 use vst::{host::Host, prelude::HostCallback};
 

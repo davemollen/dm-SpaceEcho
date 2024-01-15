@@ -11,7 +11,7 @@ use nih_plug_vizia::{ViziaState, ViziaTheming, create_vizia_editor};
 use nih_plug_vizia::vizia::{
   views::HStack, 
   modifiers::StyleModifiers, 
-  state::Model
+  model::Model
 };
 use std::sync::Arc;
 use crate::space_echo_parameters::SpaceEchoParameters;
@@ -28,7 +28,7 @@ pub(crate) fn create(
     editor_state: Arc<ViziaState>,
 ) -> Option<Box<dyn Editor>> {
     create_vizia_editor(editor_state, ViziaTheming::Custom, move |cx, gui_context| { 
-      cx.add_theme(STYLE);
+      let _ = cx.add_stylesheet(STYLE);
 
       UiData {
         params: params.clone(),
