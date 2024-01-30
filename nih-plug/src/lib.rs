@@ -140,8 +140,8 @@ impl ClapPlugin for DmSpaceEcho {
   const CLAP_FEATURES: &'static [ClapFeature] = &[
     ClapFeature::AudioEffect,
     ClapFeature::Stereo,
-    ClapFeature::Mono,
-    ClapFeature::Utility,
+    ClapFeature::Delay,
+    ClapFeature::Reverb
   ];
 }
 
@@ -149,6 +149,7 @@ impl Vst3Plugin for DmSpaceEcho {
   const VST3_CLASS_ID: [u8; 16] = *b"dm-SpaceEcho....";
   const VST3_SUBCATEGORIES: &'static [Vst3SubCategory] = &[
     Vst3SubCategory::Fx, 
+    Vst3SubCategory::Stereo,
     Vst3SubCategory::Delay, 
     Vst3SubCategory::Reverb
   ];
