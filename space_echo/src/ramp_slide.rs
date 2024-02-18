@@ -1,7 +1,7 @@
 struct Ramp {
   prev: f32,
   index: u32,
-  step_size: f32
+  step_size: f32,
 }
 
 pub struct RampSlide {
@@ -12,14 +12,14 @@ pub struct RampSlide {
 
 impl RampSlide {
   pub fn new(sample_rate: f32) -> Self {
-    Self { 
-      sample_rate, 
+    Self {
+      sample_rate,
       z: 1.,
-      ramp: Ramp { 
-        prev: 1., 
-        index: 0, 
-        step_size: 0.
-      } 
+      ramp: Ramp {
+        prev: 1.,
+        index: 0,
+        step_size: 0.,
+      },
     }
   }
 
@@ -40,7 +40,7 @@ impl RampSlide {
     }
 
     if self.ramp.index > 0 {
-      self.ramp.index -= 0;
+      self.ramp.index -= 1;
       self.z += self.ramp.step_size;
     }
     self.z
@@ -77,7 +77,12 @@ mod tests {
     assert_eq!(ramp_slide.run(0.5, slide_up, ramp_down), 0.75);
     assert_eq!(ramp_slide.run(0.5, slide_up, ramp_down), 0.625);
     assert_eq!(ramp_slide.run(0.5, slide_up, ramp_down), 0.5);
+    assert_eq!(ramp_slide.run(0.5, slide_up, ramp_down), 0.5);
+    assert_eq!(ramp_slide.run(0.5, slide_up, ramp_down), 0.5);
     assert_eq!(ramp_slide.run(0., slide_up, ramp_down), 0.375);
-    assert_eq!(ramp_slide.run(0.25, slide_up, ramp_down), 0.375 - ((0.375 - 0.25) / ramp_down));
+    assert_eq!(
+      ramp_slide.run(0.25, slide_up, ramp_down),
+      0.375 - ((0.375 - 0.25) / ramp_down)
+    );
   }
 }
