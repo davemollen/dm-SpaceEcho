@@ -1,51 +1,37 @@
 ## dm-SpaceEcho
 
-A space echo effect written in Rust.
-The effect can be compiled to a [Mod devices](https://moddevices.com/), lv2, vst3, CLAP or vst plugin.
+A delay/reverb (space echo like) effect written in Rust.
+
+The effect can be compiled to a [MOD devices](https://moddevices.com/), VST3 or CLAP plugin.
+VST is a trademark of Steinberg Media Technologies GmbH, registered in Europe and other countries.
+
+<img src="https://steinbergmedia.github.io/vst3_dev_portal/resources/licensing_6.png" width="60" height="auto" alt="VST trademark">
 
 ## Table of contents:
 
-- [Mod devices installation](#Mod-devices-installation)
-- [Other plugin format installation](#Other-plugin-format-installation)
-  - [LV2 installation](#LV2-installation)
-  - [VST3 installation](#VST3-installation)
-  - [CLAP installation](#CLAP-installation)
-  - [VST installation](#VST-installation)
+- [Download VST3 and CLAP plugin](#Download-VST3-and-CLAP-plugin)
+- [MOD devices installation](#MOD-devices-installation)
+- [Other plugin formats](#Other-plugin-formats)
 
-## Mod devices installation
+## Download VST3 and CLAP plugin
 
-You can find the plugin for the Mod Dwarf [here](./lv2/dm-SpaceEcho.lv2/).
+You can download the VST3 and CLAP plugins for Linux, Windows and macOS from the [release page](https://github.com/davemollen/dm-SpaceEcho/releases).
 
-To build the plugin for your MOD device see [these instructions](https://github.com/moddevices/mod-plugin-builder).
+On macOS you may need to [disable Gatekeeper](https://disable-gatekeeper.github.io/) as Apple has recently made it more difficult to run unsigned code on macOS.
 
-## Other plugin format installation
-A prerequisite to install any plugin is to have Rust installed on your machine.
-Follow [these instructions](https://www.rust-lang.org/tools/install) to install Rust.
+If you want to build the plugin on your own machine, check out the [nih-plug readme](https://github.com/robbert-vdh/nih-plug). Build scripts for macOS specifically can be found in the [./scripts](./scripts/) folder of this repository.
 
-Below you can find the additional instructions per plugin format. These instructions might not be complete. Please let me know if anything's missing.
+## MOD devices installation
 
-### LV2 installation
-Go into the lv2 directory and run the `cargo build --release` command.
-Once finished, copy the compiled plugin from [/target/release](./lv2/target/release) into your plugin folder.
+This plugin is not yet in the MOD Audio plugin store.
+However, you can find a build of the plugin for the MOD Dwarf at [./lv2/dm-SpaceEcho.lv2](./lv2/dm-SpaceEcho.lv2/). Copy this file to your MOD devices' plugin folder. If you want a build for MOD Duo or MOD Duo X you'll need to build the plugin yourself for now. For more information about building this plugin for your MOD device, see [these instructions](https://github.com/moddevices/mod-plugin-builder).
 
-### VST3 installation
-If you want to compile the vst3 plugin for mac you should run `./scripts/build-vst3-for-mac.sh`. This will compile and copy the plugin to the default plugin folder.
+## Other plugin formats
 
-If you want to compile the vst3 plugin on other systems you should go into the nih-plug directory and run `cargo xtask bundle dm_space_echo --release`.
-Once finished, copy the compiled plugin from [/target/bundled](./nih-plug/target/bundled) into your plugin folder.
+- VST2:
 
-### CLAP installation
-If you want to compile the CLAP plugin you should go into the nih-plug directory and run `cargo xtask bundle dm_space_echo --release`.
-Once finished, copy the compiled plugin from [/target/bundled](./nih-plug/target/bundled) into your plugin folder.
+  Legacy code for a VST2 plugin is also in this repository. Since VST2 has been deprecated automated builds for VST2 have been excluded.
 
-### VST installation
-The following scripts can be used to compile the plugin for mac. Prefix the command with `sudo ` if you get a `Permission denied` error.
-- For intel macs:
+- LV2
 
-  Running the `./scripts/build-vst-for-mac.sh` command will compile and copy the plugin to the default plugin folder.
-- For M1 macs:
-
-  Running the `./scripts/build-vst-for-mac-m1.sh` command will compile and copy the plugin to the default plugin folder.
-
-If you want to compile the vst plugin on other systems you should go into the vst directory and run `cargo build --release`.
-Once finished, copy the compiled plugin from [/target/release](./vst/target/release) into your plugin folder.
+  Code for a LV2 plugin is also in this repository. Automated builds are excluded for LV2 because the rust lv2 crate doesn't have GUI support. The LV2 plugin format is being used for the MOD devices plugin which in turn does have a GUI. Because MOD has it's own GUI layer on top of the LV2 plugin.
