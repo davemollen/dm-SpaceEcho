@@ -300,7 +300,7 @@
 }
 
 .mod-pedal{{{cns}}} .mod-light:has(+ .mod-toggle-image) {
-    background-image:url(/resources/pedals/red-light-off.png);
+    background-image:url(/resources/assets/red-light-off.png{{{ns}}});
     background-position:center center;
     background-repeat:no-repeat;
     background-size:20px 20px;
@@ -309,7 +309,7 @@
 }
 
 .mod-pedal{{{cns}}} .mod-light:has(+ .mod-toggle-image.on) {
-    background-image:url(/resources/pedals/red-light-on.png);
+    background-image:url(/resources/assets/red-light-on.png{{{ns}}});
 }
 
 /* = KNOBS
