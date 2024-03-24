@@ -1,24 +1,22 @@
-#[path="./components/param_checkbox.rs"]
+#[path = "./components/param_checkbox.rs"]
 mod param_checkbox;
 use param_checkbox::ParamCheckbox;
-#[path="./components/param_knob.rs"]
+#[path = "./components/param_knob.rs"]
 mod param_knob;
 use param_knob::{ParamKnob, ParamKnobSize};
-#[path="./components/param_radio_button.rs"]
+#[path = "./components/param_radio_button.rs"]
 mod param_radio_button;
+use super::{ParamChangeEvent, UiData};
+use crate::space_echo_parameters::{ChannelMode, SpaceEchoParameters, TimeMode};
+use nih_plug::{params::Param, prelude::Enum};
+use nih_plug_vizia::vizia::{
+  layout::Units::{Auto, Stretch},
+  prelude::{Context, LayoutModifiers, LensExt, StyleModifiers, Units::Pixels},
+  view::Handle,
+  views::{HStack, VStack},
+};
 use param_radio_button::ParamRadioButton;
 use std::sync::Arc;
-use nih_plug_vizia::vizia::{
-  prelude::{
-    Context, LayoutModifiers, StyleModifiers, LensExt,
-    Units::Pixels
-  },
-  views::{HStack, VStack}, 
-  view::Handle, layout::Units::{Stretch, Auto}
-};
-use nih_plug::{params::Param, prelude::Enum};
-use crate::space_echo_parameters::{SpaceEchoParameters, TimeMode, ChannelMode};
-use super::{UiData, ParamChangeEvent};
 
 pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStack> {
   HStack::new(cx, |cx| {
@@ -29,12 +27,12 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
       params.input.as_ptr(),
       |params| &params.input,
       |param_ptr, val| ParamChangeEvent::SetParam(param_ptr, val),
-      ParamKnobSize::Regular
+      ParamKnobSize::Regular,
     )
-      .top(Stretch(1.0))
-      .bottom(Stretch(1.0))
-      .border_color("#2d5f4f")
-      .border_width(Pixels(2.0));
+    .top(Stretch(1.0))
+    .bottom(Stretch(1.0))
+    .border_color("#2d5f4f")
+    .border_width(Pixels(2.0));
 
     VStack::new(cx, |cx| {
       HStack::new(cx, |cx| {
@@ -45,8 +43,9 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
           params.time_link.as_ptr(),
           |params| &params.time_link,
           |param_ptr, val| ParamChangeEvent::SetParam(param_ptr, val),
-        ).width(Pixels(72.0));
-        
+        )
+        .width(Pixels(72.0));
+
         ParamKnob::new(
           cx,
           params.time_left.name(),
@@ -54,20 +53,21 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
           params.time_left.as_ptr(),
           |params| &params.time_left,
           |param_ptr, val| ParamChangeEvent::SetParam(param_ptr, val),
-          ParamKnobSize::Regular
+          ParamKnobSize::Regular,
         );
-    
+
         // show when time_link is on
         ParamKnob::new(
           cx,
           params.time_right.name(),
           UiData::params,
-          params.time_right.as_ptr(),
+          params.time_left.as_ptr(),
           |params| &params.time_left,
           |param_ptr, val| ParamChangeEvent::SetParam(param_ptr, val),
-          ParamKnobSize::Regular
-        ).toggle_class("hide", UiData::params.map(|p| !p.time_link.value()));
-    
+          ParamKnobSize::Regular,
+        )
+        .toggle_class("hide", UiData::params.map(|p| !p.time_link.value()));
+
         // show when time_link is off
         ParamKnob::new(
           cx,
@@ -76,9 +76,10 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
           params.time_right.as_ptr(),
           |params| &params.time_right,
           |param_ptr, val| ParamChangeEvent::SetParam(param_ptr, val),
-          ParamKnobSize::Regular
-        ).toggle_class("hide", UiData::params.map(|p| p.time_link.value()));
-        
+          ParamKnobSize::Regular,
+        )
+        .toggle_class("hide", UiData::params.map(|p| p.time_link.value()));
+
         ParamKnob::new(
           cx,
           params.feedback.name(),
@@ -86,7 +87,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
           params.feedback.as_ptr(),
           |params| &params.feedback,
           |param_ptr, val| ParamChangeEvent::SetParam(param_ptr, val),
-          ParamKnobSize::Regular
+          ParamKnobSize::Regular,
         );
       })
       .size(Auto)
@@ -104,7 +105,8 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
           params.hold.as_ptr(),
           |params| &params.hold,
           |param_ptr, val| ParamChangeEvent::SetParam(param_ptr, val),
-        ).width(Pixels(72.0));
+        )
+        .width(Pixels(72.0));
         ParamKnob::new(
           cx,
           params.wow_and_flutter.name(),
@@ -112,7 +114,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
           params.wow_and_flutter.as_ptr(),
           |params| &params.wow_and_flutter,
           |param_ptr, val| ParamChangeEvent::SetParam(param_ptr, val),
-          ParamKnobSize::Regular
+          ParamKnobSize::Regular,
         );
       })
       .size(Auto)
@@ -128,7 +130,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
           params.time_mode.as_ptr(),
           |params| &params.time_mode,
           |param_ptr, val| ParamChangeEvent::SetParam(param_ptr, val),
-          TimeMode::variants()
+          TimeMode::variants(),
         );
         ParamRadioButton::new(
           cx,
@@ -137,7 +139,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
           params.channel_mode.as_ptr(),
           |params| &params.channel_mode,
           |param_ptr, val| ParamChangeEvent::SetParam(param_ptr, val),
-          ChannelMode::variants()
+          ChannelMode::variants(),
         );
       })
       .size(Auto)

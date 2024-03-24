@@ -1,7 +1,7 @@
 use crate::{float_ext::FloatExt, slide::Slide};
 
 const ATTACK_TIME: f32 = 1.;
-const RELEASE_TIME: f32 = 60.;
+const RELEASE_TIME: f32 = 30.;
 
 pub struct Duck {
   slide: Slide,

@@ -5,8 +5,6 @@ use space_echo_parameters::SpaceEchoParameters;
 use std::sync::Arc;
 mod editor;
 
-const TIME_SMOOTHING_FACTOR: f32 = 0.25;
-
 struct DmSpaceEcho {
   params: Arc<SpaceEchoParameters>,
   space_echo: SpaceEcho,
@@ -116,7 +114,7 @@ impl Plugin for DmSpaceEcho {
         mix,
         limiter,
         hold,
-        TIME_SMOOTHING_FACTOR
+        0.25,
       );
 
       let left_channel_out = channel_samples.get_mut(0).unwrap();
@@ -141,17 +139,17 @@ impl ClapPlugin for DmSpaceEcho {
     ClapFeature::AudioEffect,
     ClapFeature::Stereo,
     ClapFeature::Delay,
-    ClapFeature::Reverb
+    ClapFeature::Reverb,
   ];
 }
 
 impl Vst3Plugin for DmSpaceEcho {
   const VST3_CLASS_ID: [u8; 16] = *b"dm-SpaceEcho....";
   const VST3_SUBCATEGORIES: &'static [Vst3SubCategory] = &[
-    Vst3SubCategory::Fx, 
+    Vst3SubCategory::Fx,
     Vst3SubCategory::Stereo,
-    Vst3SubCategory::Delay, 
-    Vst3SubCategory::Reverb
+    Vst3SubCategory::Delay,
+    Vst3SubCategory::Reverb,
   ];
 }
 
