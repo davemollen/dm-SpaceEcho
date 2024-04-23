@@ -21,19 +21,6 @@ impl VariableDelayRead {
     }
   }
 
-  fn crossfade(
-    &mut self,
-    delay_line: &mut DelayLine,
-    added_time: f32,
-    interp: Interpolation,
-  ) -> f32 {
-    let ramp = self.ramp.run(5., 0., 1.);
-    let window = (ramp * FRAC_PI_2).fast_cos();
-    let window = window * window;
-    delay_line.read(self.previous_time + added_time, interp) * window
-      + delay_line.read(self.next_time + added_time, interp) * (1. - window)
-  }
-
   pub fn read(
     &mut self,
     delay_line: &mut DelayLine,
@@ -56,5 +43,18 @@ impl VariableDelayRead {
       }
       _ => self.crossfade(delay_line, added_time, interp),
     }
+  }
+
+  fn crossfade(
+    &mut self,
+    delay_line: &mut DelayLine,
+    added_time: f32,
+    interp: Interpolation,
+  ) -> f32 {
+    let ramp = self.ramp.process(5., 0., 1.);
+    let window = (ramp * FRAC_PI_2).fast_cos();
+    let window = window * window;
+    delay_line.read(self.previous_time + added_time, interp) * window
+      + delay_line.read(self.next_time + added_time, interp) * (1. - window)
   }
 }

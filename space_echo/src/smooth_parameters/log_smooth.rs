@@ -8,7 +8,7 @@ impl LogSmooth {
     Self { sample_rate, z: initial_value }
   }
 
-  pub fn run(&mut self, input: f32, factor: f32) -> f32 {
+  pub fn process(&mut self, input: f32, factor: f32) -> f32 {
     let difference = input - self.z;
     if difference.is_subnormal() {
       input

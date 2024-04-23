@@ -17,13 +17,8 @@ impl RandomOscillator {
     }
   }
 
-  fn cosine_interp(&self, origin: f32, target: f32, mix: f32) -> f32 {
-    let cosine_mix = (1. - (mix * PI).fast_cos()) / 2.;
-    origin * (1. - cosine_mix) + target * cosine_mix
-  }
-
-  pub fn run(&mut self, phase: f32, probability: f32) -> f32 {
-    let trigger = self.delta.run(phase) < 0.;
+  pub fn process(&mut self, phase: f32, probability: f32) -> f32 {
+    let trigger = self.delta.process(phase) < 0.;
 
     if trigger {
       self.origin = self.target;
@@ -34,5 +29,10 @@ impl RandomOscillator {
       };
     }
     self.cosine_interp(self.origin, self.target, phase)
+  }
+
+  fn cosine_interp(&self, origin: f32, target: f32, mix: f32) -> f32 {
+    let cosine_mix = (1. - (mix * PI).fast_cos()) / 2.;
+    origin * (1. - cosine_mix) + target * cosine_mix
   }
 }

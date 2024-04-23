@@ -13,7 +13,7 @@ impl EarlyReflection {
     }
   }
 
-  pub fn run(&mut self, input: (f32, f32)) -> (f32, f32) {
+  pub fn process(&mut self, input: (f32, f32)) -> (f32, f32) {
     let added_channels = input.0 + input.1;
     let subtracted_channels = input.0 - input.1;
     let delay_out = self.delay_line.read(self.time_in_ms, Interpolation::Step);

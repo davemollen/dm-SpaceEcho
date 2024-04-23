@@ -39,28 +39,6 @@ impl SmoothParameters {
     }
   }
 
-  pub fn get_time_parameters(
-    &mut self,
-    time_left: f32,
-    time_right: f32,
-    time_link: bool,
-    smoothing_factor: f32,
-  ) -> (f32, f32) {
-    let time_left = self.smooth_time_left.run(time_left, smoothing_factor);
-    
-    if time_link {
-      (
-        time_left,
-        time_left
-      )
-    } else {
-      (
-        time_left,
-        self.smooth_time_right.run(time_right, smoothing_factor),
-      )
-    }
-  }
-
   pub fn get_parameters(
     &mut self,
     input_level: f32,
@@ -77,24 +55,24 @@ impl SmoothParameters {
     mix: f32,
     hold: bool,
   ) -> (f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32) {
-    let input_level = self.smooth_input_level.run(input_level, 7.);
+    let input_level = self.smooth_input_level.process(input_level, 7.);
     let feedback = self
       .smooth_feedback
-      .run(if hold { 1. } else { feedback }, 3.);
-    let wow_and_flutter = self.smooth_wow_and_flutter.run(if hold { 0. } else { wow_and_flutter }, 7.);
+      .process(if hold { 1. } else { feedback }, 3.);
+    let wow_and_flutter = self.smooth_wow_and_flutter.process(if hold { 0. } else { wow_and_flutter }, 7.);
     let highpass_freq = self
       .smooth_highpass_freq
-      .run(if hold { 20. } else { highpass_freq }, 7.);
-    let highpass_res = self.smooth_highpass_res.run(if hold { 0. } else { highpass_res }, 7.);
+      .process(if hold { 20. } else { highpass_freq }, 7.);
+    let highpass_res = self.smooth_highpass_res.process(if hold { 0. } else { highpass_res }, 7.);
     let lowpass_freq = self
       .smooth_lowpass_freq
-      .run(if hold { 20000. } else { lowpass_freq }, 7.);
-    let lowpass_res = self.smooth_lowpass_res.run(if hold { 0. } else { lowpass_res }, 7.);
-    let reverb = self.smooth_reverb.run(reverb, 7.);
-    let decay = self.smooth_decay.run(decay, 7.);
-    let stereo = self.smooth_stereo.run(stereo, 7.);
-    let output_level = self.smooth_output_level.run(output_level, 7.);
-    let mix = self.smooth_mix.run(mix, 7.);
+      .process(if hold { 20000. } else { lowpass_freq }, 7.);
+    let lowpass_res = self.smooth_lowpass_res.process(if hold { 0. } else { lowpass_res }, 7.);
+    let reverb = self.smooth_reverb.process(reverb, 7.);
+    let decay = self.smooth_decay.process(decay, 7.);
+    let stereo = self.smooth_stereo.process(stereo, 7.);
+    let output_level = self.smooth_output_level.process(output_level, 7.);
+    let mix = self.smooth_mix.process(mix, 7.);
 
     (
       input_level,
@@ -110,5 +88,27 @@ impl SmoothParameters {
       output_level,
       mix,
     )
+  }
+
+  pub fn get_time_parameters(
+    &mut self,
+    time_left: f32,
+    time_right: f32,
+    time_link: bool,
+    smoothing_factor: f32,
+  ) -> (f32, f32) {
+    let time_left = self.smooth_time_left.process(time_left, smoothing_factor);
+    
+    if time_link {
+      (
+        time_left,
+        time_left
+      )
+    } else {
+      (
+        time_left,
+        self.smooth_time_right.process(time_right, smoothing_factor),
+      )
+    }
   }
 }

@@ -29,7 +29,7 @@ impl Tap {
   }
 
   pub fn read(&mut self, lfo_phase: f32) -> f32 {
-    let time_offset = self.random_lfo.run(lfo_phase, 1.);
+    let time_offset = self.random_lfo.process(lfo_phase, 1.);
 
     self
       .delay_line
@@ -37,6 +37,6 @@ impl Tap {
   }
 
   pub fn apply_absorb(&mut self, input: f32) -> f32 {
-    self.one_pole_filter.run(input, 6000.)
+    self.one_pole_filter.process(input, 6000.)
   }
 }

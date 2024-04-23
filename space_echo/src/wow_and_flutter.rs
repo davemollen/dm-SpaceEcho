@@ -26,24 +26,24 @@ impl WowAndFlutter {
     }
   }
 
-  pub fn get_wow_oscillator(&mut self) -> f32 {
-    let wow_oscillator_phase = self.wow_phasor.run(2.1);
-    self.wow_oscillator.run(wow_oscillator_phase, 0.4) * MAX_WOW_TIME_IN_SECS
-  }
-
-  pub fn get_flutter_oscillator(&mut self) -> f32 {
-    let flutter_oscillator_phase = self.flutter_phasor.run(24.37891);
-    self.flutter_oscillator.run(flutter_oscillator_phase, 0.95) * MAX_FLUTTER_TIME_IN_SECS
-  }
-
-  pub fn run(&mut self, wow_and_flutter: f32) -> f32 {
+  pub fn process(&mut self, wow_and_flutter: f32) -> f32 {
     let wow_oscillator = self.get_wow_oscillator();
     let flutter_oscillator = self.get_flutter_oscillator();
 
-    let smoothed_param = self.smooth_param.run(wow_and_flutter, 12.);
+    let smoothed_param = self.smooth_param.process(wow_and_flutter, 12.);
     let flutter_gain = smoothed_param.fast_pow(3.);
     let wow_gain = smoothed_param.fast_pow(6.);
 
     wow_oscillator * wow_gain + flutter_oscillator * flutter_gain
+  }
+
+  pub fn get_wow_oscillator(&mut self) -> f32 {
+    let wow_oscillator_phase = self.wow_phasor.process(2.1);
+    self.wow_oscillator.process(wow_oscillator_phase, 0.4) * MAX_WOW_TIME_IN_SECS
+  }
+
+  pub fn get_flutter_oscillator(&mut self) -> f32 {
+    let flutter_oscillator_phase = self.flutter_phasor.process(24.37891);
+    self.flutter_oscillator.process(flutter_oscillator_phase, 0.95) * MAX_FLUTTER_TIME_IN_SECS
   }
 }

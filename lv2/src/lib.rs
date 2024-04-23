@@ -84,7 +84,7 @@ impl Plugin for DmSpaceEcho {
     for ((input_left, input_right), (output_left, output_right)) in
       input_channels.zip(output_channels)
     {
-      let (space_echo_left, space_echo_right) = self.space_echo.run(
+      let (space_echo_left, space_echo_right) = self.space_echo.process(
         (*input_left, *input_right),
         input_level,
         channel_mode,

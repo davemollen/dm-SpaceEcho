@@ -13,7 +13,7 @@ impl DcBlockStereo {
     }
   }
 
-  pub fn run(&mut self, x: (f32, f32)) -> (f32, f32) {
+  pub fn process(&mut self, x: (f32, f32)) -> (f32, f32) {
     let coeff = 1. - (220.5 / self.sample_rate);
     let y = (
       x.0 - self.xm1.0 + coeff * self.ym1.0,

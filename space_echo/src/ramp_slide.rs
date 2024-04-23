@@ -23,6 +23,20 @@ impl RampSlide {
     }
   }
 
+  pub fn process(&mut self, input: f32, slide_up: f32, ramp_down: f32) -> f32 {
+    let difference = input - self.z;
+
+    if difference.is_subnormal() {
+      input
+    } else {
+      if input > self.z {
+        self.slide_up(difference, self.mstosamps(slide_up))
+      } else {
+        self.ramp_down(input, self.mstosamps(ramp_down), difference)
+      }
+    }
+  }
+
   fn mstosamps(&self, time: f32) -> f32 {
     time * 0.001 * self.sample_rate
   }
@@ -45,20 +59,6 @@ impl RampSlide {
     }
     self.z
   }
-
-  pub fn run(&mut self, input: f32, slide_up: f32, ramp_down: f32) -> f32 {
-    let difference = input - self.z;
-
-    if difference.is_subnormal() {
-      input
-    } else {
-      if input > self.z {
-        self.slide_up(difference, self.mstosamps(slide_up))
-      } else {
-        self.ramp_down(input, self.mstosamps(ramp_down), difference)
-      }
-    }
-  }
 }
 
 #[cfg(test)]
@@ -71,17 +71,17 @@ mod tests {
     let ramp_down = 4.0;
     let mut ramp_slide = RampSlide::new(1000.);
 
-    assert_eq!(ramp_slide.run(1., slide_up, ramp_down), 1.0);
-    assert_eq!(ramp_slide.run(1., slide_up, ramp_down), 1.0);
-    assert_eq!(ramp_slide.run(0.5, slide_up, ramp_down), 0.875);
-    assert_eq!(ramp_slide.run(0.5, slide_up, ramp_down), 0.75);
-    assert_eq!(ramp_slide.run(0.5, slide_up, ramp_down), 0.625);
-    assert_eq!(ramp_slide.run(0.5, slide_up, ramp_down), 0.5);
-    assert_eq!(ramp_slide.run(0.5, slide_up, ramp_down), 0.5);
-    assert_eq!(ramp_slide.run(0.5, slide_up, ramp_down), 0.5);
-    assert_eq!(ramp_slide.run(0., slide_up, ramp_down), 0.375);
+    assert_eq!(ramp_slide.process(1., slide_up, ramp_down), 1.0);
+    assert_eq!(ramp_slide.process(1., slide_up, ramp_down), 1.0);
+    assert_eq!(ramp_slide.process(0.5, slide_up, ramp_down), 0.875);
+    assert_eq!(ramp_slide.process(0.5, slide_up, ramp_down), 0.75);
+    assert_eq!(ramp_slide.process(0.5, slide_up, ramp_down), 0.625);
+    assert_eq!(ramp_slide.process(0.5, slide_up, ramp_down), 0.5);
+    assert_eq!(ramp_slide.process(0.5, slide_up, ramp_down), 0.5);
+    assert_eq!(ramp_slide.process(0.5, slide_up, ramp_down), 0.5);
+    assert_eq!(ramp_slide.process(0., slide_up, ramp_down), 0.375);
     assert_eq!(
-      ramp_slide.run(0.25, slide_up, ramp_down),
+      ramp_slide.process(0.25, slide_up, ramp_down),
       0.375 - ((0.375 - 0.25) / ramp_down)
     );
   }

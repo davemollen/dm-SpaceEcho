@@ -24,7 +24,7 @@ impl OnePoleFilterStereo {
     self.z
   }
 
-  pub fn run(&mut self, input: (f32, f32), cutoff_freq: f32) -> (f32, f32) {
+  pub fn process(&mut self, input: (f32, f32), cutoff_freq: f32) -> (f32, f32) {
     if self.z_is_subnormal(input) {
       input
     } else {

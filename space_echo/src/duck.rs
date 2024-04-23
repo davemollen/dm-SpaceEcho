@@ -14,7 +14,7 @@ impl Duck {
     }
   }
 
-  pub fn run(&mut self, input: (f32, f32), side_chain_input: (f32, f32), duck: f32) -> (f32, f32) {
+  pub fn process(&mut self, input: (f32, f32), side_chain_input: (f32, f32), duck: f32) -> (f32, f32) {
     if duck == 0. {
       input
     } else {
@@ -25,7 +25,7 @@ impl Duck {
       } else {
         1.
       };
-      let duck_gain = self.slide.run(slide_input, RELEASE_TIME, ATTACK_TIME);
+      let duck_gain = self.slide.process(slide_input, RELEASE_TIME, ATTACK_TIME);
       (input.0 * duck_gain, input.1 * duck_gain)
     }
   }

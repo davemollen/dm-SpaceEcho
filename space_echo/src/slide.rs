@@ -8,11 +8,7 @@ impl Slide {
     Self { sample_rate, z: 1. }
   }
 
-  fn mstosamps(&self, time: f32) -> f32 {
-    time * 0.001 * self.sample_rate
-  }
-
-  pub fn run(&mut self, input: f32, slide_up: f32, slide_down: f32) -> f32 {
+  pub fn process(&mut self, input: f32, slide_up: f32, slide_down: f32) -> f32 {
     let difference = input - self.z;
 
     if difference.is_subnormal() {
@@ -24,5 +20,9 @@ impl Slide {
           .recip();
       self.z
     }
+  }
+
+  fn mstosamps(&self, time: f32) -> f32 {
+    time * 0.001 * self.sample_rate
   }
 }

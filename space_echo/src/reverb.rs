@@ -31,11 +31,24 @@ impl Reverb {
     }
   }
 
+  pub fn process(&mut self, input: (f32, f32), reverb: f32, decay: f32) -> (f32, f32) {
+    if reverb > 0. {
+      let early_reflections_out = self.apply_early_reflections(input);
+      let delay_network_out = self.read_from_delay_network(early_reflections_out);
+      let feedback_matrix_out = self.apply_feedback_matrix(&delay_network_out);
+      self.process_and_write_taps(feedback_matrix_out, decay * 0.5);
+
+      Mix::process(input, (delay_network_out[0], delay_network_out[1]), reverb)
+    } else {
+      input
+    }
+  }
+
   fn apply_early_reflections(&mut self, input: (f32, f32)) -> (f32, f32) {
     let early_reflections_out = self
       .early_reflections
       .iter_mut()
-      .fold(input, |sum, early_reflection| early_reflection.run(sum));
+      .fold(input, |sum, early_reflection| early_reflection.process(sum));
 
     (
       early_reflections_out.0 * 0.125,
@@ -44,7 +57,7 @@ impl Reverb {
   }
 
   fn read_from_delay_network(&mut self, input: (f32, f32)) -> Vec<f32> {
-    let lfo_phase = self.phasor.run(3.7);
+    let lfo_phase = self.phasor.process(3.7);
 
     self
       .taps
@@ -84,18 +97,5 @@ impl Reverb {
         let absorb_output = tap.apply_absorb(feedback_matrix_output);
         tap.write(absorb_output * decay);
       });
-  }
-
-  pub fn run(&mut self, input: (f32, f32), reverb: f32, decay: f32) -> (f32, f32) {
-    if reverb > 0. {
-      let early_reflections_out = self.apply_early_reflections(input);
-      let delay_network_out = self.read_from_delay_network(early_reflections_out);
-      let feedback_matrix_out = self.apply_feedback_matrix(&delay_network_out);
-      self.process_and_write_taps(feedback_matrix_out, decay * 0.5);
-
-      Mix::run(input, (delay_network_out[0], delay_network_out[1]), reverb)
-    } else {
-      input
-    }
   }
 }
