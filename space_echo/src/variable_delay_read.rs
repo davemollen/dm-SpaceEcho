@@ -38,7 +38,7 @@ impl VariableDelayRead {
       (true, true) => {
         self.previous_time = self.next_time;
         self.next_time = time;
-        self.ramp.start(None);
+        self.ramp.start();
         self.crossfade(delay_line, added_time, interp)
       }
       _ => self.crossfade(delay_line, added_time, interp),
@@ -51,7 +51,7 @@ impl VariableDelayRead {
     added_time: f32,
     interp: Interpolation,
   ) -> f32 {
-    let ramp = self.ramp.process(5., 0., 1.);
+    let ramp = self.ramp.process(5.);
     let window = (ramp * FRAC_PI_2).fast_cos();
     let window = window * window;
     delay_line.read(self.previous_time + added_time, interp) * window

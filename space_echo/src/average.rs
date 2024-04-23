@@ -7,7 +7,6 @@ pub struct Average {
 impl Average {
   pub fn new(length: usize) -> Self {
     Self {
-      // TODO: make buffer a power of two and use bit masking for wrapping the index
       buffer: vec![0.0; length],
       write_pointer: 0,
       previous_mean: 0.,
