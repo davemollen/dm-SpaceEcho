@@ -87,13 +87,12 @@ impl Plugin for DmSpaceEcho {
     let hold = self.params.hold.value();
 
     buffer.iter_samples().for_each(|mut channel_samples| {
-      let left_channel_in = channel_samples.get_mut(0).unwrap();
-      let input_left = *left_channel_in;
-      let right_channel_in = channel_samples.get_mut(1).unwrap();
-      let input_right = *right_channel_in;
+      let channel_iterator = &mut channel_samples.iter_mut();
+      let left_channel = channel_iterator.next().unwrap();
+      let right_channel = channel_iterator.next().unwrap();
 
       let (space_echo_left, space_echo_right) = self.space_echo.process(
-        (input_left, input_right),
+        (*left_channel, *right_channel),
         input_level,
         channel_mode,
         time_mode,
@@ -117,10 +116,8 @@ impl Plugin for DmSpaceEcho {
         0.25,
       );
 
-      let left_channel_out = channel_samples.get_mut(0).unwrap();
-      *left_channel_out = space_echo_left;
-      let right_channel_out = channel_samples.get_mut(1).unwrap();
-      *right_channel_out = space_echo_right;
+      *left_channel = space_echo_left;
+      *right_channel = space_echo_right;
     });
     ProcessStatus::Normal
   }
