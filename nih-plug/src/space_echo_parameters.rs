@@ -1,15 +1,16 @@
-use std::sync::Arc;
 use nih_plug::{
-  formatters::{s2v_f32_percentage, v2s_f32_percentage, v2s_f32_hz_then_khz, s2v_f32_hz_then_khz},
-  prelude::{BoolParam, FloatParam, FloatRange, Params}, params::{EnumParam, enums::Enum}
+  formatters::{s2v_f32_hz_then_khz, s2v_f32_percentage, v2s_f32_hz_then_khz, v2s_f32_percentage},
+  params::{enums::Enum, EnumParam},
+  prelude::{BoolParam, FloatParam, FloatRange, Params},
 };
+use std::sync::Arc;
 mod custom_formatters;
+use crate::editor;
 use custom_formatters::v2s_f32_digits;
 use nih_plug_vizia::ViziaState;
-use crate::editor;
 
 #[derive(Enum, PartialEq)]
-pub enum ChannelMode { 
+pub enum ChannelMode {
   Stereo,
   #[name = "Ping Pong"]
   PingPong,
@@ -18,7 +19,7 @@ pub enum ChannelMode {
 #[derive(Enum, PartialEq)]
 pub enum TimeMode {
   Repitch,
-  Fade
+  Fade,
 }
 
 #[derive(Params)]
@@ -84,7 +85,7 @@ pub struct SpaceEchoParameters {
   pub limiter: BoolParam,
 
   #[id = "hold"]
-  pub hold: BoolParam
+  pub hold: BoolParam,
 }
 
 impl Default for SpaceEchoParameters {
@@ -103,15 +104,9 @@ impl Default for SpaceEchoParameters {
       .with_unit(" dB")
       .with_value_to_string(v2s_f32_digits(2)),
 
-      channel_mode: EnumParam::new(
-        "Channel Mode",
-        ChannelMode::Stereo,
-      ),
+      channel_mode: EnumParam::new("Channel Mode", ChannelMode::Stereo),
 
-      time_mode: EnumParam::new(
-        "Time Mode",
-        TimeMode::Repitch
-      ),
+      time_mode: EnumParam::new("Time Mode", TimeMode::Repitch),
 
       time_link: BoolParam::new("Link", true),
 
@@ -139,29 +134,15 @@ impl Default for SpaceEchoParameters {
       .with_unit(" ms")
       .with_value_to_string(v2s_f32_digits(2)),
 
-      feedback: FloatParam::new(
-        "Feedback", 
-        0.5, 
-        FloatRange::Linear { 
-          min: 0., 
-          max: 1.5 
-        }
-      )
-      .with_unit(" %")
-      .with_value_to_string(v2s_f32_percentage(2))
-      .with_string_to_value(s2v_f32_percentage()),
+      feedback: FloatParam::new("Feedback", 0.5, FloatRange::Linear { min: 0., max: 1.5 })
+        .with_unit(" %")
+        .with_value_to_string(v2s_f32_percentage(2))
+        .with_string_to_value(s2v_f32_percentage()),
 
-      wow_and_flutter: FloatParam::new(
-        "Flutter",
-        0.,
-        FloatRange::Linear { 
-          min: 0., 
-          max: 1. 
-        },
-      )
-      .with_unit(" %")
-      .with_value_to_string(v2s_f32_percentage(2))
-      .with_string_to_value(s2v_f32_percentage()),
+      wow_and_flutter: FloatParam::new("Flutter", 0., FloatRange::Linear { min: 0., max: 1. })
+        .with_unit(" %")
+        .with_value_to_string(v2s_f32_percentage(2))
+        .with_string_to_value(s2v_f32_percentage()),
 
       highpass_freq: FloatParam::new(
         "Highpass",
@@ -175,17 +156,10 @@ impl Default for SpaceEchoParameters {
       .with_value_to_string(v2s_f32_hz_then_khz(2))
       .with_string_to_value(s2v_f32_hz_then_khz()),
 
-      highpass_res: FloatParam::new(
-        "Res", 
-        0., 
-        FloatRange::Linear { 
-          min: 0., 
-          max: 1. 
-        }
-      )
-      .with_unit(" %")
-      .with_value_to_string(v2s_f32_percentage(2))
-      .with_string_to_value(s2v_f32_percentage()),
+      highpass_res: FloatParam::new("Res", 0., FloatRange::Linear { min: 0., max: 1. })
+        .with_unit(" %")
+        .with_value_to_string(v2s_f32_percentage(2))
+        .with_string_to_value(s2v_f32_percentage()),
 
       lowpass_freq: FloatParam::new(
         "Lowpass",
@@ -199,97 +173,55 @@ impl Default for SpaceEchoParameters {
       .with_value_to_string(v2s_f32_hz_then_khz(2))
       .with_string_to_value(s2v_f32_hz_then_khz()),
 
-      lowpass_res: FloatParam::new(
-        "Res", 
-        0., 
-        FloatRange::Linear { 
-          min: 0., 
-          max: 1. 
-        }
-      )
-      .with_unit(" %")
-      .with_value_to_string(v2s_f32_percentage(2))
-      .with_string_to_value(s2v_f32_percentage()),
+      lowpass_res: FloatParam::new("Res", 0., FloatRange::Linear { min: 0., max: 1. })
+        .with_unit(" %")
+        .with_value_to_string(v2s_f32_percentage(2))
+        .with_string_to_value(s2v_f32_percentage()),
 
-      reverb: FloatParam::new(
-        "Reverb", 
-        0., 
-        FloatRange::Linear { 
-          min: 0., 
-          max: 1. 
-        }
-      )
-      .with_unit(" %")
-      .with_value_to_string(v2s_f32_percentage(2))
-      .with_string_to_value(s2v_f32_percentage()),
+      reverb: FloatParam::new("Reverb", 0., FloatRange::Linear { min: 0., max: 1. })
+        .with_unit(" %")
+        .with_value_to_string(v2s_f32_percentage(2))
+        .with_string_to_value(s2v_f32_percentage()),
 
-      decay: FloatParam::new(
-        "Decay", 
-        0.5, 
-        FloatRange::Linear { 
-          min: 0., 
-          max: 1. 
-        }
-      )
-      .with_unit(" %")
-      .with_value_to_string(v2s_f32_percentage(2))
-      .with_string_to_value(s2v_f32_percentage()),
+      decay: FloatParam::new("Decay", 0.5, FloatRange::Linear { min: 0., max: 1. })
+        .with_unit(" %")
+        .with_value_to_string(v2s_f32_percentage(2))
+        .with_string_to_value(s2v_f32_percentage()),
 
-      stereo: FloatParam::new(
-        "Stereo", 
-        1., 
-        FloatRange::Linear { 
-          min: 0., 
-          max: 1. 
-        }
-      )
-      .with_unit(" %")
-      .with_value_to_string(v2s_f32_percentage(2))
-      .with_string_to_value(s2v_f32_percentage()),
+      stereo: FloatParam::new("Stereo", 1., FloatRange::Linear { min: 0., max: 1. })
+        .with_unit(" %")
+        .with_value_to_string(v2s_f32_percentage(2))
+        .with_string_to_value(s2v_f32_percentage()),
 
-      duck: FloatParam::new(
-        "Duck", 
-        0., 
-        FloatRange::Linear { 
-          min: 0., 
-          max: 1. 
-        }
-      )
-      .with_unit(" %")
-      .with_value_to_string(v2s_f32_percentage(2))
-      .with_string_to_value(s2v_f32_percentage()),
+      duck: FloatParam::new("Duck", 0., FloatRange::Linear { min: 0., max: 1. })
+        .with_unit(" %")
+        .with_value_to_string(v2s_f32_percentage(2))
+        .with_string_to_value(s2v_f32_percentage()),
 
       // TODO: add an AsymmetricalSkewed option to the FloatRange enum
       output: FloatParam::new(
         "Output",
         0.,
         FloatRange::SymmetricalSkewed {
-          min: -100.,
+          min: -70.,
           max: 12.,
           factor: 0.333333,
-          center: 0.
+          center: 0.,
         },
       )
       .with_unit(" dB")
       .with_value_to_string(Arc::new(move |value| {
-        if value == -100. {
+        if value == -70. {
           "-inf".to_string()
         } else {
           format!("{:.2}", value)
         }
       })),
 
-      mix: FloatParam::new(
-        "Mix", 
-        0.5, 
-        FloatRange::Linear { 
-          min: 0., 
-          max: 1. 
-        }
-      )
-      .with_unit(" %")
-      .with_value_to_string(v2s_f32_percentage(2))
-      .with_string_to_value(s2v_f32_percentage()),
+      mix: FloatParam::new("Mix", 0.5, FloatRange::Linear { min: 0., max: 1. })
+        .with_unit(" %")
+        .with_value_to_string(v2s_f32_percentage(2))
+        .with_string_to_value(s2v_f32_percentage()),
 
       limiter: BoolParam::new("Limiter", false),
 
