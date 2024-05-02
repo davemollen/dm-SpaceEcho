@@ -1,11 +1,16 @@
 use crate::space_echo_parameters::Params;
 use std::any::Any;
 use vizia::{
-  prelude::{ActionModifiers, Context, EmitContext, LensExt, LayoutModifiers, Units, Units::{Stretch, Pixels}},
-  views::{Knob, Label, TextEvent, Textbox, VStack}, modifiers::TextModifiers,
-  view::Handle, 
-  binding::Lens, 
-  style::FontWeightKeyword, layout::Units::Auto
+  binding::Lens,
+  layout::Units::Auto,
+  modifiers::TextModifiers,
+  prelude::{
+    ActionModifiers, Context, EmitContext, LayoutModifiers, LensExt, Units,
+    Units::{Pixels, Stretch},
+  },
+  style::FontWeightKeyword,
+  view::Handle,
+  views::{Knob, Label, TextEvent, Textbox, VStack},
 };
 
 pub enum ParamKnobSize {
@@ -19,7 +24,7 @@ impl ParamKnobSize {
     match self {
       ParamKnobSize::Small => Pixels(32.),
       ParamKnobSize::Regular => Pixels(44.),
-      ParamKnobSize::Large => Pixels(68.)
+      ParamKnobSize::Large => Pixels(68.),
     }
   }
 }
@@ -33,8 +38,8 @@ impl ParamKnob {
     lens: L,
     params_to_param: F,
     on_change: C,
-    size: ParamKnobSize
-  ) -> Handle<'a, VStack> 
+    size: ParamKnobSize,
+  ) -> Handle<'a, VStack>
   where
     P: Params,
     L: 'static + Lens + Copy + Send + Sync,
@@ -73,9 +78,10 @@ impl ParamKnob {
         cx.emit(TextEvent::EndEdit);
 
         if success {
-          let normalized_value =
-            lens.map(move |p| params_to_param(p).string_to_normalized_value(&text));
-          match normalized_value.get(cx) {
+          let val = lens
+            .map(move |p| params_to_param(p).string_to_normalized_value(&text))
+            .get(cx);
+          match val {
             Some(val) => cx.emit(on_change(val)),
             _ => (),
           };
