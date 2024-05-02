@@ -2,6 +2,8 @@ mod log_smooth;
 use crate::one_pole_filter::OnePoleFilter;
 use log_smooth::LogSmooth;
 
+const TIME_SMOOTHING_FACTOR: f32 = 0.25;
+
 pub struct SmoothParameters {
   smooth_input_level: OnePoleFilter,
   smooth_feedback: OnePoleFilter,
@@ -59,15 +61,21 @@ impl SmoothParameters {
     let feedback = self
       .smooth_feedback
       .process(if hold { 1. } else { feedback }, 3.);
-    let wow_and_flutter = self.smooth_wow_and_flutter.process(if hold { 0. } else { wow_and_flutter }, 7.);
+    let wow_and_flutter = self
+      .smooth_wow_and_flutter
+      .process(if hold { 0. } else { wow_and_flutter }, 7.);
     let highpass_freq = self
       .smooth_highpass_freq
       .process(if hold { 20. } else { highpass_freq }, 7.);
-    let highpass_res = self.smooth_highpass_res.process(if hold { 0. } else { highpass_res }, 7.);
+    let highpass_res = self
+      .smooth_highpass_res
+      .process(if hold { 0. } else { highpass_res }, 7.);
     let lowpass_freq = self
       .smooth_lowpass_freq
       .process(if hold { 20000. } else { lowpass_freq }, 7.);
-    let lowpass_res = self.smooth_lowpass_res.process(if hold { 0. } else { lowpass_res }, 7.);
+    let lowpass_res = self
+      .smooth_lowpass_res
+      .process(if hold { 0. } else { lowpass_res }, 7.);
     let reverb = self.smooth_reverb.process(reverb, 7.);
     let decay = self.smooth_decay.process(decay, 7.);
     let stereo = self.smooth_stereo.process(stereo, 7.);
@@ -95,19 +103,19 @@ impl SmoothParameters {
     time_left: f32,
     time_right: f32,
     time_link: bool,
-    smoothing_factor: f32,
   ) -> (f32, f32) {
-    let time_left = self.smooth_time_left.process(time_left, smoothing_factor);
-    
+    let time_left = self
+      .smooth_time_left
+      .process(time_left, TIME_SMOOTHING_FACTOR);
+
     if time_link {
-      (
-        time_left,
-        time_left
-      )
+      (time_left, time_left)
     } else {
       (
         time_left,
-        self.smooth_time_right.process(time_right, smoothing_factor),
+        self
+          .smooth_time_right
+          .process(time_right, TIME_SMOOTHING_FACTOR),
       )
     }
   }

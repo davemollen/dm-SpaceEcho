@@ -6,8 +6,10 @@ mod duck;
 mod float_ext;
 mod limiter;
 mod mix;
+mod moving_min;
 mod one_pole_filter;
 mod phasor;
+mod ramp_slide;
 mod random_oscillator;
 mod reverb;
 mod saturation;
@@ -16,8 +18,6 @@ mod smooth_parameters;
 mod tsk_filter_stereo;
 mod variable_delay_read;
 mod wow_and_flutter;
-mod ramp_slide;
-mod moving_min;
 
 use {
   dc_block_stereo::DcBlockStereo,
@@ -98,7 +98,6 @@ impl SpaceEcho {
     mix: f32,
     limiter: bool,
     hold: bool,
-    time_smoothing_factor: f32
   ) -> (f32, f32) {
     let (
       input_level,
@@ -131,7 +130,7 @@ impl SpaceEcho {
 
     let delay_input = self.get_delay_input(input, channel_mode, hold, input_level);
     let delay_output =
-      self.read_from_delay_lines(time_left, time_right, time_link, time_mode, wow_and_flutter, time_smoothing_factor);
+      self.read_from_delay_lines(time_left, time_right, time_link, time_mode, wow_and_flutter);
 
     let (saturation_output_left, saturation_output_right, saturation_gain_compensation) =
       self.saturation.process(delay_output, 0.15);
@@ -192,7 +191,6 @@ impl SpaceEcho {
     time_link: bool,
     time_mode: i32,
     wow_and_flutter_param: f32,
-    time_smoothing_factor: f32
   ) -> (f32, f32) {
     let wow_and_flutter_time = if wow_and_flutter_param > 0. {
       self.wow_and_flutter.process(wow_and_flutter_param)
@@ -204,7 +202,7 @@ impl SpaceEcho {
       0 => {
         let (time_left, time_right) = self
           .smooth_parameters
-          .get_time_parameters(time_left, time_right, time_link, time_smoothing_factor);
+          .get_time_parameters(time_left, time_right, time_link);
 
         let delay_out_left = self
           .delay_line_left
@@ -285,4 +283,3 @@ impl SpaceEcho {
     )
   }
 }
-
