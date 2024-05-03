@@ -1,7 +1,7 @@
 use crate::{float_ext::FloatExt, slide::Slide};
 
-const ATTACK_TIME: f32 = 1.;
-const RELEASE_TIME: f32 = 30.;
+const ATTACK_TIME: f32 = 1.5;
+const RELEASE_TIME: f32 = 60.;
 
 pub struct Duck {
   slide: Slide,
@@ -14,7 +14,12 @@ impl Duck {
     }
   }
 
-  pub fn process(&mut self, input: (f32, f32), side_chain_input: (f32, f32), duck: f32) -> (f32, f32) {
+  pub fn process(
+    &mut self,
+    input: (f32, f32),
+    side_chain_input: (f32, f32),
+    duck: f32,
+  ) -> (f32, f32) {
     if duck == 0. {
       input
     } else {
