@@ -1,6 +1,6 @@
 label {
   font-size: 14px;
-  color: #E1D9D1;
+  color: #e1d9d1;
 }
 
 knob {
@@ -28,13 +28,13 @@ checkbox {
 }
 
 checkbox:hover {
-  background-color: #E1D9D1;
+  background-color: #e1d9d1;
 }
 
 textbox {
   font-size: 12px;
   width: 72px;
-  color: #E1D9D1;
+  color: #e1d9d1;
   background-color: transparent;
   border-width: 0px;
   outline-color: none;
@@ -48,9 +48,13 @@ textbox:hover {
 }
 
 textbox:checked.caret {
-  caret-color: #E1D9D1;
+  caret-color: #e1d9d1;
 }
 
 .hide {
   display: none;
+}
+
+.show {
+  display: block;
 }

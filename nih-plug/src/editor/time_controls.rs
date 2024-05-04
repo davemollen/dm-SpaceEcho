@@ -66,6 +66,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
           |param_ptr, val| ParamChangeEvent::SetParam(param_ptr, val),
           ParamKnobSize::Regular,
         )
+        .class("show")
         .toggle_class("hide", UiData::params.map(|p| !p.time_link.value()));
 
         // show when time_link is off
@@ -78,6 +79,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<HStac
           |param_ptr, val| ParamChangeEvent::SetParam(param_ptr, val),
           ParamKnobSize::Regular,
         )
+        .class("show")
         .toggle_class("hide", UiData::params.map(|p| p.time_link.value()));
 
         ParamKnob::new(
