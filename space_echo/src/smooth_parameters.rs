@@ -107,16 +107,11 @@ impl SmoothParameters {
     let time_left = self
       .smooth_time_left
       .process(time_left, TIME_SMOOTHING_FACTOR);
+    let time_right = self.smooth_time_right.process(
+      if time_link { time_left } else { time_right },
+      TIME_SMOOTHING_FACTOR,
+    );
 
-    if time_link {
-      (time_left, time_left)
-    } else {
-      (
-        time_left,
-        self
-          .smooth_time_right
-          .process(time_right, TIME_SMOOTHING_FACTOR),
-      )
-    }
+    (time_left, time_right)
   }
 }
