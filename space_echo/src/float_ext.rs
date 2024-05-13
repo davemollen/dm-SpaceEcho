@@ -14,6 +14,7 @@ pub trait FloatExt {
   fn fast_sin_bhaskara(self) -> Self;
   fn fast_cos_bhaskara(self) -> Self;
   fn fast_pow(self, exponent: Self) -> Self;
+  fn fast_exp(self) -> Self;
 }
 
 impl FloatExt for f32 {
@@ -121,6 +122,11 @@ impl FloatExt for f32 {
 
   fn fast_pow(self, exponent: Self) -> Self {
     pow2(exponent * log2(self))
+  }
+
+  /// Exponential function.
+  fn fast_exp(self) -> Self {
+    pow2(1.442695040_f32 * self)
   }
 }
 
