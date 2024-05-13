@@ -12,17 +12,20 @@ impl OnePoleFilter {
   }
 
   pub fn process(&mut self, input: f32, cutoff_freq: f32) -> f32 {
+    let b1 = (-2.0 * PI * cutoff_freq / self.sample_rate).fast_exp();
+    let a0 = 1.0 - b1;
+    self.z = (input * a0 + self.z * b1).flush_denormals();
+    self.z
+  }
+
+  pub fn process_param(&mut self, input: f32, cutoff_freq: f32) -> f32 {
     if (input - self.z).is_subnormal() {
       input
     } else {
-      self.apply_filter(input, cutoff_freq)
+      let b1 = (-2.0 * PI * cutoff_freq / self.sample_rate).fast_exp();
+      let a0 = 1.0 - b1;
+      self.z = input * a0 + self.z * b1;
+      self.z
     }
-  }
-
-  fn apply_filter(&mut self, input: f32, freq: f32) -> f32 {
-    let b1 = (-2.0 * PI * freq / self.sample_rate).fast_exp();
-    let a0 = 1.0 - b1;
-    self.z = input * a0 + self.z * b1;
-    self.z
   }
 }

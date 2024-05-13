@@ -17,7 +17,7 @@ impl LogSmooth {
       input
     } else {
       let ad = 0.693147 / (factor * self.sample_rate).max(1.);
-      self.z = difference * ad + self.z;
+      self.z += difference * ad;
       self.z
     }
   }

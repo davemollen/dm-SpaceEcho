@@ -57,30 +57,30 @@ impl SmoothParameters {
     mix: f32,
     hold: bool,
   ) -> (f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32) {
-    let input_level = self.smooth_input_level.process(input_level, 7.);
+    let input_level = self.smooth_input_level.process_param(input_level, 7.);
     let feedback = self
       .smooth_feedback
-      .process(if hold { 1. } else { feedback }, 3.);
+      .process_param(if hold { 1. } else { feedback }, 3.);
     let wow_and_flutter = self
       .smooth_wow_and_flutter
-      .process(if hold { 0. } else { wow_and_flutter }, 7.);
+      .process_param(if hold { 0. } else { wow_and_flutter }, 7.);
     let highpass_freq = self
       .smooth_highpass_freq
-      .process(if hold { 20. } else { highpass_freq }, 7.);
+      .process_param(if hold { 20. } else { highpass_freq }, 7.);
     let highpass_res = self
       .smooth_highpass_res
-      .process(if hold { 0. } else { highpass_res }, 7.);
+      .process_param(if hold { 0. } else { highpass_res }, 7.);
     let lowpass_freq = self
       .smooth_lowpass_freq
-      .process(if hold { 20000. } else { lowpass_freq }, 7.);
+      .process_param(if hold { 20000. } else { lowpass_freq }, 7.);
     let lowpass_res = self
       .smooth_lowpass_res
-      .process(if hold { 0. } else { lowpass_res }, 7.);
-    let reverb = self.smooth_reverb.process(reverb, 7.);
-    let decay = self.smooth_decay.process(decay, 7.);
-    let stereo = self.smooth_stereo.process(stereo, 7.);
-    let output_level = self.smooth_output_level.process(output_level, 7.);
-    let mix = self.smooth_mix.process(mix, 7.);
+      .process_param(if hold { 0. } else { lowpass_res }, 7.);
+    let reverb = self.smooth_reverb.process_param(reverb, 7.);
+    let decay = self.smooth_decay.process_param(decay, 7.);
+    let stereo = self.smooth_stereo.process_param(stereo, 7.);
+    let output_level = self.smooth_output_level.process_param(output_level, 7.);
+    let mix = self.smooth_mix.process_param(mix, 7.);
 
     (
       input_level,

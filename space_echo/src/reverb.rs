@@ -1,7 +1,7 @@
 mod tap;
 use tap::Tap;
 mod early_reflection;
-use crate::{mix::Mix, phasor::Phasor};
+use crate::{float_ext::FloatExt, mix::Mix, phasor::Phasor};
 use early_reflection::EarlyReflection;
 
 pub struct Reverb {
@@ -95,7 +95,7 @@ impl Reverb {
       .zip(feedback_matrix_outputs)
       .for_each(|(tap, feedback_matrix_output)| {
         let absorb_output = tap.apply_absorb(feedback_matrix_output);
-        tap.write(absorb_output * decay);
+        tap.write((absorb_output * decay).flush_denormals());
       });
   }
 }

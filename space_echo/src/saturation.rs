@@ -17,7 +17,7 @@ impl Saturation {
     let average = self.average.process((input.0 + input.1) * 0.5);
     let saturation_gain = self
       .enabled
-      .process(if average > threshold { 1. } else { 0. }, 7.);
+      .process_param(if average > threshold { 1. } else { 0. }, 7.);
     let clean_gain = 1. - saturation_gain;
     let saturation_gain_compensation = (1. + threshold - average).clamp(0.4, 1.);
 

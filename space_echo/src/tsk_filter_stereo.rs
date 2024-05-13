@@ -1,6 +1,6 @@
 /* Transposed Sallen Key filter */
-
 mod one_pole_filter_stereo;
+use crate::float_ext::FloatExt;
 use one_pole_filter_stereo::OnePoleFilterStereo;
 
 #[derive(Clone, Copy)]
@@ -34,7 +34,10 @@ impl TSKFilterStereo {
     let y0 = (input.0 - self.z.0, input.1 - self.z.1);
     let y1 = Self::get_filter_output(&mut self.one_pole_filter1, y0, freq, filter_type);
     let y2 = Self::get_filter_output(&mut self.one_pole_filter2, y1, freq, filter_type);
-    self.z = ((y2.0 - y1.0) * resonance, (y2.1 - y1.1) * resonance);
+    self.z = (
+      ((y2.0 - y1.0) * resonance).flush_denormals(),
+      ((y2.1 - y1.1) * resonance).flush_denormals(),
+    );
 
     y2
   }
