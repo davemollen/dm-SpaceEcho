@@ -15,7 +15,6 @@ pub trait FloatExt {
   fn fast_cos_bhaskara(self) -> Self;
   fn fast_pow(self, exponent: Self) -> Self;
   fn fast_exp(self) -> Self;
-  fn flush_denormals(self) -> Self;
 }
 
 impl FloatExt for f32 {
@@ -128,15 +127,6 @@ impl FloatExt for f32 {
   /// Exponential function.
   fn fast_exp(self) -> Self {
     pow2(1.442695040_f32 * self)
-  }
-
-  /// Replaces denormal values with zero
-  fn flush_denormals(self) -> Self {
-    if self.is_subnormal() {
-      0.
-    } else {
-      self
-    }
   }
 }
 

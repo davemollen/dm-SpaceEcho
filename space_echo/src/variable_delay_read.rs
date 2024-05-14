@@ -1,8 +1,5 @@
 mod ramp;
-use crate::{
-  delay_line::{DelayLine, Interpolation},
-  float_ext::FloatExt,
-};
+use super::{float_ext::FloatExt, DelayLine, Interpolation};
 use ramp::Ramp;
 use std::f32::consts::FRAC_PI_2;
 

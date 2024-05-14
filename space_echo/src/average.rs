@@ -1,5 +1,3 @@
-use crate::float_ext::FloatExt;
-
 pub struct Average {
   buffer: Vec<f32>,
   write_pointer: usize,
@@ -46,7 +44,7 @@ impl Average {
     if mean <= 0. {
       0.
     } else {
-      (mean / n as f32).fast_pow(0.5)
+      (mean / n as f32).sqrt()
     }
   }
 }

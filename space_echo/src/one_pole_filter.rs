@@ -14,7 +14,7 @@ impl OnePoleFilter {
   pub fn process(&mut self, input: f32, cutoff_freq: f32) -> f32 {
     let b1 = (-2.0 * PI * cutoff_freq / self.sample_rate).fast_exp();
     let a0 = 1.0 - b1;
-    self.z = (input * a0 + self.z * b1).flush_denormals();
+    self.z = input * a0 + self.z * b1;
     self.z
   }
 

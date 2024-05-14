@@ -1,7 +1,4 @@
-use crate::{
-  float_ext::FloatExt, one_pole_filter::OnePoleFilter, phasor::Phasor,
-  random_oscillator::RandomOscillator,
-};
+use crate::{one_pole_filter::OnePoleFilter, phasor::Phasor, random_oscillator::RandomOscillator};
 
 const MAX_FLUTTER_TIME_IN_SECS: f32 = 2.;
 const MAX_WOW_TIME_IN_SECS: f32 = 15.;
@@ -31,8 +28,8 @@ impl WowAndFlutter {
     let flutter_oscillator = self.get_flutter_oscillator();
 
     let smoothed_param = self.smooth_param.process(wow_and_flutter, 12.);
-    let flutter_gain = smoothed_param.fast_pow(3.);
-    let wow_gain = smoothed_param.fast_pow(6.);
+    let flutter_gain = smoothed_param * smoothed_param * smoothed_param * smoothed_param;
+    let wow_gain = flutter_gain * flutter_gain;
 
     wow_oscillator * wow_gain + flutter_oscillator * flutter_gain
   }
@@ -44,6 +41,9 @@ impl WowAndFlutter {
 
   pub fn get_flutter_oscillator(&mut self) -> f32 {
     let flutter_oscillator_phase = self.flutter_phasor.process(24.37891);
-    self.flutter_oscillator.process(flutter_oscillator_phase, 0.95) * MAX_FLUTTER_TIME_IN_SECS
+    self
+      .flutter_oscillator
+      .process(flutter_oscillator_phase, 0.95)
+      * MAX_FLUTTER_TIME_IN_SECS
   }
 }

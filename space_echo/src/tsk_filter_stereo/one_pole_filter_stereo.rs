@@ -17,10 +17,7 @@ impl OnePoleFilterStereo {
   pub fn process(&mut self, input: (f32, f32), cutoff_freq: f32) -> (f32, f32) {
     let b1 = (-2.0 * PI * cutoff_freq / self.sample_rate).fast_exp();
     let a0 = 1.0 - b1;
-    self.z = (
-      (input.0 * a0 + self.z.0 * b1).flush_denormals(),
-      (input.1 * a0 + self.z.1 * b1).flush_denormals(),
-    );
+    self.z = (input.0 * a0 + self.z.0 * b1, input.1 * a0 + self.z.1 * b1);
     self.z
   }
 }

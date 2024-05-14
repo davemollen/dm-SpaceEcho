@@ -19,6 +19,7 @@ mod tsk_filter_stereo;
 mod variable_delay_read;
 mod wow_and_flutter;
 
+pub use reverb::Reverb;
 use {
   dc_block_stereo::DcBlockStereo,
   delay_line::{DelayLine, Interpolation},
@@ -26,7 +27,6 @@ use {
   float_ext::FloatExt,
   limiter::Limiter,
   mix::Mix,
-  reverb::Reverb,
   saturation::Saturation,
   smooth_parameters::SmoothParameters,
   tsk_filter_stereo::{FilterType, TSKFilterStereo},
