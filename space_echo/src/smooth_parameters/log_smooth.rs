@@ -16,7 +16,7 @@ impl LogSmooth {
     if difference.is_subnormal() {
       input
     } else {
-      let ad = 0.693147 / (factor * self.sample_rate).max(1.);
+      let ad = 0.693147 * (factor * self.sample_rate).max(1.).recip();
       self.z += difference * ad;
       self.z
     }

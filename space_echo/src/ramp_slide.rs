@@ -49,7 +49,7 @@ impl RampSlide {
   fn ramp_down(&mut self, input: f32, ramp_down: f32, difference: f32) -> f32 {
     if input != self.ramp.prev {
       self.ramp.index = ramp_down as u32;
-      self.ramp.step_size = difference / ramp_down;
+      self.ramp.step_size = difference * ramp_down.recip();
       self.ramp.prev = input;
     }
 
