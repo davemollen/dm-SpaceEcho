@@ -13,6 +13,23 @@ impl Average {
     }
   }
 
+  pub fn process(&mut self, input: f32) -> f32 {
+    let n = self.buffer.len();
+
+    let squared = input * input;
+    let oldest_buffer_entry = self.get_oldest_buffer_entry();
+    let mean = squared + self.previous_mean - oldest_buffer_entry;
+
+    self.previous_mean = mean;
+    self.write(squared);
+
+    if mean <= 0. {
+      0.
+    } else {
+      (mean / n as f32).sqrt()
+    }
+  }
+
   fn wrap(&self, index: usize) -> usize {
     let buffer_len = self.buffer.len();
     if index >= buffer_len {
@@ -29,22 +46,5 @@ impl Average {
 
   fn get_oldest_buffer_entry(&self) -> f32 {
     self.buffer[self.write_pointer]
-  }
-
-  pub fn process(&mut self, input: f32) -> f32 {
-    let n = self.buffer.len();
-
-    let squared = input * input;
-    let oldest_buffer_entry = self.get_oldest_buffer_entry();
-    let mean = squared + self.previous_mean - oldest_buffer_entry;
-
-    self.previous_mean = mean;
-    self.write(squared);
-
-    if mean <= 0. {
-      0.
-    } else {
-      (mean / n as f32).sqrt()
-    }
   }
 }
