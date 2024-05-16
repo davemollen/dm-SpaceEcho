@@ -54,7 +54,7 @@ impl Plugin for DmSpaceEcho {
   // Process a chunk of audio. The audio ports are dereferenced to slices, which the plugin
   // iterates over.
   fn run(&mut self, ports: &mut Ports, _features: &mut (), _sample_count: u32) {
-    let input_level = *ports.input.dbtoa();
+    let input_level = (*ports.input).dbtoa();
     let time_link = *ports.time_link == 1.;
     let time_left = *ports.time_left;
     let time_right = *ports.time_right;
@@ -70,9 +70,8 @@ impl Plugin for DmSpaceEcho {
     let reverb = *ports.reverb * 0.01;
     let decay = *ports.decay * 0.01;
     let stereo = *ports.stereo * 0.01;
-    let duck = *ports.duck * 0.01;
     let duck_threshold = (*ports.duck * 0.01 * MIN_DUCK_THRESHOLD).dbtoa();
-    let output_level = *ports.output.dbtoa();
+    let output_level = (*ports.output).dbtoa();
     let mix = *ports.mix * 0.01;
     let limiter = *ports.limiter == 1.;
 
