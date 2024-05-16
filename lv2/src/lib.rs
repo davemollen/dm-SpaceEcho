@@ -1,7 +1,7 @@
 extern crate lv2;
 extern crate space_echo;
 use lv2::prelude::*;
-use space_echo::SpaceEcho;
+use space_echo::{FloatExt, SpaceEcho, MIN_DUCK_THRESHOLD};
 
 #[derive(PortCollection)]
 struct Ports {
@@ -54,7 +54,7 @@ impl Plugin for DmSpaceEcho {
   // Process a chunk of audio. The audio ports are dereferenced to slices, which the plugin
   // iterates over.
   fn run(&mut self, ports: &mut Ports, _features: &mut (), _sample_count: u32) {
-    let input_level = *ports.input;
+    let input_level = *ports.input.dbtoa();
     let time_link = *ports.time_link == 1.;
     let time_left = *ports.time_left;
     let time_right = *ports.time_right;
@@ -71,7 +71,8 @@ impl Plugin for DmSpaceEcho {
     let decay = *ports.decay * 0.01;
     let stereo = *ports.stereo * 0.01;
     let duck = *ports.duck * 0.01;
-    let output_level = *ports.output;
+    let duck_threshold = (*ports.duck * 0.01 * MIN_DUCK_THRESHOLD).dbtoa();
+    let output_level = *ports.output.dbtoa();
     let mix = *ports.mix * 0.01;
     let limiter = *ports.limiter == 1.;
 
@@ -101,7 +102,7 @@ impl Plugin for DmSpaceEcho {
         reverb,
         decay,
         stereo,
-        duck,
+        duck_threshold,
         output_level,
         mix,
         limiter,

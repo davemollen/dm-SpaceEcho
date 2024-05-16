@@ -1,5 +1,5 @@
 use nih_plug::prelude::*;
-use space_echo::SpaceEcho;
+use space_echo::{FloatExt, SpaceEcho, MIN_DUCK_THRESHOLD};
 mod space_echo_parameters;
 use space_echo_parameters::SpaceEchoParameters;
 use std::sync::Arc;
@@ -65,7 +65,7 @@ impl Plugin for DmSpaceEcho {
     _aux: &mut AuxiliaryBuffers,
     _context: &mut impl ProcessContext<Self>,
   ) -> ProcessStatus {
-    let input_level = self.params.input.value();
+    let input_level = self.params.input.value().dbtoa();
     let time_link = self.params.time_link.value();
     let time_left = self.params.time_left.value();
     let time_right = self.params.time_right.value();
@@ -77,9 +77,9 @@ impl Plugin for DmSpaceEcho {
     let lowpass_res = self.params.lowpass_res.value();
     let reverb = self.params.reverb.value();
     let decay = self.params.decay.value();
-    let output_level = self.params.output.value();
+    let output_level = self.params.output.value().dbtoa();
     let stereo = self.params.stereo.value();
-    let duck = self.params.duck.value();
+    let duck_threshold = (self.params.duck.value() * MIN_DUCK_THRESHOLD).dbtoa();
     let mix = self.params.mix.value();
     let channel_mode = self.params.channel_mode.value() as i32;
     let time_mode = self.params.time_mode.value() as i32;
@@ -108,7 +108,7 @@ impl Plugin for DmSpaceEcho {
         reverb,
         decay,
         stereo,
-        duck,
+        duck_threshold,
         output_level,
         mix,
         limiter,

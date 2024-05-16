@@ -3,7 +3,7 @@ extern crate vst;
 mod editor;
 use editor::SpaceEchoEditor;
 mod space_echo_parameters;
-use space_echo::SpaceEcho;
+use space_echo::{FloatExt, SpaceEcho, MIN_DUCK_THRESHOLD};
 use space_echo_parameters::{Params, SpaceEchoParameters};
 use std::sync::Arc;
 use vst::{
@@ -54,7 +54,7 @@ impl Plugin for DmSpaceEcho {
   }
 
   fn process(&mut self, buffer: &mut AudioBuffer<f32>) {
-    let input_level = self.params.input.get_value();
+    let input_level = self.params.input.get_value().dbtoa();
     let time_link = self.params.time_link.get_value();
     let time_left = self.params.time_left.get_value();
     let time_right = self.params.time_right.get_value();
@@ -66,9 +66,9 @@ impl Plugin for DmSpaceEcho {
     let lowpass_res = self.params.lowpass_res.get_value();
     let reverb = self.params.reverb.get_value();
     let decay = self.params.decay.get_value();
-    let output_level = self.params.output.get_value();
+    let output_level = self.params.output.get_value().dbtoa();
     let stereo = self.params.stereo.get_value();
-    let duck = self.params.duck.get_value();
+    let duck_threshold = (self.params.duck.get_value() * MIN_DUCK_THRESHOLD).dbtoa();
     let mix = self.params.mix.get_value();
     let channel_mode = self.params.channel_mode.get_value();
     let time_mode = self.params.time_mode.get_value();
@@ -101,7 +101,7 @@ impl Plugin for DmSpaceEcho {
         reverb,
         decay,
         stereo,
-        duck,
+        duck_threshold,
         output_level,
         mix,
         limiter,

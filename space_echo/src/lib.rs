@@ -19,12 +19,10 @@ mod tsk_filter_stereo;
 mod variable_delay_read;
 mod wow_and_flutter;
 
-pub use reverb::Reverb;
 use {
   dc_block_stereo::DcBlockStereo,
   delay_line::{DelayLine, Interpolation},
   duck::Duck,
-  float_ext::FloatExt,
   limiter::Limiter,
   mix::Mix,
   saturation::Saturation,
@@ -33,6 +31,8 @@ use {
   variable_delay_read::VariableDelayRead,
   wow_and_flutter::{WowAndFlutter, MAX_WOW_AND_FLUTTER_TIME_IN_SECS},
 };
+pub use {float_ext::FloatExt, reverb::Reverb};
+pub const MIN_DUCK_THRESHOLD: f32 = -40.;
 
 pub struct SpaceEcho {
   delay_line_left: DelayLine,
@@ -93,7 +93,7 @@ impl SpaceEcho {
     reverb: f32,
     decay: f32,
     stereo: f32,
-    duck: f32,
+    duck_threshold: f32,
     output_level: f32,
     mix: f32,
     limiter: bool,
@@ -148,22 +148,17 @@ impl SpaceEcho {
 
     let stereo_output = self.apply_stereo_amount(filter_output, stereo);
     let reverb_output = self.reverb.process(
-      self.apply_linear_gain(stereo_output, saturation_gain_compensation),
+      self.apply_gain(stereo_output, saturation_gain_compensation),
       reverb,
       decay,
     );
-    let ducking_output = self.duck.process(reverb_output, input, duck);
-    let space_echo_output = self.apply_db_gain(ducking_output, output_level);
+    let ducking_output = self.duck.process(reverb_output, input, duck_threshold);
+    let space_echo_output = self.apply_gain(ducking_output, output_level);
     let mix_output = Mix::process(input, space_echo_output, mix);
     self.limiter.process(mix_output, limiter)
   }
 
-  fn apply_linear_gain(&self, input: (f32, f32), gain: f32) -> (f32, f32) {
-    (input.0 * gain, input.1 * gain)
-  }
-
-  fn apply_db_gain(&self, input: (f32, f32), level: f32) -> (f32, f32) {
-    let gain = level.dbtoa();
+  fn apply_gain(&self, input: (f32, f32), gain: f32) -> (f32, f32) {
     (input.0 * gain, input.1 * gain)
   }
 
@@ -172,15 +167,15 @@ impl SpaceEcho {
     input: (f32, f32),
     channel_mode: i32,
     hold: bool,
-    input_level: f32,
+    gain: f32,
   ) -> (f32, f32) {
-    self.apply_db_gain(
+    self.apply_gain(
       match (hold, channel_mode) {
         (true, _) => (0., 0.),
         (false, 1) => ((input.0 + input.1) * 0.5, 0.),
         _ => input,
       },
-      input_level,
+      gain,
     )
   }
 
