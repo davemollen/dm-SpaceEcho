@@ -64,7 +64,7 @@ impl Reverb {
   fn apply_reverb_tail(&mut self, input: (f32, f32), decay: f32) -> (f32, f32) {
     let delay_out = self.read_from_taps(input);
     let matrix_out = self.apply_matrix(delay_out);
-    self.apply_absorption_and_write(matrix_out, decay);
+    self.apply_absorption_and_write_to_taps(matrix_out, decay);
 
     (delay_out[0], delay_out[1])
   }
@@ -86,7 +86,11 @@ impl Reverb {
       .map(move |matrix_element| Self::get_matrix_result(input, matrix_element))
   }
 
-  fn apply_absorption_and_write(&mut self, input: impl IntoIterator<Item = f32>, decay: f32) {
+  fn apply_absorption_and_write_to_taps(
+    &mut self,
+    input: impl IntoIterator<Item = f32>,
+    decay: f32,
+  ) {
     input
       .into_iter()
       .zip(self.taps.iter_mut())
