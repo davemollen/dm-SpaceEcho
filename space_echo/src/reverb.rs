@@ -64,8 +64,7 @@ impl Reverb {
   fn apply_reverb_tail(&mut self, input: (f32, f32), decay: f32) -> (f32, f32) {
     let delay_out = self.read_from_taps(input);
     let matrix_out = self.apply_matrix(delay_out);
-    let absorb_out = self.apply_absorption(matrix_out);
-    self.write_to_taps(absorb_out, decay);
+    self.apply_absorption_and_write(matrix_out, decay);
 
     (delay_out[0], delay_out[1])
   }
@@ -81,34 +80,25 @@ impl Reverb {
     ]
   }
 
-  fn apply_matrix(&self, input: [f32; 4]) -> [f32; 4] {
-    [
-      self.get_matrix_result(input, MATRIX[0]),
-      self.get_matrix_result(input, MATRIX[1]),
-      self.get_matrix_result(input, MATRIX[2]),
-      self.get_matrix_result(input, MATRIX[3]),
-    ]
+  fn apply_matrix(&self, input: [f32; 4]) -> impl IntoIterator<Item = f32> {
+    MATRIX
+      .into_iter()
+      .map(move |matrix_element| Self::get_matrix_result(input, matrix_element))
   }
 
-  fn apply_absorption(&mut self, input: [f32; 4]) -> [f32; 4] {
-    [
-      self.taps[0].apply_absorb(input[0]),
-      self.taps[1].apply_absorb(input[1]),
-      self.taps[2].apply_absorb(input[2]),
-      self.taps[3].apply_absorb(input[3]),
-    ]
+  fn apply_absorption_and_write(&mut self, input: impl IntoIterator<Item = f32>, decay: f32) {
+    input
+      .into_iter()
+      .zip(self.taps.iter_mut())
+      .for_each(|(x, tap)| {
+        let absorb_out = tap.apply_absorb(x);
+        tap.write(absorb_out * decay)
+      })
   }
 
-  fn write_to_taps(&mut self, input: [f32; 4], decay: f32) {
-    self.taps[0].write(input[0] * decay);
-    self.taps[1].write(input[1] * decay);
-    self.taps[2].write(input[2] * decay);
-    self.taps[3].write(input[3] * decay);
-  }
-
-  fn get_matrix_result(&self, inputs: [f32; 4], matrix: [f32; 4]) -> f32 {
+  fn get_matrix_result(inputs: [f32; 4], matrix: [f32; 4]) -> f32 {
     inputs
-      .iter()
+      .into_iter()
       .zip(matrix)
       .map(|(input, factor)| input * factor)
       .sum()
