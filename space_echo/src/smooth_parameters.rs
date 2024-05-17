@@ -106,6 +106,7 @@ impl SmoothParameters {
     time_right: f32,
     time_link: bool,
   ) -> (f32, f32) {
+    // TODO: initial value on startup should not ramp up/down
     let time_left = self
       .smooth_time_left
       .process(time_left, TIME_SMOOTHING_FACTOR);

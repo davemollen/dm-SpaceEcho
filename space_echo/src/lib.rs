@@ -173,6 +173,7 @@ impl SpaceEcho {
   ) -> (f32, f32) {
     self.apply_gain(
       match (hold, channel_mode) {
+        // TODO: remove clicks when changing hold
         (true, _) => (0., 0.),
         (false, 1) => ((input.0 + input.1) * 0.5, 0.),
         _ => input,
