@@ -12,7 +12,7 @@ pub struct VariableDelayRead {
 impl VariableDelayRead {
   pub fn new(sample_rate: f32) -> Self {
     Self {
-      ramp: Ramp::new(sample_rate),
+      ramp: Ramp::new(sample_rate, 5.),
       previous_time: 0.,
       next_time: 0.,
     }
@@ -48,7 +48,7 @@ impl VariableDelayRead {
     added_time: f32,
     interp: Interpolation,
   ) -> f32 {
-    let ramp = self.ramp.process(5.);
+    let ramp = self.ramp.process();
     let window = (ramp * FRAC_PI_2).fast_cos();
     let window = window * window;
     delay_line.read(self.previous_time + added_time, interp) * window
