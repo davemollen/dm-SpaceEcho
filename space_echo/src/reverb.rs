@@ -1,7 +1,7 @@
 mod tap;
 use tap::Tap;
 mod early_reflection;
-use crate::{mix::Mix, phasor::Phasor};
+use crate::shared::{mix::Mix, phasor::Phasor};
 use early_reflection::EarlyReflection;
 
 const MATRIX: [[f32; 4]; 4] = [
@@ -34,7 +34,7 @@ impl Reverb {
         Tap::new(sample_rate, 86.7545),
         Tap::new(sample_rate, 95.945),
       ],
-      phasor: Phasor::new(sample_rate),
+      phasor: Phasor::new(sample_rate, 3.7),
     }
   }
 
@@ -71,7 +71,7 @@ impl Reverb {
   }
 
   fn read_from_taps(&mut self, input: (f32, f32)) -> [f32; 4] {
-    let lfo_phase = self.phasor.process(3.7);
+    let lfo_phase = self.phasor.process();
 
     [
       self.taps[0].read(lfo_phase) + input.0,

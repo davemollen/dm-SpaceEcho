@@ -1,37 +1,39 @@
-mod average;
 mod dc_block_stereo;
-mod delay_line;
-mod delta;
 mod duck;
-mod float_ext;
 mod limiter;
-mod mix;
-mod moving_min;
-mod one_pole_filter;
-mod phasor;
-mod ramp_slide;
-mod random_oscillator;
 mod reverb;
 mod saturation;
-mod slide;
 mod smooth_parameters;
 mod tsk_filter_stereo;
 mod variable_delay_read;
 mod wow_and_flutter;
+mod shared {
+  pub mod delay_line;
+  pub mod delta;
+  pub mod float_ext;
+  pub mod mix;
+  pub mod one_pole_filter;
+  pub mod param_filter;
+  pub mod phasor;
+  pub mod random_oscillator;
+  pub mod slide;
+}
 
 use {
   dc_block_stereo::DcBlockStereo,
-  delay_line::{DelayLine, Interpolation},
   duck::Duck,
   limiter::Limiter,
-  mix::Mix,
   saturation::Saturation,
+  shared::{
+    delay_line::{DelayLine, Interpolation},
+    mix::Mix,
+  },
   smooth_parameters::SmoothParameters,
   tsk_filter_stereo::{FilterType, TSKFilterStereo},
   variable_delay_read::VariableDelayRead,
   wow_and_flutter::{WowAndFlutter, MAX_WOW_AND_FLUTTER_TIME_IN_SECS},
 };
-pub use {float_ext::FloatExt, reverb::Reverb};
+pub use {reverb::Reverb, shared::float_ext::FloatExt};
 pub const MIN_DUCK_THRESHOLD: f32 = -40.;
 
 pub struct SpaceEcho {

@@ -1,4 +1,4 @@
-use crate::float_ext::FloatExt;
+use crate::shared::float_ext::FloatExt;
 use std::f32::consts::FRAC_PI_2;
 
 pub struct Mix;
@@ -18,7 +18,7 @@ impl Mix {
 
 #[cfg(test)]
 mod tests {
-  use crate::mix::Mix;
+  use super::Mix;
 
   fn assert_approximately_eq(left: f32, right: f32) {
     assert_eq!((left * 100.).round() / 100., (right * 100.).round() / 100.)

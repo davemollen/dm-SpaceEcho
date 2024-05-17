@@ -1,15 +1,17 @@
-use crate::{average::Average, float_ext::FloatExt, one_pole_filter::OnePoleFilter};
+mod average;
+use crate::{shared::float_ext::FloatExt, shared::param_filter::ParamFilter};
+use average::Average;
 
 pub struct Saturation {
   average: Average,
-  enabled: OnePoleFilter,
+  enabled: ParamFilter,
 }
 
 impl Saturation {
   pub fn new(sample_rate: f32) -> Self {
     Self {
       average: Average::new((1000. / 44100. * sample_rate) as usize),
-      enabled: OnePoleFilter::new(sample_rate),
+      enabled: ParamFilter::new(sample_rate, 7.),
     }
   }
 
@@ -17,7 +19,7 @@ impl Saturation {
     let average = self.average.process((input.0 + input.1) * 0.5);
     let saturation_gain = self
       .enabled
-      .process_param(if average > threshold { 1. } else { 0. }, 7.);
+      .process(if average > threshold { 1. } else { 0. });
     let clean_gain = 1. - saturation_gain;
     let saturation_gain_compensation = (1. + threshold - average).clamp(0.4, 1.);
 

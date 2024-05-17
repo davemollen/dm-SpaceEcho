@@ -1,6 +1,5 @@
 /* Transposed Sallen Key filter */
 mod one_pole_filter_stereo;
-use crate::float_ext::FloatExt;
 use one_pole_filter_stereo::OnePoleFilterStereo;
 
 #[derive(Clone, Copy)]

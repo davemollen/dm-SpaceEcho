@@ -1,22 +1,23 @@
 mod log_smooth;
-use crate::one_pole_filter::OnePoleFilter;
 use log_smooth::LogSmooth;
+
+use crate::shared::param_filter::ParamFilter;
 
 const TIME_SMOOTHING_FACTOR: f32 = 0.25;
 
 pub struct SmoothParameters {
-  smooth_input_level: OnePoleFilter,
-  smooth_feedback: OnePoleFilter,
-  smooth_wow_and_flutter: OnePoleFilter,
-  smooth_highpass_freq: OnePoleFilter,
-  smooth_highpass_res: OnePoleFilter,
-  smooth_lowpass_freq: OnePoleFilter,
-  smooth_lowpass_res: OnePoleFilter,
-  smooth_reverb: OnePoleFilter,
-  smooth_decay: OnePoleFilter,
-  smooth_stereo: OnePoleFilter,
-  smooth_output_level: OnePoleFilter,
-  smooth_mix: OnePoleFilter,
+  smooth_input_level: ParamFilter,
+  smooth_feedback: ParamFilter,
+  smooth_wow_and_flutter: ParamFilter,
+  smooth_highpass_freq: ParamFilter,
+  smooth_highpass_res: ParamFilter,
+  smooth_lowpass_freq: ParamFilter,
+  smooth_lowpass_res: ParamFilter,
+  smooth_reverb: ParamFilter,
+  smooth_decay: ParamFilter,
+  smooth_stereo: ParamFilter,
+  smooth_output_level: ParamFilter,
+  smooth_mix: ParamFilter,
   smooth_time_left: LogSmooth,
   smooth_time_right: LogSmooth,
 }
@@ -24,18 +25,18 @@ pub struct SmoothParameters {
 impl SmoothParameters {
   pub fn new(sample_rate: f32) -> Self {
     Self {
-      smooth_input_level: OnePoleFilter::new(sample_rate),
-      smooth_feedback: OnePoleFilter::new(sample_rate),
-      smooth_wow_and_flutter: OnePoleFilter::new(sample_rate),
-      smooth_highpass_freq: OnePoleFilter::new(sample_rate),
-      smooth_highpass_res: OnePoleFilter::new(sample_rate),
-      smooth_lowpass_freq: OnePoleFilter::new(sample_rate),
-      smooth_lowpass_res: OnePoleFilter::new(sample_rate),
-      smooth_reverb: OnePoleFilter::new(sample_rate),
-      smooth_decay: OnePoleFilter::new(sample_rate),
-      smooth_stereo: OnePoleFilter::new(sample_rate),
-      smooth_output_level: OnePoleFilter::new(sample_rate),
-      smooth_mix: OnePoleFilter::new(sample_rate),
+      smooth_input_level: ParamFilter::new(sample_rate, 7.),
+      smooth_feedback: ParamFilter::new(sample_rate, 3.),
+      smooth_wow_and_flutter: ParamFilter::new(sample_rate, 7.),
+      smooth_highpass_freq: ParamFilter::new(sample_rate, 7.),
+      smooth_highpass_res: ParamFilter::new(sample_rate, 7.),
+      smooth_lowpass_freq: ParamFilter::new(sample_rate, 7.),
+      smooth_lowpass_res: ParamFilter::new(sample_rate, 7.),
+      smooth_reverb: ParamFilter::new(sample_rate, 7.),
+      smooth_decay: ParamFilter::new(sample_rate, 7.),
+      smooth_stereo: ParamFilter::new(sample_rate, 7.),
+      smooth_output_level: ParamFilter::new(sample_rate, 7.),
+      smooth_mix: ParamFilter::new(sample_rate, 7.),
       smooth_time_left: LogSmooth::new(sample_rate, 250.0),
       smooth_time_right: LogSmooth::new(sample_rate, 250.0),
     }
@@ -57,30 +58,31 @@ impl SmoothParameters {
     mix: f32,
     hold: bool,
   ) -> (f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32) {
-    let input_level = self.smooth_input_level.process_param(input_level, 7.);
+    let input_level = self.smooth_input_level.process(input_level);
     let feedback = self
       .smooth_feedback
-      .process_param(if hold { 1. } else { feedback }, 3.);
-    let wow_and_flutter = self
-      .smooth_wow_and_flutter
-      .process_param(if hold { 0. } else { wow_and_flutter }, 7.);
+      .process(if hold { 1. } else { feedback });
+    let wow_and_flutter =
+      self
+        .smooth_wow_and_flutter
+        .process(if hold { 0. } else { wow_and_flutter });
     let highpass_freq = self
       .smooth_highpass_freq
-      .process_param(if hold { 20. } else { highpass_freq }, 7.);
+      .process(if hold { 20. } else { highpass_freq });
     let highpass_res = self
       .smooth_highpass_res
-      .process_param(if hold { 0. } else { highpass_res }, 7.);
+      .process(if hold { 0. } else { highpass_res });
     let lowpass_freq = self
       .smooth_lowpass_freq
-      .process_param(if hold { 20000. } else { lowpass_freq }, 7.);
+      .process(if hold { 20000. } else { lowpass_freq });
     let lowpass_res = self
       .smooth_lowpass_res
-      .process_param(if hold { 0. } else { lowpass_res }, 7.);
-    let reverb = self.smooth_reverb.process_param(reverb, 7.);
-    let decay = self.smooth_decay.process_param(decay, 7.);
-    let stereo = self.smooth_stereo.process_param(stereo, 7.);
-    let output_level = self.smooth_output_level.process_param(output_level, 7.);
-    let mix = self.smooth_mix.process_param(mix, 7.);
+      .process(if hold { 0. } else { lowpass_res });
+    let reverb = self.smooth_reverb.process(reverb);
+    let decay = self.smooth_decay.process(decay);
+    let stereo = self.smooth_stereo.process(stereo);
+    let output_level = self.smooth_output_level.process(output_level);
+    let mix = self.smooth_mix.process(mix);
 
     (
       input_level,

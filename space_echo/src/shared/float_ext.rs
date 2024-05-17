@@ -15,6 +15,7 @@ pub trait FloatExt {
   fn fast_cos_bhaskara(self) -> Self;
   fn fast_pow(self, exponent: Self) -> Self;
   fn fast_exp(self) -> Self;
+  fn mstosamps(self, sample_rate: Self) -> Self;
 }
 
 impl FloatExt for f32 {
@@ -128,11 +129,15 @@ impl FloatExt for f32 {
   fn fast_exp(self) -> Self {
     pow2(1.442695040_f32 * self)
   }
+
+  fn mstosamps(self, sample_rate: Self) -> Self {
+    self * 0.001 * sample_rate
+  }
 }
 
 #[cfg(test)]
 mod tests {
-  use crate::float_ext::FloatExt;
+  use super::FloatExt;
   use std::f32::consts::{FRAC_1_SQRT_2, PI};
 
   fn assert_approximately_eq(left: f32, right: f32) {

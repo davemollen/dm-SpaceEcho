@@ -1,5 +1,6 @@
 use crate::{
-  one_pole_filter::OnePoleFilter, phasor::Phasor, random_oscillator::RandomOscillator, FloatExt,
+  shared::{one_pole_filter::OnePoleFilter, phasor::Phasor, random_oscillator::RandomOscillator},
+  FloatExt,
 };
 
 const MAX_FLUTTER_TIME_IN_SECS: f32 = 2.;
@@ -17,9 +18,9 @@ pub struct WowAndFlutter {
 impl WowAndFlutter {
   pub fn new(sample_rate: f32) -> Self {
     Self {
-      wow_phasor: Phasor::new(sample_rate),
+      wow_phasor: Phasor::new(sample_rate, 2.1),
       wow_oscillator: RandomOscillator::new(),
-      flutter_phasor: Phasor::new(sample_rate),
+      flutter_phasor: Phasor::new(sample_rate, 24.37891),
       flutter_oscillator: RandomOscillator::new(),
       smooth_param: OnePoleFilter::new(sample_rate),
     }
@@ -37,12 +38,12 @@ impl WowAndFlutter {
   }
 
   pub fn get_wow_oscillator(&mut self) -> f32 {
-    let wow_oscillator_phase = self.wow_phasor.process(2.1);
+    let wow_oscillator_phase = self.wow_phasor.process();
     self.wow_oscillator.process(wow_oscillator_phase, 0.4) * MAX_WOW_TIME_IN_SECS
   }
 
   pub fn get_flutter_oscillator(&mut self) -> f32 {
-    let flutter_oscillator_phase = self.flutter_phasor.process(24.37891);
+    let flutter_oscillator_phase = self.flutter_phasor.process();
     self
       .flutter_oscillator
       .process(flutter_oscillator_phase, 0.95)

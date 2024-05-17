@@ -55,7 +55,7 @@ impl MovingMin {
 
 #[cfg(test)]
 mod tests {
-  use crate::moving_min::MovingMin;
+  use super::MovingMin;
 
   #[test]
   fn should_hold_minimum_for_attack_time_in_ms() {

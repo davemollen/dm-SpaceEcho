@@ -1,11 +1,11 @@
-use crate::{moving_min::MovingMin, ramp_slide::RampSlide};
+mod moving_min;
+mod ramp_slide;
+use {moving_min::MovingMin, ramp_slide::RampSlide};
 
 pub struct Limiter {
   buffer: Vec<(f32, f32)>,
   buffer_index: usize,
   slide: RampSlide,
-  attack_time: f32,
-  release_time: f32,
   limit: f32,
   moving_min: MovingMin,
 }
@@ -23,9 +23,7 @@ impl Limiter {
     Self {
       buffer: vec![(0., 0.); buffer_length],
       buffer_index: 0,
-      slide: RampSlide::new(sample_rate),
-      attack_time,
-      release_time,
+      slide: RampSlide::new(sample_rate, release_time, attack_time),
       limit,
       moving_min: MovingMin::new(sample_rate, attack_time, hold_time, limit),
     }
@@ -34,7 +32,7 @@ impl Limiter {
   pub fn process(&mut self, input: (f32, f32), is_on: bool) -> (f32, f32) {
     if is_on {
       let moving_min = self.get_moving_min(input);
-      let limiter_gain = self.apply_filters(moving_min);
+      let limiter_gain = self.slide.process(moving_min);
 
       let delay_output = self.read_from_buffer();
       self.write_to_buffer(input);
@@ -72,12 +70,6 @@ impl Limiter {
   fn get_moving_min(&mut self, input: (f32, f32)) -> f32 {
     let gain_reduction = self.get_gain_reduction(input);
     self.moving_min.process(gain_reduction)
-  }
-
-  fn apply_filters(&mut self, moving_min: f32) -> f32 {
-    self
-      .slide
-      .process(moving_min, self.release_time, self.attack_time)
   }
 
   fn write_to_buffer(&mut self, input: (f32, f32)) {

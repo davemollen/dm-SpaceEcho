@@ -1,4 +1,7 @@
-use crate::{float_ext::FloatExt, slide::Slide, MIN_DUCK_THRESHOLD};
+use crate::{
+  shared::{float_ext::FloatExt, slide::Slide},
+  MIN_DUCK_THRESHOLD,
+};
 
 const ATTACK_TIME: f32 = 1.5;
 const RELEASE_TIME: f32 = 60.;
@@ -12,7 +15,7 @@ impl Duck {
   pub fn new(sample_rate: f32) -> Self {
     Self {
       min_duck_threshold: MIN_DUCK_THRESHOLD.dbtoa(),
-      slide: Slide::new(sample_rate),
+      slide: Slide::new(sample_rate, RELEASE_TIME, ATTACK_TIME),
     }
   }
 
@@ -31,7 +34,7 @@ impl Duck {
       } else {
         1.
       };
-      let duck_gain = self.slide.process(slide_input, RELEASE_TIME, ATTACK_TIME);
+      let duck_gain = self.slide.process(slide_input);
       (input.0 * duck_gain, input.1 * duck_gain)
     }
   }

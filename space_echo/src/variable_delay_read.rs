@@ -1,5 +1,5 @@
 mod ramp;
-use super::{float_ext::FloatExt, DelayLine, Interpolation};
+use super::{shared::float_ext::FloatExt, DelayLine, Interpolation};
 use ramp::Ramp;
 use std::f32::consts::FRAC_PI_2;
 

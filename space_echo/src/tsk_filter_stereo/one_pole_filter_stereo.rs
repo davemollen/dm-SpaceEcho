@@ -1,5 +1,7 @@
-use super::{FilterType, FloatExt};
+use crate::FloatExt;
 use std::f32::consts::TAU;
+
+use super::FilterType;
 
 pub struct OnePoleFilterStereo {
   sample_period: f32,

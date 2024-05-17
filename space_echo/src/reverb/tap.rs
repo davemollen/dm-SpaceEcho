@@ -1,4 +1,4 @@
-use crate::{
+use crate::shared::{
   delay_line::{DelayLine, Interpolation},
   one_pole_filter::OnePoleFilter,
   random_oscillator::RandomOscillator,

@@ -1,4 +1,4 @@
-use crate::{delta::Delta, float_ext::FloatExt};
+use crate::shared::{delta::Delta, float_ext::FloatExt};
 use std::f32::consts::PI;
 
 pub struct RandomOscillator {
