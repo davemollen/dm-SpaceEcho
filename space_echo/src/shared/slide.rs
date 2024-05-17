@@ -16,11 +16,10 @@ impl Slide {
   }
 
   pub fn process(&mut self, input: f32) -> f32 {
-    let difference = input - self.z;
-
-    if difference.is_subnormal() {
+    if input.is_equal_to(self.z) {
       input
     } else {
+      let difference = input - self.z;
       self.z += difference
         * if input > self.z {
           self.slide_up

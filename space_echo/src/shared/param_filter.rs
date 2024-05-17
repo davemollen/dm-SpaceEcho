@@ -1,5 +1,7 @@
 use std::f32::consts::TAU;
 
+use crate::FloatExt;
+
 pub struct ParamFilter {
   b1: f32,
   z: f32,
@@ -14,7 +16,7 @@ impl ParamFilter {
   }
 
   pub fn process(&mut self, input: f32) -> f32 {
-    if (input - self.z).is_subnormal() {
+    if input.is_equal_to(self.z) {
       input
     } else {
       let a0 = 1.0 - self.b1;
