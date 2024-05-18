@@ -16,6 +16,10 @@ fn reverb_bench(c: &mut Criterion) {
   let duck_threshold = MIN_DUCK_THRESHOLD.dbtoa();
   let signal_stream = generate_stereo_signal_stream(44100);
 
+  let time_left = 250.;
+  let time_right = 250.;
+  space_echo.initialize_params(time_left, time_right);
+
   c.bench_function("space_echo", |b| {
     b.iter(|| {
       for signal in &signal_stream {
@@ -24,8 +28,8 @@ fn reverb_bench(c: &mut Criterion) {
           1.,
           0,
           0,
-          250.,
-          250.,
+          time_left,
+          time_right,
           false,
           0.8,
           0.777,
