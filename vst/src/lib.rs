@@ -17,6 +17,7 @@ struct DmSpaceEcho {
   params: Arc<SpaceEchoParameters>,
   space_echo: SpaceEcho,
   editor: Option<SpaceEchoEditor>,
+  is_active: bool,
 }
 
 impl Plugin for DmSpaceEcho {
@@ -31,6 +32,7 @@ impl Plugin for DmSpaceEcho {
         is_open: false,
         host: Some(host),
       }),
+      is_active: false,
     }
   }
 
@@ -74,6 +76,11 @@ impl Plugin for DmSpaceEcho {
     let time_mode = self.params.time_mode.get_value();
     let limiter = self.params.limiter.get_value();
     let hold = self.params.hold.get_value();
+
+    if !self.is_active {
+      self.space_echo.initialize_params(time_left, time_right);
+      self.is_active = true;
+    }
 
     let (input_channels, mut output_channels) = buffer.split();
     let zipped_input_channels = input_channels.get(0).iter().zip(input_channels.get(1));

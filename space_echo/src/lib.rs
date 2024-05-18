@@ -77,6 +77,10 @@ impl SpaceEcho {
     }
   }
 
+  pub fn initialize_params(&mut self, time_left: f32, time_right: f32) {
+    self.smooth_parameters.initialize(time_left, time_right)
+  }
+
   pub fn process(
     &mut self,
     input: (f32, f32),

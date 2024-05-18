@@ -56,6 +56,10 @@ impl Plugin for DmSpaceEcho {
     _context: &mut impl InitContext<Self>,
   ) -> bool {
     self.space_echo = SpaceEcho::new(buffer_config.sample_rate);
+    self.space_echo.initialize_params(
+      self.params.time_left.value(),
+      self.params.time_right.value(),
+    );
     true
   }
 

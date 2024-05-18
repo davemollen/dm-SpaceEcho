@@ -6,11 +6,12 @@ pub struct LogSmooth {
 }
 
 impl LogSmooth {
-  pub fn new(sample_rate: f32, initial_value: f32) -> Self {
-    Self {
-      sample_rate,
-      z: initial_value,
-    }
+  pub fn new(sample_rate: f32) -> Self {
+    Self { sample_rate, z: 0. }
+  }
+
+  pub fn initialize(&mut self, value: f32) {
+    self.z = value;
   }
 
   pub fn process(&mut self, input: f32, factor: f32) -> f32 {
@@ -18,7 +19,7 @@ impl LogSmooth {
       input
     } else {
       let difference = input - self.z;
-      let ad = 0.693147 * (factor * self.sample_rate).max(1.).recip();
+      let ad = 0.693147 * (factor * self.sample_rate).recip();
       self.z += difference * ad;
       self.z
     }

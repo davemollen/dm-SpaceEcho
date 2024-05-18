@@ -37,9 +37,14 @@ impl SmoothParameters {
       smooth_stereo: ParamFilter::new(sample_rate, 7.),
       smooth_output_level: ParamFilter::new(sample_rate, 7.),
       smooth_mix: ParamFilter::new(sample_rate, 7.),
-      smooth_time_left: LogSmooth::new(sample_rate, 250.0),
-      smooth_time_right: LogSmooth::new(sample_rate, 250.0),
+      smooth_time_left: LogSmooth::new(sample_rate),
+      smooth_time_right: LogSmooth::new(sample_rate),
     }
+  }
+
+  pub fn initialize(&mut self, time_left: f32, time_right: f32) {
+    self.smooth_time_left.initialize(time_left);
+    self.smooth_time_right.initialize(time_right);
   }
 
   pub fn get_parameters(
@@ -106,7 +111,6 @@ impl SmoothParameters {
     time_right: f32,
     time_link: bool,
   ) -> (f32, f32) {
-    // TODO: initial value on startup should not ramp up/down
     let time_left = self
       .smooth_time_left
       .process(time_left, TIME_SMOOTHING_FACTOR);

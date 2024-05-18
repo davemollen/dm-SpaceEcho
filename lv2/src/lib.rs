@@ -34,6 +34,7 @@ struct Ports {
 #[uri("https://github.com/davemollen/dm-SpaceEcho")]
 struct DmSpaceEcho {
   space_echo: SpaceEcho,
+  is_active: bool,
 }
 
 impl Plugin for DmSpaceEcho {
@@ -48,6 +49,7 @@ impl Plugin for DmSpaceEcho {
   fn new(_plugin_info: &PluginInfo, _features: &mut ()) -> Option<Self> {
     Some(Self {
       space_echo: SpaceEcho::new(_plugin_info.sample_rate() as f32),
+      is_active: false,
     })
   }
 
@@ -74,6 +76,11 @@ impl Plugin for DmSpaceEcho {
     let output_level = (*ports.output).dbtoa();
     let mix = *ports.mix * 0.01;
     let limiter = *ports.limiter == 1.;
+
+    if !self.is_active {
+      self.space_echo.initialize_params(time_left, time_right);
+      self.is_active = true;
+    }
 
     let input_channels = ports.input_left.iter().zip(ports.input_right.iter());
     let output_channels = ports
