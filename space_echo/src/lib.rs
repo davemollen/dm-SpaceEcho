@@ -118,6 +118,7 @@ impl SpaceEcho {
       stereo,
       output_level,
       mix,
+      bypass_gain,
     ) = self.smooth_parameters.get_parameters(
       input_level,
       feedback,
@@ -134,7 +135,7 @@ impl SpaceEcho {
       hold,
     );
 
-    let delay_input = self.get_delay_input(input, channel_mode, hold, input_level);
+    let delay_input = self.get_delay_input(input, channel_mode, bypass_gain, input_level);
     let delay_output =
       self.read_from_delay_lines(time_left, time_right, time_link, time_mode, wow_and_flutter);
 
@@ -172,18 +173,18 @@ impl SpaceEcho {
     &self,
     input: (f32, f32),
     channel_mode: i32,
-    hold: bool,
+    bypass_gain: f32,
     gain: f32,
   ) -> (f32, f32) {
-    self.apply_gain(
-      match (hold, channel_mode) {
-        // TODO: remove clicks when changing hold
-        (true, _) => (0., 0.),
-        (false, 1) => ((input.0 + input.1) * 0.5, 0.),
-        _ => input,
-      },
-      gain,
-    )
+    let input = self.apply_gain(input, gain);
+    let hold_is_active = bypass_gain > 0. && bypass_gain < 1.;
+
+    match (hold_is_active, channel_mode) {
+      (true, 0) => (input.0 * bypass_gain, input.1 * bypass_gain),
+      (true, 1) => ((input.0 + input.1) * 0.5 * bypass_gain, 0.),
+      (false, 1) => ((input.0 + input.1) * 0.5, 0.),
+      _ => input,
+    }
   }
 
   fn read_from_delay_lines(

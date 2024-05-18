@@ -18,6 +18,7 @@ pub struct SmoothParameters {
   smooth_stereo: ParamFilter,
   smooth_output_level: ParamFilter,
   smooth_mix: ParamFilter,
+  smooth_hold: ParamFilter,
   smooth_time_left: LogSmooth,
   smooth_time_right: LogSmooth,
 }
@@ -37,6 +38,7 @@ impl SmoothParameters {
       smooth_stereo: ParamFilter::new(sample_rate, 7.),
       smooth_output_level: ParamFilter::new(sample_rate, 7.),
       smooth_mix: ParamFilter::new(sample_rate, 7.),
+      smooth_hold: ParamFilter::new(sample_rate, 7.),
       smooth_time_left: LogSmooth::new(sample_rate),
       smooth_time_right: LogSmooth::new(sample_rate),
     }
@@ -62,7 +64,21 @@ impl SmoothParameters {
     output_level: f32,
     mix: f32,
     hold: bool,
-  ) -> (f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32) {
+  ) -> (
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+  ) {
     let input_level = self.smooth_input_level.process(input_level);
     let feedback = self
       .smooth_feedback
@@ -88,6 +104,7 @@ impl SmoothParameters {
     let stereo = self.smooth_stereo.process(stereo);
     let output_level = self.smooth_output_level.process(output_level);
     let mix = self.smooth_mix.process(mix);
+    let bypass_gain = self.smooth_hold.process(if hold { 0. } else { 1. });
 
     (
       input_level,
@@ -102,6 +119,7 @@ impl SmoothParameters {
       stereo,
       output_level,
       mix,
+      bypass_gain,
     )
   }
 
