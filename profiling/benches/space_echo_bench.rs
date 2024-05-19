@@ -13,36 +13,65 @@ fn generate_stereo_signal_stream(length: usize) -> Vec<(f32, f32)> {
 
 fn reverb_bench(c: &mut Criterion) {
   let mut space_echo = SpaceEcho::new(44100.);
-  let duck_threshold = MIN_DUCK_THRESHOLD.dbtoa();
   let signal_stream = generate_stereo_signal_stream(44100);
 
+  let duck_threshold = MIN_DUCK_THRESHOLD.dbtoa();
+  let input_level = 1.;
+  let feedback = 0.8;
+  let wow_and_flutter = 0.777;
+  let highpass_freq = 40.;
+  let highpass_res = 0.1;
+  let lowpass_freq = 6000.;
+  let lowpass_res = 0.1;
+  let reverb = 0.5;
+  let decay = 0.8;
+  let stereo = 1.;
+  let output_level = 1.;
+  let mix = 0.5;
+  let hold = false;
   let time_left = 250.;
   let time_right = 250.;
-  space_echo.initialize_params(time_left, time_right);
+  space_echo.initialize_params(
+    input_level,
+    feedback,
+    wow_and_flutter,
+    highpass_freq,
+    highpass_res,
+    lowpass_freq,
+    lowpass_res,
+    reverb,
+    decay,
+    stereo,
+    output_level,
+    mix,
+    hold,
+    time_left,
+    time_right,
+  );
 
   c.bench_function("space_echo", |b| {
     b.iter(|| {
       for signal in &signal_stream {
         space_echo.process(
           *signal,
-          1.,
+          input_level,
           0,
           0,
           time_left,
           time_right,
           false,
-          0.8,
-          0.777,
-          40.,
-          0.1,
-          6000.,
-          0.1,
-          0.5,
-          0.8,
-          1.,
+          feedback,
+          wow_and_flutter,
+          highpass_freq,
+          highpass_res,
+          lowpass_freq,
+          lowpass_res,
+          reverb,
+          decay,
+          stereo,
           duck_threshold,
-          1.,
-          0.5,
+          output_level,
+          mix,
           false,
           false,
         );

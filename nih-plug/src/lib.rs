@@ -57,6 +57,19 @@ impl Plugin for DmSpaceEcho {
   ) -> bool {
     self.space_echo = SpaceEcho::new(buffer_config.sample_rate);
     self.space_echo.initialize_params(
+      self.params.input.value().dbtoa(),
+      self.params.feedback.value(),
+      self.params.wow_and_flutter.value(),
+      self.params.highpass_freq.value(),
+      self.params.highpass_res.value(),
+      self.params.lowpass_freq.value(),
+      self.params.lowpass_res.value(),
+      self.params.reverb.value(),
+      self.params.decay.value(),
+      self.params.stereo.value(),
+      self.params.output.value().dbtoa(),
+      self.params.mix.value(),
+      self.params.hold.value(),
       self.params.time_left.value(),
       self.params.time_right.value(),
     );

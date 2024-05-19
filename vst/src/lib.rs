@@ -78,7 +78,23 @@ impl Plugin for DmSpaceEcho {
     let hold = self.params.hold.get_value();
 
     if !self.is_active {
-      self.space_echo.initialize_params(time_left, time_right);
+      self.space_echo.initialize_params(
+        input_level,
+        feedback,
+        wow_and_flutter,
+        highpass_freq,
+        highpass_res,
+        lowpass_freq,
+        lowpass_res,
+        reverb,
+        decay,
+        stereo,
+        output_level,
+        mix,
+        hold,
+        time_left,
+        time_right,
+      );
       self.is_active = true;
     }
 

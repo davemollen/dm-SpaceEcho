@@ -44,7 +44,37 @@ impl SmoothParameters {
     }
   }
 
-  pub fn initialize(&mut self, time_left: f32, time_right: f32) {
+  pub fn initialize(
+    &mut self,
+    input_level: f32,
+    feedback: f32,
+    wow_and_flutter: f32,
+    highpass_freq: f32,
+    highpass_res: f32,
+    lowpass_freq: f32,
+    lowpass_res: f32,
+    reverb: f32,
+    decay: f32,
+    stereo: f32,
+    output_level: f32,
+    mix: f32,
+    hold: bool,
+    time_left: f32,
+    time_right: f32,
+  ) {
+    self.smooth_input_level.initialize(input_level);
+    self.smooth_feedback.initialize(feedback);
+    self.smooth_wow_and_flutter.initialize(wow_and_flutter);
+    self.smooth_highpass_freq.initialize(highpass_freq);
+    self.smooth_highpass_res.initialize(highpass_res);
+    self.smooth_lowpass_freq.initialize(lowpass_freq);
+    self.smooth_lowpass_res.initialize(lowpass_res);
+    self.smooth_reverb.initialize(reverb);
+    self.smooth_decay.initialize(decay);
+    self.smooth_stereo.initialize(stereo);
+    self.smooth_output_level.initialize(output_level);
+    self.smooth_mix.initialize(mix);
+    self.smooth_hold.initialize(if hold { 1. } else { 0. });
     self.smooth_time_left.initialize(time_left);
     self.smooth_time_right.initialize(time_right);
   }

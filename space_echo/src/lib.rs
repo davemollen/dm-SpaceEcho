@@ -78,8 +78,41 @@ impl SpaceEcho {
     }
   }
 
-  pub fn initialize_params(&mut self, time_left: f32, time_right: f32) {
-    self.smooth_parameters.initialize(time_left, time_right)
+  pub fn initialize_params(
+    &mut self,
+    input_level: f32,
+    feedback: f32,
+    wow_and_flutter: f32,
+    highpass_freq: f32,
+    highpass_res: f32,
+    lowpass_freq: f32,
+    lowpass_res: f32,
+    reverb: f32,
+    decay: f32,
+    stereo: f32,
+    output_level: f32,
+    mix: f32,
+    hold: bool,
+    time_left: f32,
+    time_right: f32,
+  ) {
+    self.smooth_parameters.initialize(
+      input_level,
+      feedback,
+      wow_and_flutter,
+      highpass_freq,
+      highpass_res,
+      lowpass_freq,
+      lowpass_res,
+      reverb,
+      decay,
+      stereo,
+      output_level,
+      mix,
+      hold,
+      time_left,
+      time_right,
+    )
   }
 
   pub fn process(
