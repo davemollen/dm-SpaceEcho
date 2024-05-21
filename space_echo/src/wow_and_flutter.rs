@@ -21,12 +21,9 @@ impl WowAndFlutter {
     }
   }
 
-  pub fn process(&mut self, wow_and_flutter: f32) -> f32 {
+  pub fn process(&mut self, wow_gain: f32, flutter_gain: f32) -> f32 {
     let wow_oscillator = self.get_wow_oscillator();
     let flutter_oscillator = self.get_flutter_oscillator();
-    let flutter_gain = wow_and_flutter * wow_and_flutter * wow_and_flutter;
-    let wow_gain = flutter_gain * flutter_gain;
-
     wow_oscillator * wow_gain + flutter_oscillator * flutter_gain
   }
 

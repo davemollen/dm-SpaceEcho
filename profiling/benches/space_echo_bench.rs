@@ -1,83 +1,25 @@
+#[path = "../src/utils.rs"]
+mod utils;
 use criterion::{criterion_group, criterion_main, Criterion};
-use space_echo::{FloatExt, SpaceEcho, MIN_DUCK_THRESHOLD};
+use space_echo::SpaceEcho;
+use utils::{generate_stereo_signal_stream, get_params};
 
-fn generate_signal() -> f32 {
-  fastrand::f32() * 2. - 1.
-}
-
-fn generate_stereo_signal_stream(length: usize) -> Vec<(f32, f32)> {
-  (0..length)
-    .map(|_| (generate_signal(), generate_signal()))
-    .collect()
-}
-
-fn reverb_bench(c: &mut Criterion) {
+fn space_echo_bench(c: &mut Criterion) {
   let mut space_echo = SpaceEcho::new(44100.);
   let signal_stream = generate_stereo_signal_stream(44100);
 
-  let duck_threshold = MIN_DUCK_THRESHOLD.dbtoa();
-  let input_level = 1.;
-  let feedback = 0.8;
-  let wow_and_flutter = 0.777;
-  let highpass_freq = 40.;
-  let highpass_res = 0.1;
-  let lowpass_freq = 6000.;
-  let lowpass_res = 0.1;
-  let reverb = 0.5;
-  let decay = 0.8;
-  let stereo = 1.;
-  let output_level = 1.;
-  let mix = 0.5;
-  let hold = false;
-  let time_left = 250.;
-  let time_right = 250.;
-  space_echo.initialize_params(
-    input_level,
-    feedback,
-    wow_and_flutter,
-    highpass_freq,
-    highpass_res,
-    lowpass_freq,
-    lowpass_res,
-    reverb,
-    decay,
-    stereo,
-    output_level,
-    mix,
-    time_left,
-    time_right,
-  );
+  let params = get_params();
+  let mapped_params = space_echo.map_params(&params);
+  space_echo.initialize_params_to_smooth(&mapped_params);
 
   c.bench_function("space_echo", |b| {
     b.iter(|| {
       for signal in &signal_stream {
-        space_echo.process(
-          *signal,
-          input_level,
-          0,
-          0,
-          time_left,
-          time_right,
-          false,
-          feedback,
-          wow_and_flutter,
-          highpass_freq,
-          highpass_res,
-          lowpass_freq,
-          lowpass_res,
-          reverb,
-          decay,
-          stereo,
-          duck_threshold,
-          output_level,
-          mix,
-          false,
-          false,
-        );
+        space_echo.process(*signal, &mapped_params);
       }
     })
   });
 }
 
-criterion_group!(benches, reverb_bench);
+criterion_group!(benches, space_echo_bench);
 criterion_main!(benches);

@@ -19,21 +19,22 @@ mod shared {
   pub mod slide;
 }
 
+pub use reverb::Reverb;
 use {
   dc_block_stereo::DcBlockStereo,
-  duck::Duck,
+  duck::{Duck, MIN_DUCK_THRESHOLD},
   limiter::Limiter,
   saturation::Saturation,
   shared::{
     delay_line::{DelayLine, Interpolation},
+    float_ext::FloatExt,
     mix::Mix,
   },
-  smooth_parameters::SmoothParameters,
+  smooth_parameters::{SmoothParameters, SmoothedParams},
   tsk_filter_stereo::{FilterType, TSKFilterStereo},
   variable_delay_read::VariableDelayRead,
   wow_and_flutter::{WowAndFlutter, MAX_WOW_AND_FLUTTER_TIME_IN_SECS},
 };
-pub use {duck::MIN_DUCK_THRESHOLD, reverb::Reverb, shared::float_ext::FloatExt};
 
 pub struct InputParams {
   pub input: f32,
@@ -120,27 +121,59 @@ impl SpaceEcho {
     }
   }
 
-  pub fn initialize_params(
-    &mut self,
-    input_level: f32,
-    feedback: f32,
-    wow_and_flutter: f32,
-    highpass_freq: f32,
-    highpass_res: f32,
-    lowpass_freq: f32,
-    lowpass_res: f32,
-    reverb: f32,
-    decay: f32,
-    stereo: f32,
-    output_level: f32,
-    mix: f32,
-    time_left: f32,
-    time_right: f32,
-  ) {
-    self.smooth_parameters.initialize(
+  pub fn map_params(&self, params: &InputParams) -> MappedParams {
+    MappedParams {
+      input_level: if params.hold {
+        0.
+      } else {
+        params.input.dbtoa()
+      },
+      channel_mode: params.channel_mode,
+      time_mode: params.time_mode,
+      time_left: params.time_left,
+      time_right: if params.time_link {
+        params.time_left
+      } else {
+        params.time_right
+      },
+      feedback: if params.hold { 1. } else { params.feedback },
+      flutter_gain: if params.hold {
+        0.
+      } else {
+        params.wow_and_flutter * params.wow_and_flutter * params.wow_and_flutter
+      },
+      highpass_freq: if params.hold {
+        20.
+      } else {
+        params.highpass_freq
+      },
+      highpass_res: if params.hold { 0. } else { params.highpass_res },
+      lowpass_freq: if params.hold {
+        20000.
+      } else {
+        params.lowpass_freq
+      },
+      lowpass_res: if params.hold { 0. } else { params.lowpass_res },
+      reverb: params.reverb,
+      decay: params.decay,
+      stereo: params.stereo,
+      duck_threshold: (params.duck * MIN_DUCK_THRESHOLD).dbtoa(),
+      output_level: params.output.dbtoa(),
+      mix: params.mix,
+      limiter: params.limiter,
+    }
+  }
+
+  pub fn initialize_params_to_smooth(&mut self, mapped_params: &MappedParams) {
+    self.smooth_parameters.initialize(mapped_params);
+  }
+
+  pub fn process(&mut self, input: (f32, f32), params: &MappedParams) -> (f32, f32) {
+    let SmoothedParams {
       input_level,
       feedback,
-      wow_and_flutter,
+      wow_gain,
+      flutter_gain,
       highpass_freq,
       highpass_res,
       lowpass_freq,
@@ -152,65 +185,16 @@ impl SpaceEcho {
       mix,
       time_left,
       time_right,
-    )
-  }
+    } = self.smooth_parameters.get_params(params);
 
-  pub fn process(
-    &mut self,
-    input: (f32, f32),
-    input_level: f32,
-    channel_mode: i32,
-    time_mode: i32,
-    time_left: f32,
-    time_right: f32,
-    time_link: bool,
-    feedback: f32,
-    wow_and_flutter: f32,
-    highpass_freq: f32,
-    highpass_res: f32,
-    lowpass_freq: f32,
-    lowpass_res: f32,
-    reverb: f32,
-    decay: f32,
-    stereo: f32,
-    duck_threshold: f32,
-    output_level: f32,
-    mix: f32,
-    limiter: bool,
-    hold: bool,
-  ) -> (f32, f32) {
-    let (
-      input_level,
-      feedback,
-      wow_and_flutter,
-      highpass_freq,
-      highpass_res,
-      lowpass_freq,
-      lowpass_res,
-      reverb,
-      decay,
-      stereo,
-      output_level,
-      mix,
-    ) = self.smooth_parameters.get_parameters(
-      input_level,
-      feedback,
-      wow_and_flutter,
-      highpass_freq,
-      highpass_res,
-      lowpass_freq,
-      lowpass_res,
-      reverb,
-      decay,
-      stereo,
-      output_level,
-      mix,
-      hold,
+    let delay_input = self.get_delay_input(input, params.channel_mode, input_level);
+    let delay_output = self.read_from_delay_lines(
+      time_left,
+      time_right,
+      params.time_mode,
+      wow_gain,
+      flutter_gain,
     );
-
-    let delay_input = self.get_delay_input(input, channel_mode, input_level);
-    let delay_output =
-      self.read_from_delay_lines(time_left, time_right, time_link, time_mode, wow_and_flutter);
 
     let (saturation_output_left, saturation_output_right, saturation_gain_compensation) =
       self.saturation.process(delay_output, 0.15);
@@ -222,7 +206,7 @@ impl SpaceEcho {
       lowpass_freq,
       lowpass_res,
     );
-    let feedback_matrix_output = self.apply_channel_mode(filter_output, channel_mode);
+    let feedback_matrix_output = self.apply_channel_mode(filter_output, params.channel_mode);
     let db_block_output = self.dc_block.process(feedback_matrix_output);
     self.write_to_delay_lines(delay_input, db_block_output, feedback);
 
@@ -232,10 +216,12 @@ impl SpaceEcho {
       reverb,
       decay,
     );
-    let ducking_output = self.duck.process(reverb_output, input, duck_threshold);
+    let ducking_output = self
+      .duck
+      .process(reverb_output, input, params.duck_threshold);
     let space_echo_output = self.apply_gain(ducking_output, output_level);
     let mix_output = Mix::process(input, space_echo_output, mix);
-    self.limiter.process(mix_output, limiter)
+    self.limiter.process(mix_output, params.limiter)
   }
 
   fn apply_gain(&self, input: (f32, f32), gain: f32) -> (f32, f32) {
@@ -255,47 +241,40 @@ impl SpaceEcho {
     &mut self,
     time_left: f32,
     time_right: f32,
-    time_link: bool,
     time_mode: i32,
-    wow_and_flutter_param: f32,
+    wow_gain: f32,
+    flutter_gain: f32,
   ) -> (f32, f32) {
-    let wow_and_flutter_time = if wow_and_flutter_param > 0. {
-      self.wow_and_flutter.process(wow_and_flutter_param)
+    let wow_and_flutter_time = if wow_gain > 0. {
+      self.wow_and_flutter.process(wow_gain, flutter_gain)
     } else {
       0.
     };
 
-    match time_mode {
-      0 => {
-        let (time_left, time_right) = self
-          .smooth_parameters
-          .get_time_parameters(time_left, time_right, time_link);
+    if time_mode == 0 {
+      let delay_out_left = self
+        .delay_line_left
+        .read(time_left + wow_and_flutter_time, Interpolation::Linear);
+      let delay_out_right = self
+        .delay_line_right
+        .read(time_right + wow_and_flutter_time, Interpolation::Linear);
 
-        let delay_out_left = self
-          .delay_line_left
-          .read(time_left + wow_and_flutter_time, Interpolation::Linear);
-        let delay_out_right = self
-          .delay_line_right
-          .read(time_right + wow_and_flutter_time, Interpolation::Linear);
+      (delay_out_left, delay_out_right)
+    } else {
+      let delay_out_left = self.variable_delay_read_left.read(
+        &mut self.delay_line_left,
+        time_left,
+        wow_and_flutter_time,
+        Interpolation::Linear,
+      );
+      let delay_out_right = self.variable_delay_read_right.read(
+        &mut self.delay_line_right,
+        time_right,
+        wow_and_flutter_time,
+        Interpolation::Linear,
+      );
 
-        (delay_out_left, delay_out_right)
-      }
-      _ => {
-        let delay_out_left = self.variable_delay_read_left.read(
-          &mut self.delay_line_left,
-          time_left,
-          wow_and_flutter_time,
-          Interpolation::Linear,
-        );
-        let delay_out_right = self.variable_delay_read_right.read(
-          &mut self.delay_line_right,
-          time_right,
-          wow_and_flutter_time,
-          Interpolation::Linear,
-        );
-
-        (delay_out_left, delay_out_right)
-      }
+      (delay_out_left, delay_out_right)
     }
   }
 
