@@ -12,7 +12,6 @@ pub struct WowAndFlutter {
   wow_oscillator: RandomOscillator,
   flutter_phasor: Phasor,
   flutter_oscillator: RandomOscillator,
-  smooth_param: OnePoleFilter,
 }
 
 impl WowAndFlutter {
@@ -22,16 +21,13 @@ impl WowAndFlutter {
       wow_oscillator: RandomOscillator::new(),
       flutter_phasor: Phasor::new(sample_rate, 24.37891),
       flutter_oscillator: RandomOscillator::new(),
-      smooth_param: OnePoleFilter::new(sample_rate),
     }
   }
 
   pub fn process(&mut self, wow_and_flutter: f32) -> f32 {
     let wow_oscillator = self.get_wow_oscillator();
     let flutter_oscillator = self.get_flutter_oscillator();
-
-    let smoothed_param = self.smooth_param.process(wow_and_flutter, 12.);
-    let flutter_gain = smoothed_param * smoothed_param * smoothed_param;
+    let flutter_gain = wow_and_flutter * wow_and_flutter * wow_and_flutter;
     let wow_gain = flutter_gain * flutter_gain;
 
     wow_oscillator * wow_gain + flutter_oscillator * flutter_gain
