@@ -33,9 +33,51 @@ use {
   variable_delay_read::VariableDelayRead,
   wow_and_flutter::{WowAndFlutter, MAX_WOW_AND_FLUTTER_TIME_IN_SECS},
 };
-pub use {reverb::Reverb, shared::float_ext::FloatExt};
+pub use {duck::MIN_DUCK_THRESHOLD, reverb::Reverb, shared::float_ext::FloatExt};
 
-pub const MIN_DUCK_THRESHOLD: f32 = -40.;
+pub struct InputParams {
+  pub input: f32,
+  pub channel_mode: i32,
+  pub time_mode: i32,
+  pub time_link: bool,
+  pub time_left: f32,
+  pub time_right: f32,
+  pub feedback: f32,
+  pub wow_and_flutter: f32,
+  pub highpass_freq: f32,
+  pub highpass_res: f32,
+  pub lowpass_freq: f32,
+  pub lowpass_res: f32,
+  pub reverb: f32,
+  pub decay: f32,
+  pub stereo: f32,
+  pub duck: f32,
+  pub output: f32,
+  pub mix: f32,
+  pub limiter: bool,
+  pub hold: bool,
+}
+
+pub struct MappedParams {
+  pub input_level: f32,
+  pub channel_mode: i32,
+  pub time_mode: i32,
+  pub time_left: f32,
+  pub time_right: f32,
+  pub feedback: f32,
+  pub flutter_gain: f32,
+  pub highpass_freq: f32,
+  pub highpass_res: f32,
+  pub lowpass_freq: f32,
+  pub lowpass_res: f32,
+  pub reverb: f32,
+  pub decay: f32,
+  pub stereo: f32,
+  pub duck_threshold: f32,
+  pub output_level: f32,
+  pub mix: f32,
+  pub limiter: bool,
+}
 
 pub struct SpaceEcho {
   delay_line_left: DelayLine,
