@@ -1,7 +1,4 @@
-use crate::{
-  shared::{one_pole_filter::OnePoleFilter, phasor::Phasor, random_oscillator::RandomOscillator},
-  FloatExt,
-};
+use crate::shared::{phasor::Phasor, random_oscillator::RandomOscillator};
 
 const MAX_FLUTTER_TIME_IN_SECS: f32 = 2.;
 const MAX_WOW_TIME_IN_SECS: f32 = 15.;

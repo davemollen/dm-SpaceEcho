@@ -36,7 +36,6 @@ fn main() {
     stereo,
     output_level,
     mix,
-    hold,
     time_left,
     time_right,
   );

@@ -92,7 +92,6 @@ impl SpaceEcho {
     stereo: f32,
     output_level: f32,
     mix: f32,
-    hold: bool,
     time_left: f32,
     time_right: f32,
   ) {
@@ -109,7 +108,6 @@ impl SpaceEcho {
       stereo,
       output_level,
       mix,
-      hold,
       time_left,
       time_right,
     )
@@ -152,7 +150,6 @@ impl SpaceEcho {
       stereo,
       output_level,
       mix,
-      bypass_gain,
     ) = self.smooth_parameters.get_parameters(
       input_level,
       feedback,
@@ -169,7 +166,7 @@ impl SpaceEcho {
       hold,
     );
 
-    let delay_input = self.get_delay_input(input, channel_mode, bypass_gain, input_level);
+    let delay_input = self.get_delay_input(input, channel_mode, input_level);
     let delay_output =
       self.read_from_delay_lines(time_left, time_right, time_link, time_mode, wow_and_flutter);
 
@@ -203,20 +200,11 @@ impl SpaceEcho {
     (input.0 * gain, input.1 * gain)
   }
 
-  fn get_delay_input(
-    &self,
-    input: (f32, f32),
-    channel_mode: i32,
-    bypass_gain: f32,
-    gain: f32,
-  ) -> (f32, f32) {
+  fn get_delay_input(&self, input: (f32, f32), channel_mode: i32, gain: f32) -> (f32, f32) {
     let input = self.apply_gain(input, gain);
-    let hold_is_active = bypass_gain > 0. && bypass_gain < 1.;
 
-    match (hold_is_active, channel_mode) {
-      (true, 0) => (input.0 * bypass_gain, input.1 * bypass_gain),
-      (true, 1) => ((input.0 + input.1) * 0.5 * bypass_gain, 0.),
-      (false, 1) => ((input.0 + input.1) * 0.5, 0.),
+    match channel_mode {
+      1 => ((input.0 + input.1) * 0.5, 0.),
       _ => input,
     }
   }

@@ -44,7 +44,6 @@ fn reverb_bench(c: &mut Criterion) {
     stereo,
     output_level,
     mix,
-    hold,
     time_left,
     time_right,
   );

@@ -69,7 +69,6 @@ impl Plugin for DmSpaceEcho {
       self.params.stereo.value(),
       self.params.output.value().dbtoa(),
       self.params.mix.value(),
-      self.params.hold.value(),
       self.params.time_left.value(),
       self.params.time_right.value(),
     );
