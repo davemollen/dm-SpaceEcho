@@ -20,7 +20,6 @@ fn main() {
   let stereo = 1.;
   let output_level = 1.;
   let mix = 0.5;
-  let hold = false;
   let time_left = 250.;
   let time_right = 250.;
   space_echo.initialize_params(
