@@ -1,5 +1,5 @@
 use nih_plug::prelude::*;
-use space_echo::{InputParams, MappedParams, SpaceEcho};
+use space_echo::{FloatExt, MappedParams, SpaceEcho, MIN_DUCK_THRESHOLD};
 mod space_echo_parameters;
 use space_echo_parameters::SpaceEchoParameters;
 use std::sync::Arc;
@@ -12,30 +12,61 @@ struct DmSpaceEcho {
 
 impl DmSpaceEcho {
   fn get_params(&self) -> MappedParams {
-    let params = InputParams {
-      input: self.params.input.value(),
+    let hold = self.params.hold.value();
+    let wow_and_flutter = self.params.wow_and_flutter.value();
+
+    MappedParams {
+      input_level: if hold {
+        0.
+      } else {
+        self.params.input.value().dbtoa()
+      },
       channel_mode: self.params.channel_mode.value() as i32,
       time_mode: self.params.time_mode.value() as i32,
-      time_link: self.params.time_link.value(),
       time_left: self.params.time_left.value(),
-      time_right: self.params.time_right.value(),
-      feedback: self.params.feedback.value(),
-      wow_and_flutter: self.params.wow_and_flutter.value(),
-      highpass_freq: self.params.highpass_freq.value(),
-      highpass_res: self.params.highpass_res.value(),
-      lowpass_freq: self.params.lowpass_freq.value(),
-      lowpass_res: self.params.lowpass_res.value(),
+      time_right: if self.params.time_link.value() {
+        self.params.time_left.value()
+      } else {
+        self.params.time_right.value()
+      },
+      feedback: if hold {
+        1.
+      } else {
+        self.params.feedback.value()
+      },
+      flutter_gain: if hold {
+        0.
+      } else {
+        wow_and_flutter * wow_and_flutter * wow_and_flutter
+      },
+      highpass_freq: if hold {
+        20.
+      } else {
+        self.params.highpass_freq.value()
+      },
+      highpass_res: if hold {
+        0.
+      } else {
+        self.params.highpass_res.value()
+      },
+      lowpass_freq: if hold {
+        20000.
+      } else {
+        self.params.lowpass_freq.value()
+      },
+      lowpass_res: if hold {
+        0.
+      } else {
+        self.params.lowpass_res.value()
+      },
       reverb: self.params.reverb.value(),
       decay: self.params.decay.value(),
       stereo: self.params.stereo.value(),
-      duck: self.params.duck.value(),
-      output: self.params.output.value(),
+      duck_threshold: (self.params.duck.value() * MIN_DUCK_THRESHOLD).dbtoa(),
+      output_level: self.params.output.value().dbtoa(),
       mix: self.params.mix.value(),
       limiter: self.params.limiter.value(),
-      hold: self.params.hold.value(),
-    };
-
-    self.space_echo.map_params(&params)
+    }
   }
 }
 

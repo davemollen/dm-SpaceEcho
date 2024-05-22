@@ -22,12 +22,11 @@ mod shared {
 pub use reverb::Reverb;
 use {
   dc_block_stereo::DcBlockStereo,
-  duck::{Duck, MIN_DUCK_THRESHOLD},
+  duck::Duck,
   limiter::Limiter,
   saturation::Saturation,
   shared::{
     delay_line::{DelayLine, Interpolation},
-    float_ext::FloatExt,
     mix::Mix,
   },
   smooth_parameters::{SmoothParameters, SmoothedParams},
@@ -35,29 +34,7 @@ use {
   variable_delay_read::VariableDelayRead,
   wow_and_flutter::{WowAndFlutter, MAX_WOW_AND_FLUTTER_TIME_IN_SECS},
 };
-
-pub struct InputParams {
-  pub input: f32,
-  pub channel_mode: i32,
-  pub time_mode: i32,
-  pub time_link: bool,
-  pub time_left: f32,
-  pub time_right: f32,
-  pub feedback: f32,
-  pub wow_and_flutter: f32,
-  pub highpass_freq: f32,
-  pub highpass_res: f32,
-  pub lowpass_freq: f32,
-  pub lowpass_res: f32,
-  pub reverb: f32,
-  pub decay: f32,
-  pub stereo: f32,
-  pub duck: f32,
-  pub output: f32,
-  pub mix: f32,
-  pub limiter: bool,
-  pub hold: bool,
-}
+pub use {duck::MIN_DUCK_THRESHOLD, shared::float_ext::FloatExt};
 
 pub struct MappedParams {
   pub input_level: f32,
@@ -118,49 +95,6 @@ impl SpaceEcho {
       dc_block: DcBlockStereo::new(sample_rate),
       limiter: Limiter::new(sample_rate, 2., 10., 40., 0.966051),
       smooth_parameters: SmoothParameters::new(sample_rate),
-    }
-  }
-
-  pub fn map_params(&self, params: &InputParams) -> MappedParams {
-    MappedParams {
-      input_level: if params.hold {
-        0.
-      } else {
-        params.input.dbtoa()
-      },
-      channel_mode: params.channel_mode,
-      time_mode: params.time_mode,
-      time_left: params.time_left,
-      time_right: if params.time_link {
-        params.time_left
-      } else {
-        params.time_right
-      },
-      feedback: if params.hold { 1. } else { params.feedback },
-      flutter_gain: if params.hold {
-        0.
-      } else {
-        params.wow_and_flutter * params.wow_and_flutter * params.wow_and_flutter
-      },
-      highpass_freq: if params.hold {
-        20.
-      } else {
-        params.highpass_freq
-      },
-      highpass_res: if params.hold { 0. } else { params.highpass_res },
-      lowpass_freq: if params.hold {
-        20000.
-      } else {
-        params.lowpass_freq
-      },
-      lowpass_res: if params.hold { 0. } else { params.lowpass_res },
-      reverb: params.reverb,
-      decay: params.decay,
-      stereo: params.stereo,
-      duck_threshold: (params.duck * MIN_DUCK_THRESHOLD).dbtoa(),
-      output_level: params.output.dbtoa(),
-      mix: params.mix,
-      limiter: params.limiter,
     }
   }
 

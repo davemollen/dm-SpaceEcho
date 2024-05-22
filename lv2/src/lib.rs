@@ -1,7 +1,7 @@
 extern crate lv2;
 extern crate space_echo;
 use lv2::prelude::*;
-use space_echo::{InputParams, MappedParams, SpaceEcho};
+use space_echo::{FloatExt, MappedParams, SpaceEcho, MIN_DUCK_THRESHOLD};
 
 #[derive(PortCollection)]
 struct Ports {
@@ -39,31 +39,38 @@ struct DmSpaceEcho {
 
 impl DmSpaceEcho {
   pub fn get_params(&self, ports: &mut Ports) -> MappedParams {
-    let params = InputParams {
-      input: *ports.input,
+    let hold = *ports.hold == 1.;
+    let wow_and_flutter = *ports.wow_and_flutter * 0.01;
+
+    MappedParams {
+      input_level: if hold { 0. } else { (*ports.input).dbtoa() },
       // TODO: limit time_mode and channel_mode to range from 0 to 1
       channel_mode: *ports.channel_mode as i32 - 1,
       time_mode: *ports.time_mode as i32 - 1,
-      time_link: *ports.time_link == 1.,
       time_left: *ports.time_left,
-      time_right: *ports.time_right,
-      feedback: *ports.feedback * 0.01,
-      wow_and_flutter: *ports.wow_and_flutter * 0.01,
-      highpass_freq: *ports.highpass_freq,
-      highpass_res: *ports.highpass_res * 0.01,
-      lowpass_freq: *ports.lowpass_freq,
-      lowpass_res: *ports.lowpass_res * 0.01,
+      time_right: if *ports.time_link == 1. {
+        *ports.time_left
+      } else {
+        *ports.time_right
+      },
+      feedback: if hold { 1. } else { *ports.feedback * 0.01 },
+      flutter_gain: if hold {
+        0.
+      } else {
+        wow_and_flutter * wow_and_flutter * wow_and_flutter
+      },
+      highpass_freq: if hold { 20. } else { *ports.highpass_freq },
+      highpass_res: if hold { 0. } else { *ports.highpass_res * 0.01 },
+      lowpass_freq: if hold { 20000. } else { *ports.lowpass_freq },
+      lowpass_res: if hold { 0. } else { *ports.lowpass_res * 0.01 },
       reverb: *ports.reverb * 0.01,
       decay: *ports.decay * 0.01,
       stereo: *ports.stereo * 0.01,
-      duck: *ports.duck * 0.01,
-      output: *ports.output,
+      duck_threshold: (*ports.duck * 0.01 * MIN_DUCK_THRESHOLD).dbtoa(),
+      output_level: (*ports.output).dbtoa(),
       mix: *ports.mix * 0.01,
       limiter: *ports.limiter == 1.,
-      hold: *ports.hold == 1.,
-    };
-
-    self.space_echo.map_params(&params)
+    }
   }
 }
 

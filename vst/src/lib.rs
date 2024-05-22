@@ -3,7 +3,7 @@ extern crate vst;
 mod editor;
 use editor::SpaceEchoEditor;
 mod space_echo_parameters;
-use space_echo::{InputParams, MappedParams, SpaceEcho};
+use space_echo::{FloatExt, MappedParams, SpaceEcho, MIN_DUCK_THRESHOLD};
 use space_echo_parameters::{Params, SpaceEchoParameters};
 use std::sync::Arc;
 use vst::{
@@ -22,30 +22,61 @@ struct DmSpaceEcho {
 
 impl DmSpaceEcho {
   fn get_params(&self) -> MappedParams {
-    let params = InputParams {
-      input: self.params.input.get_value(),
+    let hold = self.params.hold.get_value();
+    let wow_and_flutter = self.params.wow_and_flutter.get_value();
+
+    MappedParams {
+      input_level: if hold {
+        0.
+      } else {
+        self.params.input.get_value().dbtoa()
+      },
       channel_mode: self.params.channel_mode.get_value(),
       time_mode: self.params.time_mode.get_value(),
-      time_link: self.params.time_link.get_value(),
       time_left: self.params.time_left.get_value(),
-      time_right: self.params.time_right.get_value(),
-      feedback: self.params.feedback.get_value(),
-      wow_and_flutter: self.params.wow_and_flutter.get_value(),
-      highpass_freq: self.params.highpass_freq.get_value(),
-      highpass_res: self.params.highpass_res.get_value(),
-      lowpass_freq: self.params.lowpass_freq.get_value(),
-      lowpass_res: self.params.lowpass_res.get_value(),
+      time_right: if self.params.time_link.get_value() {
+        self.params.time_left.get_value()
+      } else {
+        self.params.time_right.get_value()
+      },
+      feedback: if hold {
+        1.
+      } else {
+        self.params.feedback.get_value()
+      },
+      flutter_gain: if hold {
+        0.
+      } else {
+        wow_and_flutter * wow_and_flutter * wow_and_flutter
+      },
+      highpass_freq: if hold {
+        20.
+      } else {
+        self.params.highpass_freq.get_value()
+      },
+      highpass_res: if hold {
+        0.
+      } else {
+        self.params.highpass_res.get_value()
+      },
+      lowpass_freq: if hold {
+        20000.
+      } else {
+        self.params.lowpass_freq.get_value()
+      },
+      lowpass_res: if hold {
+        0.
+      } else {
+        self.params.lowpass_res.get_value()
+      },
       reverb: self.params.reverb.get_value(),
       decay: self.params.decay.get_value(),
       stereo: self.params.stereo.get_value(),
-      duck: self.params.duck.get_value(),
-      output: self.params.output.get_value(),
+      duck_threshold: (self.params.duck.get_value() * MIN_DUCK_THRESHOLD).dbtoa(),
+      output_level: self.params.output.get_value().dbtoa(),
       mix: self.params.mix.get_value(),
       limiter: self.params.limiter.get_value(),
-      hold: self.params.hold.get_value(),
-    };
-
-    self.space_echo.map_params(&params)
+    }
   }
 }
 
