@@ -30,5 +30,6 @@ pub fn get_params() -> MappedParams {
     output_level: 1.,
     mix: 0.5,
     limiter: false,
+    filter_gain: 1.,
   }
 }

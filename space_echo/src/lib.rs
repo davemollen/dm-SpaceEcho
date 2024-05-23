@@ -55,6 +55,7 @@ pub struct MappedParams {
   pub output_level: f32,
   pub mix: f32,
   pub limiter: bool,
+  pub filter_gain: f32,
 }
 
 pub struct SpaceEcho {
@@ -117,6 +118,7 @@ impl SpaceEcho {
       stereo,
       output_level,
       mix,
+      filter_gain,
       time_left,
       time_right,
     } = self.smooth_parameters.get_params(params);
@@ -139,6 +141,7 @@ impl SpaceEcho {
       highpass_res,
       lowpass_freq,
       lowpass_res,
+      filter_gain,
     );
     let feedback_matrix_output = self.apply_channel_mode(filter_output, params.channel_mode);
     let db_block_output = self.dc_block.process(feedback_matrix_output);
@@ -213,6 +216,41 @@ impl SpaceEcho {
   }
 
   fn apply_filter(
+    &mut self,
+    input: (f32, f32),
+    highpass_freq: f32,
+    highpass_res: f32,
+    lowpass_freq: f32,
+    lowpass_res: f32,
+    filter_gain: f32,
+  ) -> (f32, f32) {
+    match filter_gain {
+      0. => input,
+      1. => self.get_filter_output(
+        input,
+        highpass_freq,
+        highpass_res,
+        lowpass_freq,
+        lowpass_res,
+      ),
+      _ => {
+        let filter_out = self.get_filter_output(
+          input,
+          highpass_freq,
+          highpass_res,
+          lowpass_freq,
+          lowpass_res,
+        );
+        let input_gain = 1. - filter_gain;
+        (
+          filter_out.0 * filter_gain + input.0 * input_gain,
+          filter_out.1 * filter_gain + input.1 * input_gain,
+        )
+      }
+    }
+  }
+
+  fn get_filter_output(
     &mut self,
     input: (f32, f32),
     highpass_freq: f32,

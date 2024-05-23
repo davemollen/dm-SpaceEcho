@@ -66,6 +66,7 @@ impl DmSpaceEcho {
       output_level: self.params.output.value().dbtoa(),
       mix: self.params.mix.value(),
       limiter: self.params.limiter.value(),
+      filter_gain: if self.params.hold.value() { 0. } else { 1. },
     }
   }
 }

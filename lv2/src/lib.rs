@@ -70,6 +70,7 @@ impl DmSpaceEcho {
       output_level: (*ports.output).dbtoa(),
       mix: *ports.mix * 0.01,
       limiter: *ports.limiter == 1.,
+      filter_gain: if hold { 0. } else { 1. },
     }
   }
 }

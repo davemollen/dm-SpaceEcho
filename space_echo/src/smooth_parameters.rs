@@ -19,6 +19,7 @@ pub struct SmoothedParams {
   pub stereo: f32,
   pub output_level: f32,
   pub mix: f32,
+  pub filter_gain: f32,
   pub time_left: f32,
   pub time_right: f32,
 }
@@ -36,6 +37,7 @@ pub struct SmoothParameters {
   smooth_stereo: ParamFilter,
   smooth_output_level: ParamFilter,
   smooth_mix: ParamFilter,
+  smooth_filter_gain: ParamFilter,
   smooth_time_left: LogSmooth,
   smooth_time_right: LogSmooth,
 }
@@ -55,6 +57,7 @@ impl SmoothParameters {
       smooth_stereo: ParamFilter::new(sample_rate, 7.),
       smooth_output_level: ParamFilter::new(sample_rate, 7.),
       smooth_mix: ParamFilter::new(sample_rate, 7.),
+      smooth_filter_gain: ParamFilter::new(sample_rate, 7.),
       smooth_time_left: LogSmooth::new(sample_rate),
       smooth_time_right: LogSmooth::new(sample_rate),
     }
@@ -73,6 +76,7 @@ impl SmoothParameters {
     self.smooth_stereo.initialize(params.stereo);
     self.smooth_output_level.initialize(params.output_level);
     self.smooth_mix.initialize(params.mix);
+    self.smooth_filter_gain.initialize(params.filter_gain);
     self.smooth_time_left.initialize(params.time_left);
     self.smooth_time_right.initialize(params.time_right);
   }
@@ -100,6 +104,7 @@ impl SmoothParameters {
       stereo: self.smooth_stereo.process(params.stereo),
       output_level: self.smooth_output_level.process(params.output_level),
       mix: self.smooth_mix.process(params.mix),
+      filter_gain: self.smooth_filter_gain.process(params.filter_gain),
       time_left,
       time_right,
     }
