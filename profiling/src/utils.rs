@@ -1,5 +1,3 @@
-use space_echo::MappedParams;
-
 pub fn generate_signal() -> f32 {
   fastrand::f32() * 2. - 1.
 }
@@ -10,26 +8,28 @@ pub fn generate_stereo_signal_stream(length: usize) -> Vec<(f32, f32)> {
     .collect()
 }
 
-pub fn get_params() -> MappedParams {
-  MappedParams {
-    input_level: 1.,
-    channel_mode: 0,
-    time_mode: 0,
-    time_left: 250.,
-    time_right: 250.,
-    feedback: 0.8,
-    flutter_gain: 0.2,
-    highpass_freq: 40.,
-    highpass_res: 0.1,
-    lowpass_freq: 6000.,
-    lowpass_res: 0.1,
-    reverb: 0.5,
-    decay: 0.8,
-    stereo: 1.,
-    duck_threshold: 0.,
-    output_level: 1.,
-    mix: 0.5,
-    limiter: false,
-    filter_gain: 1.,
-  }
+pub fn get_params() -> (
+  f32,
+  i32,
+  i32,
+  f32,
+  f32,
+  f32,
+  f32,
+  f32,
+  f32,
+  f32,
+  f32,
+  f32,
+  f32,
+  f32,
+  f32,
+  f32,
+  f32,
+  bool,
+  f32,
+) {
+  (
+    1., 0, 0, 250., 250., 0.8, 0.2, 40., 0.1, 6000., 0.1, 0.5, 0.8, 1., 0., 1., 0.5, false, 1.,
+  )
 }

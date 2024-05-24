@@ -3,7 +3,7 @@ extern crate vst;
 mod editor;
 use editor::SpaceEchoEditor;
 mod space_echo_parameters;
-use space_echo::{FloatExt, MappedParams, SpaceEcho, MIN_DUCK_THRESHOLD};
+use space_echo::{FloatExt, SpaceEcho, MIN_DUCK_THRESHOLD};
 use space_echo_parameters::{Params, SpaceEchoParameters};
 use std::sync::Arc;
 use vst::{
@@ -21,63 +21,85 @@ struct DmSpaceEcho {
 }
 
 impl DmSpaceEcho {
-  fn get_params(&self) -> MappedParams {
+  fn get_params(
+    &self,
+  ) -> (
+    f32,
+    i32,
+    i32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    bool,
+    f32,
+  ) {
     let hold = self.params.hold.get_value();
     let wow_and_flutter = self.params.wow_and_flutter.get_value();
 
-    MappedParams {
-      input_level: if hold {
+    (
+      if hold {
         0.
       } else {
         self.params.input.get_value().dbtoa()
       },
-      channel_mode: self.params.channel_mode.get_value(),
-      time_mode: self.params.time_mode.get_value(),
-      time_left: self.params.time_left.get_value(),
-      time_right: if self.params.time_link.get_value() {
+      self.params.channel_mode.get_value(),
+      self.params.time_mode.get_value(),
+      self.params.time_left.get_value(),
+      if self.params.time_link.get_value() {
         self.params.time_left.get_value()
       } else {
         self.params.time_right.get_value()
       },
-      feedback: if hold {
+      if hold {
         1.
       } else {
         self.params.feedback.get_value()
       },
-      flutter_gain: if hold {
+      if hold {
         0.
       } else {
         wow_and_flutter * wow_and_flutter * wow_and_flutter
       },
-      highpass_freq: if hold {
+      if hold {
         20.
       } else {
         self.params.highpass_freq.get_value()
       },
-      highpass_res: if hold {
+      if hold {
         0.
       } else {
         self.params.highpass_res.get_value()
       },
-      lowpass_freq: if hold {
+      if hold {
         20000.
       } else {
         self.params.lowpass_freq.get_value()
       },
-      lowpass_res: if hold {
+      if hold {
         0.
       } else {
         self.params.lowpass_res.get_value()
       },
-      reverb: self.params.reverb.get_value(),
-      decay: self.params.decay.get_value(),
-      stereo: self.params.stereo.get_value(),
-      duck_threshold: (self.params.duck.get_value() * MIN_DUCK_THRESHOLD).dbtoa(),
-      output_level: self.params.output.get_value().dbtoa(),
-      mix: self.params.mix.get_value(),
-      limiter: self.params.limiter.get_value(),
-      filter_gain: if self.params.hold.get_value() { 0. } else { 1. },
-    }
+      self.params.reverb.get_value(),
+      self.params.decay.get_value(),
+      self.params.stereo.get_value(),
+      (self.params.duck.get_value() * MIN_DUCK_THRESHOLD).dbtoa(),
+      self.params.output.get_value().dbtoa(),
+      self.params.mix.get_value(),
+      self.params.limiter.get_value(),
+      if self.params.hold.get_value() { 0. } else { 1. },
+    )
   }
 }
 
@@ -117,10 +139,46 @@ impl Plugin for DmSpaceEcho {
   }
 
   fn process(&mut self, buffer: &mut AudioBuffer<f32>) {
-    let params = self.get_params();
+    let (
+      input_level,
+      channel_mode,
+      time_mode,
+      time_left,
+      time_right,
+      feedback,
+      flutter_gain,
+      highpass_freq,
+      highpass_res,
+      lowpass_freq,
+      lowpass_res,
+      reverb,
+      decay,
+      stereo,
+      duck_threshold,
+      output_level,
+      mix,
+      limiter,
+      filter_gain,
+    ) = self.get_params();
 
     if !self.is_active {
-      self.space_echo.initialize_params_to_smooth(&params);
+      self.space_echo.initialize_params_to_smooth(
+        input_level,
+        time_left,
+        time_right,
+        feedback,
+        flutter_gain,
+        highpass_freq,
+        highpass_res,
+        lowpass_freq,
+        lowpass_res,
+        reverb,
+        decay,
+        stereo,
+        output_level,
+        mix,
+        filter_gain,
+      );
       self.is_active = true;
     }
 
@@ -133,9 +191,28 @@ impl Plugin for DmSpaceEcho {
     for ((input_left, input_right), (output_left, output_right)) in
       zipped_input_channels.zip(zipped_output_channels)
     {
-      let (space_echo_left, space_echo_right) = self
-        .space_echo
-        .process((*input_left, *input_right), &params);
+      let (space_echo_left, space_echo_right) = self.space_echo.process(
+        (*input_left, *input_right),
+        input_level,
+        channel_mode,
+        time_mode,
+        time_left,
+        time_right,
+        feedback,
+        flutter_gain,
+        highpass_freq,
+        highpass_res,
+        lowpass_freq,
+        lowpass_res,
+        reverb,
+        decay,
+        stereo,
+        duck_threshold,
+        output_level,
+        mix,
+        limiter,
+        filter_gain,
+      );
       *output_left = space_echo_left;
       *output_right = space_echo_right;
     }

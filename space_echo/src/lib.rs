@@ -29,34 +29,12 @@ use {
     delay_line::{DelayLine, Interpolation},
     mix::Mix,
   },
-  smooth_parameters::{SmoothParameters, SmoothedParams},
+  smooth_parameters::SmoothParameters,
   tsk_filter_stereo::{FilterType, TSKFilterStereo},
   variable_delay_read::VariableDelayRead,
   wow_and_flutter::{WowAndFlutter, MAX_WOW_AND_FLUTTER_TIME_IN_SECS},
 };
 pub use {duck::MIN_DUCK_THRESHOLD, shared::float_ext::FloatExt};
-
-pub struct MappedParams {
-  pub input_level: f32,
-  pub channel_mode: i32,
-  pub time_mode: i32,
-  pub time_left: f32,
-  pub time_right: f32,
-  pub feedback: f32,
-  pub flutter_gain: f32,
-  pub highpass_freq: f32,
-  pub highpass_res: f32,
-  pub lowpass_freq: f32,
-  pub lowpass_res: f32,
-  pub reverb: f32,
-  pub decay: f32,
-  pub stereo: f32,
-  pub duck_threshold: f32,
-  pub output_level: f32,
-  pub mix: f32,
-  pub limiter: bool,
-  pub filter_gain: f32,
-}
 
 pub struct SpaceEcho {
   delay_line_left: DelayLine,
@@ -99,12 +77,67 @@ impl SpaceEcho {
     }
   }
 
-  pub fn initialize_params_to_smooth(&mut self, mapped_params: &MappedParams) {
-    self.smooth_parameters.initialize(mapped_params);
+  pub fn initialize_params_to_smooth(
+    &mut self,
+    input_level: f32,
+    time_left: f32,
+    time_right: f32,
+    feedback: f32,
+    flutter_gain: f32,
+    highpass_freq: f32,
+    highpass_res: f32,
+    lowpass_freq: f32,
+    lowpass_res: f32,
+    reverb: f32,
+    decay: f32,
+    stereo: f32,
+    output_level: f32,
+    mix: f32,
+    filter_gain: f32,
+  ) {
+    self.smooth_parameters.initialize(
+      input_level,
+      time_left,
+      time_right,
+      feedback,
+      flutter_gain,
+      highpass_freq,
+      highpass_res,
+      lowpass_freq,
+      lowpass_res,
+      reverb,
+      decay,
+      stereo,
+      output_level,
+      mix,
+      filter_gain,
+    );
   }
 
-  pub fn process(&mut self, input: (f32, f32), params: &MappedParams) -> (f32, f32) {
-    let SmoothedParams {
+  pub fn process(
+    &mut self,
+    input: (f32, f32),
+    input_level: f32,
+    channel_mode: i32,
+    time_mode: i32,
+    time_left: f32,
+    time_right: f32,
+    feedback: f32,
+    flutter_gain: f32,
+    highpass_freq: f32,
+    highpass_res: f32,
+    lowpass_freq: f32,
+    lowpass_res: f32,
+    reverb: f32,
+    decay: f32,
+    stereo: f32,
+    duck_threshold: f32,
+    output_level: f32,
+    mix: f32,
+    limiter: bool,
+    filter_gain: f32,
+  ) -> (f32, f32) {
+    let (
       input_level,
       feedback,
       wow_gain,
@@ -121,16 +154,28 @@ impl SpaceEcho {
       filter_gain,
       time_left,
       time_right,
-    } = self.smooth_parameters.get_params(params);
-
-    let delay_input = self.get_delay_input(input, params.channel_mode, input_level);
-    let delay_output = self.read_from_delay_lines(
+    ) = self.smooth_parameters.get_params(
+      input_level,
+      time_mode,
       time_left,
       time_right,
-      params.time_mode,
-      wow_gain,
+      feedback,
       flutter_gain,
+      highpass_freq,
+      highpass_res,
+      lowpass_freq,
+      lowpass_res,
+      reverb,
+      decay,
+      stereo,
+      output_level,
+      mix,
+      filter_gain,
     );
+
+    let delay_input = self.get_delay_input(input, channel_mode, input_level);
+    let delay_output =
+      self.read_from_delay_lines(time_left, time_right, time_mode, wow_gain, flutter_gain);
 
     let (saturation_output_left, saturation_output_right, saturation_gain_compensation) =
       self.saturation.process(delay_output, 0.15);
@@ -143,7 +188,7 @@ impl SpaceEcho {
       lowpass_res,
       filter_gain,
     );
-    let feedback_matrix_output = self.apply_channel_mode(filter_output, params.channel_mode);
+    let feedback_matrix_output = self.apply_channel_mode(filter_output, channel_mode);
     let db_block_output = self.dc_block.process(feedback_matrix_output);
     self.write_to_delay_lines(delay_input, db_block_output, feedback);
 
@@ -153,12 +198,10 @@ impl SpaceEcho {
       reverb,
       decay,
     );
-    let ducking_output = self
-      .duck
-      .process(reverb_output, input, params.duck_threshold);
+    let ducking_output = self.duck.process(reverb_output, input, duck_threshold);
     let space_echo_output = self.apply_gain(ducking_output, output_level);
     let mix_output = Mix::process(input, space_echo_output, mix);
-    self.limiter.process(mix_output, params.limiter)
+    self.limiter.process(mix_output, limiter)
   }
 
   fn apply_gain(&self, input: (f32, f32), gain: f32) -> (f32, f32) {

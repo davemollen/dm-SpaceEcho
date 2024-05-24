@@ -1,28 +1,9 @@
 mod log_smooth;
 use log_smooth::LogSmooth;
 
-use crate::{shared::param_filter::ParamFilter, MappedParams};
+use crate::shared::param_filter::ParamFilter;
 
 const TIME_SMOOTHING_FACTOR: f32 = 0.25;
-
-pub struct SmoothedParams {
-  pub input_level: f32,
-  pub feedback: f32,
-  pub flutter_gain: f32,
-  pub wow_gain: f32,
-  pub highpass_freq: f32,
-  pub highpass_res: f32,
-  pub lowpass_freq: f32,
-  pub lowpass_res: f32,
-  pub reverb: f32,
-  pub decay: f32,
-  pub stereo: f32,
-  pub output_level: f32,
-  pub mix: f32,
-  pub filter_gain: f32,
-  pub time_left: f32,
-  pub time_right: f32,
-}
 
 pub struct SmoothParameters {
   smooth_input_level: ParamFilter,
@@ -63,51 +44,103 @@ impl SmoothParameters {
     }
   }
 
-  pub fn initialize(&mut self, params: &MappedParams) {
-    self.smooth_input_level.initialize(params.input_level);
-    self.smooth_feedback.initialize(params.feedback);
-    self.smooth_flutter_gain.initialize(params.flutter_gain);
-    self.smooth_highpass_freq.initialize(params.highpass_freq);
-    self.smooth_highpass_res.initialize(params.highpass_res);
-    self.smooth_lowpass_freq.initialize(params.lowpass_freq);
-    self.smooth_lowpass_res.initialize(params.lowpass_res);
-    self.smooth_reverb.initialize(params.reverb);
-    self.smooth_decay.initialize(params.decay);
-    self.smooth_stereo.initialize(params.stereo);
-    self.smooth_output_level.initialize(params.output_level);
-    self.smooth_mix.initialize(params.mix);
-    self.smooth_filter_gain.initialize(params.filter_gain);
-    self.smooth_time_left.initialize(params.time_left);
-    self.smooth_time_right.initialize(params.time_right);
+  pub fn initialize(
+    &mut self,
+    input_level: f32,
+    time_left: f32,
+    time_right: f32,
+    feedback: f32,
+    flutter_gain: f32,
+    highpass_freq: f32,
+    highpass_res: f32,
+    lowpass_freq: f32,
+    lowpass_res: f32,
+    reverb: f32,
+    decay: f32,
+    stereo: f32,
+    output_level: f32,
+    mix: f32,
+    filter_gain: f32,
+  ) {
+    self.smooth_input_level.initialize(input_level);
+    self.smooth_feedback.initialize(feedback);
+    self.smooth_flutter_gain.initialize(flutter_gain);
+    self.smooth_highpass_freq.initialize(highpass_freq);
+    self.smooth_highpass_res.initialize(highpass_res);
+    self.smooth_lowpass_freq.initialize(lowpass_freq);
+    self.smooth_lowpass_res.initialize(lowpass_res);
+    self.smooth_reverb.initialize(reverb);
+    self.smooth_decay.initialize(decay);
+    self.smooth_stereo.initialize(stereo);
+    self.smooth_output_level.initialize(output_level);
+    self.smooth_mix.initialize(mix);
+    self.smooth_filter_gain.initialize(filter_gain);
+    self.smooth_time_left.initialize(time_left);
+    self.smooth_time_right.initialize(time_right);
   }
 
-  pub fn get_params(&mut self, params: &MappedParams) -> SmoothedParams {
-    let flutter_gain = self.smooth_flutter_gain.process(params.flutter_gain);
+  pub fn get_params(
+    &mut self,
+    input_level: f32,
+    time_mode: i32,
+    time_left: f32,
+    time_right: f32,
+    feedback: f32,
+    flutter_gain: f32,
+    highpass_freq: f32,
+    highpass_res: f32,
+    lowpass_freq: f32,
+    lowpass_res: f32,
+    reverb: f32,
+    decay: f32,
+    stereo: f32,
+    output_level: f32,
+    mix: f32,
+    filter_gain: f32,
+  ) -> (
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+  ) {
+    let flutter_gain = self.smooth_flutter_gain.process(flutter_gain);
 
-    let (time_left, time_right) = if params.time_mode == 0 {
-      self.get_time_params(params.time_left, params.time_right)
+    let (time_left, time_right) = if time_mode == 0 {
+      self.get_time_params(time_left, time_right)
     } else {
-      (params.time_left, params.time_right)
+      (time_left, time_right)
     };
 
-    SmoothedParams {
-      input_level: self.smooth_input_level.process(params.input_level),
-      feedback: self.smooth_feedback.process(params.feedback),
+    (
+      self.smooth_input_level.process(input_level),
+      self.smooth_feedback.process(feedback),
       flutter_gain,
-      wow_gain: flutter_gain * flutter_gain,
-      highpass_freq: self.smooth_highpass_freq.process(params.highpass_freq),
-      highpass_res: self.smooth_highpass_res.process(params.highpass_res),
-      lowpass_freq: self.smooth_lowpass_freq.process(params.lowpass_freq),
-      lowpass_res: self.smooth_lowpass_res.process(params.lowpass_res),
-      reverb: self.smooth_reverb.process(params.reverb),
-      decay: self.smooth_decay.process(params.decay),
-      stereo: self.smooth_stereo.process(params.stereo),
-      output_level: self.smooth_output_level.process(params.output_level),
-      mix: self.smooth_mix.process(params.mix),
-      filter_gain: self.smooth_filter_gain.process(params.filter_gain),
+      flutter_gain * flutter_gain,
+      self.smooth_highpass_freq.process(highpass_freq),
+      self.smooth_highpass_res.process(highpass_res),
+      self.smooth_lowpass_freq.process(lowpass_freq),
+      self.smooth_lowpass_res.process(lowpass_res),
+      self.smooth_reverb.process(reverb),
+      self.smooth_decay.process(decay),
+      self.smooth_stereo.process(stereo),
+      self.smooth_output_level.process(output_level),
+      self.smooth_mix.process(mix),
+      self.smooth_filter_gain.process(filter_gain),
       time_left,
       time_right,
-    }
+    )
   }
 
   fn get_time_params(&mut self, time_left: f32, time_right: f32) -> (f32, f32) {

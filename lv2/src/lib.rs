@@ -1,7 +1,7 @@
 extern crate lv2;
 extern crate space_echo;
 use lv2::prelude::*;
-use space_echo::{FloatExt, MappedParams, SpaceEcho, MIN_DUCK_THRESHOLD};
+use space_echo::{FloatExt, SpaceEcho, MIN_DUCK_THRESHOLD};
 
 #[derive(PortCollection)]
 struct Ports {
@@ -38,40 +38,63 @@ struct DmSpaceEcho {
 }
 
 impl DmSpaceEcho {
-  pub fn get_params(&self, ports: &mut Ports) -> MappedParams {
+  pub fn get_params(
+    &self,
+    ports: &mut Ports,
+  ) -> (
+    f32,
+    i32,
+    i32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    f32,
+    bool,
+    f32,
+  ) {
     let hold = *ports.hold == 1.;
     let wow_and_flutter = *ports.wow_and_flutter * 0.01;
 
-    MappedParams {
-      input_level: if hold { 0. } else { (*ports.input).dbtoa() },
+    (
+      if hold { 0. } else { (*ports.input).dbtoa() },
       // TODO: limit time_mode and channel_mode to range from 0 to 1
-      channel_mode: *ports.channel_mode as i32 - 1,
-      time_mode: *ports.time_mode as i32 - 1,
-      time_left: *ports.time_left,
-      time_right: if *ports.time_link == 1. {
+      *ports.channel_mode as i32 - 1,
+      *ports.time_mode as i32 - 1,
+      *ports.time_left,
+      if *ports.time_link == 1. {
         *ports.time_left
       } else {
         *ports.time_right
       },
-      feedback: if hold { 1. } else { *ports.feedback * 0.01 },
-      flutter_gain: if hold {
+      if hold { 1. } else { *ports.feedback * 0.01 },
+      if hold {
         0.
       } else {
         wow_and_flutter * wow_and_flutter * wow_and_flutter
       },
-      highpass_freq: if hold { 20. } else { *ports.highpass_freq },
-      highpass_res: if hold { 0. } else { *ports.highpass_res * 0.01 },
-      lowpass_freq: if hold { 20000. } else { *ports.lowpass_freq },
-      lowpass_res: if hold { 0. } else { *ports.lowpass_res * 0.01 },
-      reverb: *ports.reverb * 0.01,
-      decay: *ports.decay * 0.01,
-      stereo: *ports.stereo * 0.01,
-      duck_threshold: (*ports.duck * 0.01 * MIN_DUCK_THRESHOLD).dbtoa(),
-      output_level: (*ports.output).dbtoa(),
-      mix: *ports.mix * 0.01,
-      limiter: *ports.limiter == 1.,
-      filter_gain: if hold { 0. } else { 1. },
-    }
+      if hold { 20. } else { *ports.highpass_freq },
+      if hold { 0. } else { *ports.highpass_res * 0.01 },
+      if hold { 20000. } else { *ports.lowpass_freq },
+      if hold { 0. } else { *ports.lowpass_res * 0.01 },
+      *ports.reverb * 0.01,
+      *ports.decay * 0.01,
+      *ports.stereo * 0.01,
+      (*ports.duck * 0.01 * MIN_DUCK_THRESHOLD).dbtoa(),
+      (*ports.output).dbtoa(),
+      *ports.mix * 0.01,
+      *ports.limiter == 1.,
+      if hold { 0. } else { 1. },
+    )
   }
 }
 
@@ -94,10 +117,46 @@ impl Plugin for DmSpaceEcho {
   // Process a chunk of audio. The audio ports are dereferenced to slices, which the plugin
   // iterates over.
   fn run(&mut self, ports: &mut Ports, _features: &mut (), _sample_count: u32) {
-    let params = self.get_params(ports);
+    let (
+      input_level,
+      channel_mode,
+      time_mode,
+      time_left,
+      time_right,
+      feedback,
+      flutter_gain,
+      highpass_freq,
+      highpass_res,
+      lowpass_freq,
+      lowpass_res,
+      reverb,
+      decay,
+      stereo,
+      duck_threshold,
+      output_level,
+      mix,
+      limiter,
+      filter_gain,
+    ) = self.get_params(ports);
 
     if !self.is_active {
-      self.space_echo.initialize_params_to_smooth(&params);
+      self.space_echo.initialize_params_to_smooth(
+        input_level,
+        time_left,
+        time_right,
+        feedback,
+        flutter_gain,
+        highpass_freq,
+        highpass_res,
+        lowpass_freq,
+        lowpass_res,
+        reverb,
+        decay,
+        stereo,
+        output_level,
+        mix,
+        filter_gain,
+      );
       self.is_active = true;
     }
 
@@ -110,9 +169,28 @@ impl Plugin for DmSpaceEcho {
     for ((input_left, input_right), (output_left, output_right)) in
       input_channels.zip(output_channels)
     {
-      let (space_echo_left, space_echo_right) = self
-        .space_echo
-        .process((*input_left, *input_right), &params);
+      let (space_echo_left, space_echo_right) = self.space_echo.process(
+        (*input_left, *input_right),
+        input_level,
+        channel_mode,
+        time_mode,
+        time_left,
+        time_right,
+        feedback,
+        flutter_gain,
+        highpass_freq,
+        highpass_res,
+        lowpass_freq,
+        lowpass_res,
+        reverb,
+        decay,
+        stereo,
+        duck_threshold,
+        output_level,
+        mix,
+        limiter,
+        filter_gain,
+      );
       *output_left = space_echo_left;
       *output_right = space_echo_right;
     }
