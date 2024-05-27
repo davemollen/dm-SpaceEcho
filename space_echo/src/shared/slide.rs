@@ -9,8 +9,8 @@ pub struct Slide {
 impl Slide {
   pub fn new(sample_rate: f32, slide_up: f32, slide_down: f32) -> Self {
     Self {
-      slide_up: slide_up.mstosamps(sample_rate),
-      slide_down: slide_down.mstosamps(sample_rate),
+      slide_up: slide_up.mstosamps(sample_rate).recip(),
+      slide_down: slide_down.mstosamps(sample_rate).recip(),
       z: 1.,
     }
   }
@@ -25,8 +25,7 @@ impl Slide {
           self.slide_up
         } else {
           self.slide_down
-        }
-        .recip();
+        };
       self.z
     }
   }
