@@ -1,4 +1,3 @@
-use crate::FloatExt;
 use std::f32::consts::TAU;
 
 use super::FilterType;
@@ -6,6 +5,8 @@ use super::FilterType;
 pub struct OnePoleFilterStereo {
   t: f32,
   z: (f32, f32),
+  prev_cutoff_freq: f32,
+  b1: f32,
 }
 
 impl OnePoleFilterStereo {
@@ -13,6 +14,8 @@ impl OnePoleFilterStereo {
     Self {
       t: sample_rate.recip() * -TAU,
       z: (0., 0.),
+      prev_cutoff_freq: 0.,
+      b1: 0.,
     }
   }
 
@@ -27,9 +30,16 @@ impl OnePoleFilterStereo {
   }
 
   fn apply_filter(&mut self, input: (f32, f32), cutoff_freq: f32) -> (f32, f32) {
-    let b1 = (cutoff_freq * self.t).fast_exp();
-    let a0 = 1.0 - b1;
-    self.z = (input.0 * a0 + self.z.0 * b1, input.1 * a0 + self.z.1 * b1);
+    if cutoff_freq != self.prev_cutoff_freq {
+      self.b1 = (cutoff_freq * self.t).exp();
+      self.prev_cutoff_freq = cutoff_freq;
+    }
+
+    let a0 = 1.0 - self.b1;
+    self.z = (
+      input.0 * a0 + self.z.0 * self.b1,
+      input.1 * a0 + self.z.1 * self.b1,
+    );
     self.z
   }
 }
