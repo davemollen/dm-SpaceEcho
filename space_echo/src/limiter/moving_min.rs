@@ -122,6 +122,20 @@ mod tests {
   }
 
   #[test]
+  fn should_go_to_new_minimum_when_its_smaller_instantly() {
+    let mut moving_min = MovingMin::new(1000., 4., 0., 1.);
+
+    assert_eq!(moving_min.process(0.3), 0.3);
+    assert_eq!(moving_min.process(0.2), 0.2);
+    assert_eq!(moving_min.process(0.8), 0.2);
+    assert_eq!(moving_min.process(1.3), 0.2);
+
+    assert_eq!(moving_min.process(1.6), 0.2);
+    assert_eq!(moving_min.process(1.5), 0.8);
+    assert_eq!(moving_min.process(1.5), 1.);
+  }
+
+  #[test]
   fn should_hold_minimum_for_attack_plus_hold_time_in_ms() {
     let mut moving_min = MovingMin::new(1000., 4., 2., 1.);
 

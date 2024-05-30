@@ -1,31 +1,27 @@
-use crate::FloatExt;
-
-struct Ramp {
-  prev: f32,
-  index: u32,
-  step_size: f32,
-}
+use crate::shared::float_ext::FloatExt;
 
 pub struct RampSlide {
   slide_up_factor: f32,
-  ramp_down_factor: f32,
-  ramp_down: f32,
   z: f32,
-  ramp: Ramp,
+  ramp_prev: f32,
+  ramp_index: usize,
+  ramp_step_size: f32,
+  ramp_factor: f32,
+  ramp_max_length: usize,
 }
 
 impl RampSlide {
   pub fn new(sample_rate: f32, slide_up: f32, ramp_down: f32) -> Self {
+    let ramp_down_length = ramp_down.mstosamps(sample_rate);
+
     Self {
       z: 1.,
       slide_up_factor: slide_up.mstosamps(sample_rate).recip(),
-      ramp_down_factor: ramp_down.mstosamps(sample_rate).recip(),
-      ramp_down,
-      ramp: Ramp {
-        prev: 1.,
-        index: 0,
-        step_size: 0.,
-      },
+      ramp_prev: 1.,
+      ramp_index: 0,
+      ramp_step_size: 0.,
+      ramp_factor: ramp_down_length.recip(),
+      ramp_max_length: ramp_down_length as usize - 1,
     }
   }
 
@@ -34,10 +30,10 @@ impl RampSlide {
       input
     } else {
       let difference = input - self.z;
-      if input > self.z {
-        self.slide_up(difference)
-      } else {
+      if difference <= 0. {
         self.ramp_down(input, difference)
+      } else {
+        self.slide_up(difference)
       }
     }
   }
@@ -48,16 +44,26 @@ impl RampSlide {
   }
 
   fn ramp_down(&mut self, input: f32, difference: f32) -> f32 {
-    if input != self.ramp.prev {
-      self.ramp.index = self.ramp_down as u32;
-      self.ramp.step_size = difference * self.ramp_down_factor;
-      self.ramp.prev = input;
+    if input != self.ramp_prev {
+      let step_size = difference * ((self.ramp_index + 1) as f32).recip();
+      if self.ramp_index == 0 || self.ramp_step_size < step_size {
+        self.ramp_index = self.ramp_max_length;
+        self.ramp_step_size = difference * self.ramp_factor
+      } else {
+        self.ramp_step_size = step_size
+      }
+      self.ramp_prev = input;
     }
 
-    if self.ramp.index > 0 {
-      self.ramp.index -= 1;
-      self.z += self.ramp.step_size;
+    if self.ramp_index == 0 {
+      self.z = input;
     }
+
+    if self.ramp_index > 0 {
+      self.ramp_index -= 1;
+      self.z += self.ramp_step_size;
+    }
+
     self.z
   }
 }
@@ -85,5 +91,35 @@ mod tests {
       ramp_slide.process(0.25),
       0.375 - ((0.375 - 0.25) / ramp_down)
     );
+  }
+
+  #[test]
+  fn should_ramp_down_twice() {
+    let slide_up = 2.0;
+    let ramp_down = 4.0;
+    let mut ramp_slide = RampSlide::new(1000., slide_up, ramp_down);
+
+    assert_eq!(ramp_slide.process(1.), 1.0);
+    assert_eq!(ramp_slide.process(1.), 1.0);
+    assert_eq!(ramp_slide.process(0.5), 0.875);
+    assert_eq!(ramp_slide.process(0.4), 0.7166667); // we will ramp down to 0.4 over the remainder of the ramp
+    assert_eq!(ramp_slide.process(0.4), 0.5583334);
+    assert_eq!(ramp_slide.process(0.4), 0.4);
+    assert_eq!(ramp_slide.process(0.4), 0.4);
+  }
+
+  #[test]
+  fn should_ramp_down_twice_2() {
+    let slide_up = 2.0;
+    let ramp_down = 4.0;
+    let mut ramp_slide = RampSlide::new(1000., slide_up, ramp_down);
+
+    assert_eq!(ramp_slide.process(1.), 1.0);
+    assert_eq!(ramp_slide.process(1.), 1.0);
+    assert_eq!(ramp_slide.process(0.5), 0.875);
+    assert_eq!(ramp_slide.process(0.5), 0.75);
+    assert_eq!(ramp_slide.process(0.49), 0.62); // we will ramp down to 0.49 over the remainder of the ramp
+    assert_eq!(ramp_slide.process(0.49), 0.49);
+    assert_eq!(ramp_slide.process(0.49), 0.49);
   }
 }

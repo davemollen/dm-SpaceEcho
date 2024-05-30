@@ -31,18 +31,21 @@ impl Limiter {
 
   pub fn process(&mut self, input: (f32, f32), is_on: bool) -> (f32, f32) {
     if is_on {
-      let moving_min = self.get_moving_min(input);
-      let limiter_gain = self.slide.process(moving_min);
-
-      let delay_output = self.read_from_buffer();
+      let limiter_gain = self.get_limiter_gain(input);
       self.write_to_buffer(input);
-      (
-        (delay_output.0 * limiter_gain).clamp(-self.limit, self.limit),
-        (delay_output.1 * limiter_gain).clamp(-self.limit, self.limit),
-      )
+      let delay_output = self.read_from_buffer();
+
+      (delay_output.0 * limiter_gain, delay_output.1 * limiter_gain)
     } else {
       input
     }
+  }
+
+  fn get_limiter_gain(&mut self, input: (f32, f32)) -> f32 {
+    let gain_reduction = self.get_gain_reduction(input);
+    let moving_min = self.moving_min.process(gain_reduction);
+    let limiter_gain = self.slide.process(moving_min);
+    limiter_gain
   }
 
   fn wrap(&self, buffer_index: usize) -> usize {
@@ -63,13 +66,8 @@ impl Limiter {
     if gain > self.limit {
       self.limit * gain.recip()
     } else {
-      self.limit
+      1.
     }
-  }
-
-  fn get_moving_min(&mut self, input: (f32, f32)) -> f32 {
-    let gain_reduction = self.get_gain_reduction(input);
-    self.moving_min.process(gain_reduction)
   }
 
   fn write_to_buffer(&mut self, input: (f32, f32)) {
