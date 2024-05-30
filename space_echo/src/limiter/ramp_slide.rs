@@ -6,13 +6,13 @@ pub struct RampSlide {
   ramp_prev: f32,
   ramp_index: usize,
   ramp_step_size: f32,
+  ramp_time: usize,
   ramp_factor: f32,
-  ramp_max_length: usize,
 }
 
 impl RampSlide {
   pub fn new(sample_rate: f32, slide_up: f32, ramp_down: f32) -> Self {
-    let ramp_down_length = ramp_down.mstosamps(sample_rate);
+    let ramp_time = ramp_down.mstosamps(sample_rate);
 
     Self {
       z: 1.,
@@ -20,8 +20,8 @@ impl RampSlide {
       ramp_prev: 1.,
       ramp_index: 0,
       ramp_step_size: 0.,
-      ramp_factor: ramp_down_length.recip(),
-      ramp_max_length: ramp_down_length as usize - 1,
+      ramp_time: ramp_time as usize - 1,
+      ramp_factor: ramp_time.recip(),
     }
   }
 
@@ -47,7 +47,7 @@ impl RampSlide {
     if input != self.ramp_prev {
       let step_size = difference * ((self.ramp_index + 1) as f32).recip();
       if self.ramp_index == 0 || self.ramp_step_size < step_size {
-        self.ramp_index = self.ramp_max_length;
+        self.ramp_index = self.ramp_time;
         self.ramp_step_size = difference * self.ramp_factor
       } else {
         self.ramp_step_size = step_size
