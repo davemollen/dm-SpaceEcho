@@ -82,10 +82,10 @@ impl DmSpaceEcho {
       } else {
         wow_and_flutter * wow_and_flutter * wow_and_flutter
       },
-      if hold { 20. } else { *ports.highpass_freq },
-      if hold { 0. } else { *ports.highpass_res * 0.01 },
-      if hold { 20000. } else { *ports.lowpass_freq },
-      if hold { 0. } else { *ports.lowpass_res * 0.01 },
+      *ports.highpass_freq,
+      *ports.highpass_res * 0.01,
+      *ports.lowpass_freq,
+      *ports.lowpass_res * 0.01,
       *ports.reverb * 0.01,
       *ports.decay * 0.01,
       *ports.stereo * 0.01,

@@ -61,26 +61,10 @@ impl DmSpaceEcho {
       } else {
         wow_and_flutter * wow_and_flutter * wow_and_flutter
       },
-      if hold {
-        20.
-      } else {
-        self.params.highpass_freq.value()
-      },
-      if hold {
-        0.
-      } else {
-        self.params.highpass_res.value()
-      },
-      if hold {
-        20000.
-      } else {
-        self.params.lowpass_freq.value()
-      },
-      if hold {
-        0.
-      } else {
-        self.params.lowpass_res.value()
-      },
+      self.params.highpass_freq.value(),
+      self.params.highpass_res.value(),
+      self.params.lowpass_freq.value(),
+      self.params.lowpass_res.value(),
       self.params.reverb.value(),
       self.params.decay.value(),
       self.params.stereo.value(),
