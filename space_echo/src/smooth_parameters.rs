@@ -38,7 +38,7 @@ impl SmoothParameters {
       smooth_stereo: ParamFilter::new(sample_rate, 7.),
       smooth_output_level: ParamFilter::new(sample_rate, 7.),
       smooth_mix: ParamFilter::new(sample_rate, 7.),
-      smooth_filter_gain: ParamFilter::new(sample_rate, 7.),
+      smooth_filter_gain: ParamFilter::new(sample_rate, 3.5),
       smooth_time_left: LogSmooth::new(sample_rate),
       smooth_time_right: LogSmooth::new(sample_rate),
     }
