@@ -10,9 +10,7 @@ pub struct SmoothParameters {
   smooth_feedback: ParamFilter,
   smooth_flutter_gain: ParamFilter,
   smooth_highpass_freq: ParamFilter,
-  smooth_highpass_res: ParamFilter,
   smooth_lowpass_freq: ParamFilter,
-  smooth_lowpass_res: ParamFilter,
   smooth_reverb: ParamFilter,
   smooth_decay: ParamFilter,
   smooth_stereo: ParamFilter,
@@ -30,9 +28,7 @@ impl SmoothParameters {
       smooth_feedback: ParamFilter::new(sample_rate, 7.),
       smooth_flutter_gain: ParamFilter::new(sample_rate, 7.),
       smooth_highpass_freq: ParamFilter::new(sample_rate, 7.),
-      smooth_highpass_res: ParamFilter::new(sample_rate, 7.),
       smooth_lowpass_freq: ParamFilter::new(sample_rate, 7.),
-      smooth_lowpass_res: ParamFilter::new(sample_rate, 7.),
       smooth_reverb: ParamFilter::new(sample_rate, 7.),
       smooth_decay: ParamFilter::new(sample_rate, 7.),
       smooth_stereo: ParamFilter::new(sample_rate, 7.),
@@ -52,9 +48,7 @@ impl SmoothParameters {
     feedback: f32,
     flutter_gain: f32,
     highpass_freq: f32,
-    highpass_res: f32,
     lowpass_freq: f32,
-    lowpass_res: f32,
     reverb: f32,
     decay: f32,
     stereo: f32,
@@ -66,9 +60,7 @@ impl SmoothParameters {
     self.smooth_feedback.initialize(feedback);
     self.smooth_flutter_gain.initialize(flutter_gain);
     self.smooth_highpass_freq.initialize(highpass_freq);
-    self.smooth_highpass_res.initialize(highpass_res);
     self.smooth_lowpass_freq.initialize(lowpass_freq);
-    self.smooth_lowpass_res.initialize(lowpass_res);
     self.smooth_reverb.initialize(reverb);
     self.smooth_decay.initialize(decay);
     self.smooth_stereo.initialize(stereo);
@@ -88,9 +80,7 @@ impl SmoothParameters {
     feedback: f32,
     flutter_gain: f32,
     highpass_freq: f32,
-    highpass_res: f32,
     lowpass_freq: f32,
-    lowpass_res: f32,
     reverb: f32,
     decay: f32,
     stereo: f32,
@@ -98,8 +88,6 @@ impl SmoothParameters {
     mix: f32,
     filter_gain: f32,
   ) -> (
-    f32,
-    f32,
     f32,
     f32,
     f32,
@@ -129,9 +117,7 @@ impl SmoothParameters {
       flutter_gain,
       flutter_gain * flutter_gain,
       self.smooth_highpass_freq.process(highpass_freq),
-      self.smooth_highpass_res.process(highpass_res),
       self.smooth_lowpass_freq.process(lowpass_freq),
-      self.smooth_lowpass_res.process(lowpass_res),
       self.smooth_reverb.process(reverb),
       self.smooth_decay.process(decay),
       self.smooth_stereo.process(stereo),

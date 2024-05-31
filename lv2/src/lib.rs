@@ -67,7 +67,6 @@ impl DmSpaceEcho {
 
     (
       if hold { 0. } else { (*ports.input).dbtoa() },
-      // TODO: limit time_mode and channel_mode to range from 0 to 1
       *ports.channel_mode as i32 - 1,
       *ports.time_mode as i32 - 1,
       *ports.time_left,
@@ -147,9 +146,7 @@ impl Plugin for DmSpaceEcho {
         feedback,
         flutter_gain,
         highpass_freq,
-        highpass_res,
         lowpass_freq,
-        lowpass_res,
         reverb,
         decay,
         stereo,
