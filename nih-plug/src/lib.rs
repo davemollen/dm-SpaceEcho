@@ -66,7 +66,7 @@ impl DmSpaceEcho {
       self.params.lowpass_freq.value(),
       self.params.lowpass_res.value(),
       self.params.reverb.value(),
-      self.params.decay.value(),
+      self.params.decay.value() * 0.5,
       self.params.stereo.value(),
       (self.params.duck.value() * MIN_DUCK_THRESHOLD).dbtoa(),
       self.params.output.value().dbtoa(),

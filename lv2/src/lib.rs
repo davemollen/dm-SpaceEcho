@@ -86,7 +86,7 @@ impl DmSpaceEcho {
       *ports.lowpass_freq,
       *ports.lowpass_res * 0.01,
       *ports.reverb * 0.01,
-      *ports.decay * 0.01,
+      *ports.decay * 0.005,
       *ports.stereo * 0.01,
       (*ports.duck * 0.01 * MIN_DUCK_THRESHOLD).dbtoa(),
       (*ports.output).dbtoa(),

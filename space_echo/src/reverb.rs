@@ -41,7 +41,7 @@ impl Reverb {
   pub fn process(&mut self, input: (f32, f32), reverb: f32, decay: f32) -> (f32, f32) {
     if reverb > 0. {
       let early_reflections_out = self.apply_early_reflections(input);
-      let reverb_out = self.apply_reverb_tail(early_reflections_out, decay * 0.5);
+      let reverb_out = self.apply_reverb_tail(early_reflections_out, decay);
 
       Mix::process(input, reverb_out, reverb)
     } else {
@@ -63,7 +63,7 @@ impl Reverb {
 
   fn apply_reverb_tail(&mut self, input: (f32, f32), decay: f32) -> (f32, f32) {
     let delay_out = self.read_from_taps(input);
-    let matrix_out = self.apply_matrix(delay_out);
+    let matrix_out = Self::apply_matrix(delay_out);
     self.apply_absorption_and_write_to_taps(matrix_out, decay);
 
     (delay_out[0], delay_out[1])
@@ -80,7 +80,7 @@ impl Reverb {
     ]
   }
 
-  fn apply_matrix(&self, input: [f32; 4]) -> impl IntoIterator<Item = f32> {
+  fn apply_matrix(input: [f32; 4]) -> impl IntoIterator<Item = f32> {
     MATRIX
       .into_iter()
       .map(move |matrix_element| Self::get_matrix_result(input, matrix_element))
