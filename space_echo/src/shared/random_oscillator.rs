@@ -1,6 +1,7 @@
 use crate::shared::{delta::Delta, float_ext::FloatExt};
 use std::f32::consts::PI;
 
+#[derive(Clone, Copy)]
 pub struct RandomOscillator {
   origin: f32,
   target: f32,

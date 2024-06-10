@@ -1,7 +1,13 @@
-mod tap;
-use tap::Tap;
 mod early_reflection;
-use crate::shared::{mix::Mix, phasor::Phasor};
+use std::simd::f32x4;
+
+use crate::shared::{
+  delay_line::{DelayLine, Interpolation},
+  mix::Mix,
+  one_pole_filter::OnePoleFilter,
+  phasor::Phasor,
+  random_oscillator::RandomOscillator,
+};
 use early_reflection::EarlyReflection;
 
 const MATRIX: [[f32; 4]; 4] = [
@@ -13,12 +19,17 @@ const MATRIX: [[f32; 4]; 4] = [
 
 pub struct Reverb {
   early_reflections: [EarlyReflection; 6],
-  taps: [Tap; 4],
+  time: [f32; 4],
+  delay_line: [DelayLine; 4],
+  one_pole_filter: OnePoleFilter,
+  random_lfo: [RandomOscillator; 4],
   phasor: Phasor,
 }
 
 impl Reverb {
   pub fn new(sample_rate: f32) -> Self {
+    let delay_times = [60., 71.9345, 86.7545, 95.945];
+
     Self {
       early_reflections: [
         EarlyReflection::new(sample_rate, 5.43216),
@@ -28,12 +39,11 @@ impl Reverb {
         EarlyReflection::new(sample_rate, 34.3876),
         EarlyReflection::new(sample_rate, 55.5437),
       ],
-      taps: [
-        Tap::new(sample_rate, 60.),
-        Tap::new(sample_rate, 71.9345),
-        Tap::new(sample_rate, 86.7545),
-        Tap::new(sample_rate, 95.945),
-      ],
+      time: delay_times,
+      delay_line: delay_times
+        .map(|time| DelayLine::new((sample_rate * time / 1000.) as usize + 1, sample_rate)),
+      one_pole_filter: OnePoleFilter::new(sample_rate),
+      random_lfo: [RandomOscillator::new(); 4],
       phasor: Phasor::new(sample_rate, 3.7),
     }
   }
@@ -70,34 +80,46 @@ impl Reverb {
   }
 
   fn read_from_taps(&mut self, input: (f32, f32)) -> [f32; 4] {
-    let lfo_phase = self.phasor.process();
+    let phase = self.phasor.process();
 
     [
-      self.taps[0].read(lfo_phase) + input.0,
-      self.taps[1].read(lfo_phase) + input.1,
-      self.taps[2].read(lfo_phase),
-      self.taps[3].read(lfo_phase),
+      self.delay_line[0].read(
+        self.time[0] + self.random_lfo[0].process(phase, 1.),
+        Interpolation::Linear,
+      ) + input.0,
+      self.delay_line[1].read(
+        self.time[1] + self.random_lfo[1].process(phase, 1.),
+        Interpolation::Linear,
+      ) + input.1,
+      self.delay_line[2].read(
+        self.time[2] + self.random_lfo[2].process(phase, 1.),
+        Interpolation::Linear,
+      ),
+      self.delay_line[3].read(
+        self.time[3] + self.random_lfo[3].process(phase, 1.),
+        Interpolation::Linear,
+      ),
     ]
   }
 
-  fn apply_matrix(input: [f32; 4]) -> impl IntoIterator<Item = f32> {
-    MATRIX
+  fn apply_absorption_and_write_to_taps(&mut self, input: f32x4, decay: f32) {
+    let absorb_out = self.one_pole_filter.process(input, 6000.);
+
+    absorb_out
+      .to_array()
       .into_iter()
-      .map(move |matrix_element| Self::get_matrix_result(input, matrix_element))
+      .enumerate()
+      .for_each(|(i, x)| self.delay_line[i].write(x * decay));
   }
 
-  fn apply_absorption_and_write_to_taps(
-    &mut self,
-    input: impl IntoIterator<Item = f32>,
-    decay: f32,
-  ) {
-    input
-      .into_iter()
-      .zip(self.taps.iter_mut())
-      .for_each(|(x, tap)| {
-        let absorb_out = tap.apply_absorb(x);
-        tap.write(absorb_out * decay)
-      })
+  fn apply_matrix(input: [f32; 4]) -> f32x4 {
+    [
+      Self::get_matrix_result(input, MATRIX[0]),
+      Self::get_matrix_result(input, MATRIX[1]),
+      Self::get_matrix_result(input, MATRIX[2]),
+      Self::get_matrix_result(input, MATRIX[3]),
+    ]
+    .into()
   }
 
   fn get_matrix_result(inputs: [f32; 4], matrix: [f32; 4]) -> f32 {

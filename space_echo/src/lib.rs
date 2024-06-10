@@ -1,3 +1,4 @@
+#![feature(portable_simd)]
 mod dc_block_stereo;
 mod duck;
 mod limiter;
@@ -18,6 +19,8 @@ mod shared {
   pub mod random_oscillator;
   pub mod slide;
 }
+
+use std::simd::f32x2;
 
 pub use reverb::Reverb;
 use {
@@ -261,13 +264,16 @@ impl SpaceEcho {
   ) -> (f32, f32) {
     match filter_gain {
       0. => input,
-      1. => self.get_filter_output(
-        input,
-        highpass_freq,
-        highpass_res,
-        lowpass_freq,
-        lowpass_res,
-      ),
+      1. => {
+        let filter_out = self.get_filter_output(
+          input,
+          highpass_freq,
+          highpass_res,
+          lowpass_freq,
+          lowpass_res,
+        );
+        (filter_out[0], filter_out[1])
+      }
       _ => {
         let filter_out = self.get_filter_output(
           input,
@@ -278,8 +284,8 @@ impl SpaceEcho {
         );
         let input_gain = 1. - filter_gain;
         (
-          filter_out.0 * filter_gain + input.0 * input_gain,
-          filter_out.1 * filter_gain + input.1 * input_gain,
+          filter_out[0] * filter_gain + input.0 * input_gain,
+          filter_out[1] * filter_gain + input.1 * input_gain,
         )
       }
     }
@@ -292,17 +298,22 @@ impl SpaceEcho {
     highpass_res: f32,
     lowpass_freq: f32,
     lowpass_res: f32,
-  ) -> (f32, f32) {
-    let highpass_filter_out =
-      self
-        .highpass_filter
-        .process(input, highpass_freq, highpass_res, FilterType::Highpass);
-    self.lowpass_filter.process(
-      highpass_filter_out,
-      lowpass_freq,
-      lowpass_res,
-      FilterType::Lowpass,
-    )
+  ) -> [f32; 2] {
+    let highpass_filter_out = self.highpass_filter.process(
+      f32x2::from_array([input.0, input.1]),
+      highpass_freq,
+      highpass_res,
+      FilterType::Highpass,
+    );
+    self
+      .lowpass_filter
+      .process(
+        highpass_filter_out,
+        lowpass_freq,
+        lowpass_res,
+        FilterType::Lowpass,
+      )
+      .to_array()
   }
 
   fn apply_channel_mode(&mut self, input: (f32, f32), channel_mode: i32) -> (f32, f32) {
