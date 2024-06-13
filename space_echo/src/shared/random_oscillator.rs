@@ -29,11 +29,11 @@ impl RandomOscillator {
       };
     }
 
-    self.cosine_interp(self.origin, self.target, phase)
+    self.cosine_interp(phase)
   }
 
-  fn cosine_interp(&self, origin: f32, target: f32, mix: f32) -> f32 {
+  fn cosine_interp(&self, mix: f32) -> f32 {
     let cosine_mix = (1. - (mix * PI).fast_cos()) * 0.5;
-    origin * (1. - cosine_mix) + target * cosine_mix
+    self.origin * (1. - cosine_mix) + self.target * cosine_mix
   }
 }
