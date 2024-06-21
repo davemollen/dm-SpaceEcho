@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-lv2 = "0.6.0"
+lv2 = { version = "0.6.0", features = ["minimal_plugin"] }
 space_echo = { path = "../space_echo" }
 
 [lib]
