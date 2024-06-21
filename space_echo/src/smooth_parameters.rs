@@ -35,8 +35,8 @@ impl SmoothParameters {
       smooth_output_level: ParamFilter::new(sample_rate, 7.),
       smooth_mix: ParamFilter::new(sample_rate, 7.),
       smooth_filter_gain: ParamFilter::new(sample_rate, 3.5),
-      smooth_time_left: LogSmooth::new(sample_rate),
-      smooth_time_right: LogSmooth::new(sample_rate),
+      smooth_time_left: LogSmooth::new(sample_rate, TIME_SMOOTHING_FACTOR),
+      smooth_time_right: LogSmooth::new(sample_rate, TIME_SMOOTHING_FACTOR),
     }
   }
 
@@ -106,7 +106,10 @@ impl SmoothParameters {
     let flutter_gain = self.smooth_flutter_gain.process(flutter_gain);
 
     let (time_left, time_right) = if time_mode == 0 {
-      self.get_time_params(time_left, time_right)
+      (
+        self.smooth_time_left.process(time_left),
+        self.smooth_time_right.process(time_right),
+      )
     } else {
       (time_left, time_right)
     };
@@ -127,16 +130,5 @@ impl SmoothParameters {
       time_left,
       time_right,
     )
-  }
-
-  fn get_time_params(&mut self, time_left: f32, time_right: f32) -> (f32, f32) {
-    let time_left = self
-      .smooth_time_left
-      .process(time_left, TIME_SMOOTHING_FACTOR);
-    let time_right = self
-      .smooth_time_right
-      .process(time_right, TIME_SMOOTHING_FACTOR);
-
-    (time_left, time_right)
   }
 }
