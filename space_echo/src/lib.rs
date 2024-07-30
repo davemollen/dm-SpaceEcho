@@ -173,7 +173,7 @@ impl SpaceEcho {
       self.read_from_delay_lines(time_left, time_right, time_mode, wow_gain, flutter_gain);
 
     let (saturation_output_left, saturation_output_right, saturation_gain_compensation) =
-      self.saturation.process(delay_output, 0.15);
+      self.saturation.process(delay_output);
 
     let filter_output = self.apply_filter(
       (saturation_output_left, saturation_output_right),

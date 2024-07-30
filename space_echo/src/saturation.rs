@@ -2,6 +2,8 @@ mod average;
 use crate::{shared::float_ext::FloatExt, shared::param_filter::ParamFilter};
 use average::Average;
 
+const THRESHOLD: f32 = 0.15;
+
 pub struct Saturation {
   average: Average,
   enabled: ParamFilter,
@@ -15,13 +17,13 @@ impl Saturation {
     }
   }
 
-  pub fn process(&mut self, input: (f32, f32), threshold: f32) -> (f32, f32, f32) {
+  pub fn process(&mut self, input: (f32, f32)) -> (f32, f32, f32) {
     let average = self.average.process((input.0 + input.1) * 0.5);
     let saturation_gain = self
       .enabled
-      .process(if average > threshold { 1. } else { 0. });
+      .process(if average > THRESHOLD { 1. } else { 0. });
     let clean_gain = 1. - saturation_gain;
-    let saturation_gain_compensation = (1. + threshold - average).clamp(0.4, 1.);
+    let saturation_gain_compensation = (1. + THRESHOLD - average).clamp(0.4, 1.);
 
     let (saturation_output_left, saturation_output_right) = (
       self.get_saturation_output(input.0, saturation_gain, clean_gain),
