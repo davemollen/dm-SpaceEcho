@@ -12,7 +12,7 @@ pub struct Saturation {
 impl Saturation {
   pub fn new(sample_rate: f32) -> Self {
     Self {
-      average: Average::new((1000. / 44100. * sample_rate) as usize),
+      average: Average::new(21_f32.mstosamps(sample_rate) as usize),
       enabled: ParamFilter::new(sample_rate, 7.),
     }
   }
@@ -23,7 +23,7 @@ impl Saturation {
       .enabled
       .process(if average > THRESHOLD { 1. } else { 0. });
     let clean_gain = 1. - saturation_gain;
-    let saturation_gain_compensation = (1. + THRESHOLD - average).clamp(0.4, 1.);
+    let saturation_gain_compensation = (1. + THRESHOLD - average).min(1.);
 
     let (saturation_output_left, saturation_output_right) = (
       self.get_saturation_output(input.0, saturation_gain, clean_gain),
