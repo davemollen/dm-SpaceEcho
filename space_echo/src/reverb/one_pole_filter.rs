@@ -1,25 +1,28 @@
-use std::{f32::consts::TAU, simd::f32x4};
+use std::f32::consts::TAU;
 
 pub struct OnePoleFilter {
-  z: f32x4,
-  b1: f32x4,
-  a0: f32x4,
+  t: f32,
+  z: [f32; 4],
+  b1: f32,
 }
 
 impl OnePoleFilter {
   pub fn new(sample_rate: f32, freq: f32) -> Self {
     let t = sample_rate.recip() * -TAU;
-    let b1 = f32x4::splat((freq * t).exp());
-
     Self {
-      z: f32x4::splat(0.),
-      b1,
-      a0: f32x4::splat(1.0) - b1,
+      t: sample_rate.recip() * -TAU,
+      z: [0.; 4],
+      b1: (freq * t).exp(),
     }
   }
 
-  pub fn process(&mut self, input: f32x4) -> f32x4 {
-    self.z = input * self.a0 + self.z * self.b1;
+  pub fn process(&mut self, input: [f32; 4]) -> [f32; 4] {
+    let a0 = 1. - self.b1;
+    self.z[0] = input[0] * a0 + self.z[0] * self.b1;
+    self.z[1] = input[1] * a0 + self.z[1] * self.b1;
+    self.z[2] = input[2] * a0 + self.z[2] * self.b1;
+    self.z[3] = input[3] * a0 + self.z[3] * self.b1;
+
     self.z
   }
 }

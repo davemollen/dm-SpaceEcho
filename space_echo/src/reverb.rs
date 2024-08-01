@@ -10,7 +10,6 @@ use {
   },
   early_reflection::EarlyReflection,
   one_pole_filter::OnePoleFilter,
-  std::simd::f32x4,
 };
 
 const MATRIX: [[f32; 4]; 4] = [
@@ -105,24 +104,22 @@ impl Reverb {
     ]
   }
 
-  fn apply_absorption_and_write_to_taps(&mut self, input: f32x4, decay: f32) {
+  fn apply_absorption_and_write_to_taps(&mut self, input: [f32; 4], decay: f32) {
     let absorb_out = self.one_pole_filter.process(input);
-
-    absorb_out
-      .to_array()
-      .into_iter()
-      .enumerate()
-      .for_each(|(i, x)| self.delay_line[i].write(x * decay));
+    self
+      .delay_line
+      .iter_mut()
+      .zip(absorb_out)
+      .for_each(|(delay_line, x)| delay_line.write(x * decay));
   }
 
-  fn apply_matrix(input: [f32; 4]) -> f32x4 {
+  fn apply_matrix(input: [f32; 4]) -> [f32; 4] {
     [
       Self::get_matrix_result(input, MATRIX[0]),
       Self::get_matrix_result(input, MATRIX[1]),
       Self::get_matrix_result(input, MATRIX[2]),
       Self::get_matrix_result(input, MATRIX[3]),
     ]
-    .into()
   }
 
   fn get_matrix_result(inputs: [f32; 4], matrix: [f32; 4]) -> f32 {
