@@ -1,8 +1,6 @@
 /* Transposed Sallen Key filter */
 mod one_pole_filter_stereo;
-use std::simd::f32x2;
-
-use one_pole_filter_stereo::OnePoleFilterStereo;
+use {one_pole_filter_stereo::OnePoleFilterStereo, std::simd::f32x2};
 
 #[derive(Clone, Copy)]
 pub enum FilterType {
@@ -36,7 +34,7 @@ impl TSKFilterStereo {
     let y0 = input - self.z;
     let y1 = self.one_pole_filters[0].process(y0, freq, filter_type);
     let y2 = self.one_pole_filters[1].process(y1, freq, filter_type);
-    self.z = y2 - y1 * f32x2::splat(resonance);
+    self.z = (y2 - y1) * f32x2::splat(resonance);
 
     y2
   }

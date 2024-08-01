@@ -1,14 +1,17 @@
 mod early_reflection;
-use std::simd::f32x4;
+mod one_pole_filter;
 
-use crate::shared::{
-  delay_line::{DelayLine, Interpolation},
-  mix::Mix,
+use {
+  crate::shared::{
+    delay_line::{DelayLine, Interpolation},
+    mix::Mix,
+    phasor::Phasor,
+    random_oscillator::RandomOscillator,
+  },
+  early_reflection::EarlyReflection,
   one_pole_filter::OnePoleFilter,
-  phasor::Phasor,
-  random_oscillator::RandomOscillator,
+  std::simd::f32x4,
 };
-use early_reflection::EarlyReflection;
 
 const MATRIX: [[f32; 4]; 4] = [
   [1.0, 1.0, 1.0, 1.0],
@@ -42,7 +45,7 @@ impl Reverb {
       time: delay_times,
       delay_line: delay_times
         .map(|time| DelayLine::new((sample_rate * time / 1000.) as usize + 1, sample_rate)),
-      one_pole_filter: OnePoleFilter::new(sample_rate),
+      one_pole_filter: OnePoleFilter::new(sample_rate, 6000.),
       random_lfo: [RandomOscillator::new(); 4],
       phasor: Phasor::new(sample_rate, 3.7),
     }
@@ -103,7 +106,7 @@ impl Reverb {
   }
 
   fn apply_absorption_and_write_to_taps(&mut self, input: f32x4, decay: f32) {
-    let absorb_out = self.one_pole_filter.process(input, 6000.);
+    let absorb_out = self.one_pole_filter.process(input);
 
     absorb_out
       .to_array()

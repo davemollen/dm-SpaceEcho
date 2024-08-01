@@ -17,7 +17,7 @@ impl Saturation {
     }
   }
 
-  pub fn process(&mut self, input: (f32, f32)) -> (f32, f32, f32) {
+  pub fn process(&mut self, input: (f32, f32)) -> ((f32, f32), f32) {
     let average = self.average.process((input.0 + input.1) * 0.5);
     let saturation_gain = self
       .enabled
@@ -25,15 +25,11 @@ impl Saturation {
     let clean_gain = 1. - saturation_gain;
     let saturation_gain_compensation = (1. + THRESHOLD - average).min(1.);
 
-    let (saturation_output_left, saturation_output_right) = (
+    let saturation_output = (
       self.get_saturation_output(input.0, saturation_gain, clean_gain),
       self.get_saturation_output(input.1, saturation_gain, clean_gain),
     );
-    (
-      saturation_output_left,
-      saturation_output_right,
-      saturation_gain_compensation,
-    )
+    (saturation_output, saturation_gain_compensation)
   }
 
   fn get_saturation_output(&self, input: f32, saturation_gain: f32, clean_gain: f32) -> f32 {

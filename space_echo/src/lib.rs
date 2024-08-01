@@ -13,16 +13,12 @@ mod shared {
   pub mod delta;
   pub mod float_ext;
   pub mod mix;
-  pub mod one_pole_filter;
   pub mod param_filter;
   pub mod phasor;
   pub mod random_oscillator;
   pub mod slide;
 }
 
-use std::simd::f32x2;
-
-pub use reverb::Reverb;
 use {
   dc_block_stereo::DcBlockStereo,
   duck::Duck,
@@ -33,11 +29,12 @@ use {
     mix::Mix,
   },
   smooth_parameters::SmoothParameters,
+  std::simd::f32x2,
   tsk_filter_stereo::{FilterType, TSKFilterStereo},
   variable_delay_read::VariableDelayRead,
   wow_and_flutter::{WowAndFlutter, MAX_WOW_AND_FLUTTER_TIME_IN_SECS},
 };
-pub use {duck::MIN_DUCK_THRESHOLD, shared::float_ext::FloatExt};
+pub use {duck::MIN_DUCK_THRESHOLD, reverb::Reverb, shared::float_ext::FloatExt};
 
 pub struct SpaceEcho {
   delay_line_left: DelayLine,
@@ -172,11 +169,10 @@ impl SpaceEcho {
     let delay_output =
       self.read_from_delay_lines(time_left, time_right, time_mode, wow_gain, flutter_gain);
 
-    let (saturation_output_left, saturation_output_right, saturation_gain_compensation) =
-      self.saturation.process(delay_output);
+    let (saturation_output, saturation_gain_compensation) = self.saturation.process(delay_output);
 
     let filter_output = self.apply_filter(
-      (saturation_output_left, saturation_output_right),
+      saturation_output,
       highpass_freq,
       highpass_res,
       lowpass_freq,
