@@ -283,10 +283,9 @@ impl SpaceEcho {
           lowpass_freq,
           lowpass_res,
         );
-        let input_gain = 1. - filter_gain;
         (
-          filter_out[0] * filter_gain + input.0 * input_gain,
-          filter_out[1] * filter_gain + input.1 * input_gain,
+          input.0 + (filter_out[0] - input.0) * filter_gain,
+          input.1 + (filter_out[1] - input.1) * filter_gain,
         )
       }
     }
@@ -343,11 +342,10 @@ impl SpaceEcho {
 
   fn apply_stereo_amount(&self, input: (f32, f32), stereo: f32) -> (f32, f32) {
     let factor = (1. - stereo) * 0.5;
-    let inverted_factor = 1. - factor;
 
     (
-      input.0 * inverted_factor + input.1 * factor,
-      input.0 * factor + input.1 * inverted_factor,
+      input.0 + (input.1 - input.0) * factor,
+      input.1 + (input.0 - input.1) * factor,
     )
   }
 
