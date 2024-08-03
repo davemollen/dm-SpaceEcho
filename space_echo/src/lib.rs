@@ -1,4 +1,5 @@
 #![feature(portable_simd)]
+mod average;
 mod dc_block_stereo;
 mod duck;
 mod limiter;
@@ -20,6 +21,7 @@ mod shared {
 }
 
 use {
+  average::Average,
   dc_block_stereo::DcBlockStereo,
   duck::Duck,
   limiter::Limiter,
@@ -42,7 +44,7 @@ pub struct SpaceEcho {
   variable_delay_read_left: VariableDelayRead,
   variable_delay_read_right: VariableDelayRead,
   wow_and_flutter: WowAndFlutter,
-  saturation: Saturation,
+  average: Average,
   highpass_filter: TSKFilterStereo,
   lowpass_filter: TSKFilterStereo,
   reverb: Reverb,
@@ -66,7 +68,7 @@ impl SpaceEcho {
       variable_delay_read_left: VariableDelayRead::new(sample_rate),
       variable_delay_read_right: VariableDelayRead::new(sample_rate),
       wow_and_flutter: WowAndFlutter::new(sample_rate),
-      saturation: Saturation::new(sample_rate),
+      average: Average::new(21_f32.mstosamps(sample_rate) as usize),
       highpass_filter: TSKFilterStereo::new(sample_rate),
       lowpass_filter: TSKFilterStereo::new(sample_rate),
       reverb: Reverb::new(sample_rate),
@@ -169,10 +171,13 @@ impl SpaceEcho {
     let delay_output =
       self.read_from_delay_lines(time_left, time_right, time_mode, wow_gain, flutter_gain);
 
-    let (saturation_output, saturation_gain_compensation) = self.saturation.process(delay_output);
+    let average = self
+      .average
+      .process(Self::take_loudest_channel(delay_output));
+    let gain_compensation = if average > 0.4 { 0.4 / average } else { 1. };
 
     let filter_output = self.apply_filter(
-      saturation_output,
+      delay_output,
       highpass_freq,
       highpass_res,
       lowpass_freq,
@@ -181,11 +186,11 @@ impl SpaceEcho {
     );
     let feedback_matrix_output = self.apply_channel_mode(filter_output, channel_mode);
     let db_block_output = self.dc_block.process(feedback_matrix_output);
-    self.write_to_delay_lines(delay_input, db_block_output, feedback);
+    self.write_to_delay_lines(delay_input, db_block_output, feedback, average);
 
     let stereo_output = self.apply_stereo_amount(filter_output, stereo);
     let reverb_output = self.reverb.process(
-      self.apply_gain(stereo_output, saturation_gain_compensation),
+      self.apply_gain(stereo_output, gain_compensation),
       reverb,
       decay,
     );
@@ -324,13 +329,16 @@ impl SpaceEcho {
     dry_input: (f32, f32),
     feedback_input: (f32, f32),
     feedback: f32,
+    saturation_mix: f32,
   ) {
-    self
-      .delay_line_left
-      .write(dry_input.0 + feedback_input.0 * feedback);
-    self
-      .delay_line_right
-      .write(dry_input.1 + feedback_input.1 * feedback);
+    let feedback_output = (
+      dry_input.0 + feedback_input.0 * feedback,
+      dry_input.1 + feedback_input.1 * feedback,
+    );
+    let saturation_output = Saturation::process(feedback_output, saturation_mix);
+
+    self.delay_line_left.write(saturation_output.0);
+    self.delay_line_right.write(saturation_output.1);
   }
 
   fn apply_stereo_amount(&self, input: (f32, f32), stereo: f32) -> (f32, f32) {
@@ -341,5 +349,13 @@ impl SpaceEcho {
       input.0 * inverted_factor + input.1 * factor,
       input.0 * factor + input.1 * inverted_factor,
     )
+  }
+
+  fn take_loudest_channel(input: (f32, f32)) -> f32 {
+    if input.0.abs() > input.1.abs() {
+      input.0
+    } else {
+      input.1
+    }
   }
 }

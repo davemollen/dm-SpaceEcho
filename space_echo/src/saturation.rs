@@ -1,44 +1,25 @@
-mod average;
-use crate::{shared::float_ext::FloatExt, shared::param_filter::ParamFilter};
-use average::Average;
+use crate::FloatExt;
 
-const THRESHOLD: f32 = 0.15;
-
-pub struct Saturation {
-  average: Average,
-  enabled: ParamFilter,
-}
+pub struct Saturation;
 
 impl Saturation {
-  pub fn new(sample_rate: f32) -> Self {
-    Self {
-      average: Average::new(21_f32.mstosamps(sample_rate) as usize),
-      enabled: ParamFilter::new(sample_rate, 7.),
-    }
+  pub fn process(input: (f32, f32), mix: f32) -> (f32, f32) {
+    let mix = mix.clamp(0., 1.);
+    let saturated = Self::fast_atan2(input);
+
+    (
+      input.0 + (saturated.0 - input.0) * mix,
+      input.1 + (saturated.1 - input.1) * mix,
+    )
   }
 
-  pub fn process(&mut self, input: (f32, f32)) -> ((f32, f32), f32) {
-    let average = self.average.process((input.0 + input.1) * 0.5);
-    let saturation_gain = self
-      .enabled
-      .process(if average > THRESHOLD { 1. } else { 0. });
-    let clean_gain = 1. - saturation_gain;
-    let saturation_gain_compensation = (1. + THRESHOLD - average).min(1.);
+  fn fast_atan2(x: (f32, f32)) -> (f32, f32) {
+    let n1 = 0.97239411;
+    let n2 = -0.19194795;
 
-    let saturation_output = (
-      self.get_saturation_output(input.0, saturation_gain, clean_gain),
-      self.get_saturation_output(input.1, saturation_gain, clean_gain),
-    );
-    (saturation_output, saturation_gain_compensation)
-  }
-
-  fn get_saturation_output(&self, input: f32, saturation_gain: f32, clean_gain: f32) -> f32 {
-    let clean_output = input * clean_gain;
-
-    if saturation_gain > 0. {
-      input.fast_tanh1() * saturation_gain + clean_output
-    } else {
-      clean_output
-    }
+    (
+      ((n1 + n2 * x.0 * x.0) * x.0).clamp(-1., 1.),
+      ((n1 + n2 * x.1 * x.1) * x.1).clamp(-1., 1.),
+    )
   }
 }
