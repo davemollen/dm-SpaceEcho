@@ -1,6 +1,6 @@
 #![feature(portable_simd)]
 mod average;
-mod dc_block_stereo;
+mod dc_block;
 mod duck;
 mod limiter;
 mod reverb;
@@ -22,7 +22,7 @@ mod shared {
 
 use {
   average::Average,
-  dc_block_stereo::DcBlockStereo,
+  dc_block::DcBlock,
   duck::Duck,
   limiter::Limiter,
   saturation::Saturation,
@@ -49,7 +49,7 @@ pub struct SpaceEcho {
   lowpass_filter: TSKFilterStereo,
   reverb: Reverb,
   duck: Duck,
-  dc_block: DcBlockStereo,
+  dc_block: DcBlock,
   limiter: Limiter,
   smooth_parameters: SmoothParameters,
 }
@@ -73,7 +73,7 @@ impl SpaceEcho {
       lowpass_filter: TSKFilterStereo::new(sample_rate),
       reverb: Reverb::new(sample_rate),
       duck: Duck::new(sample_rate),
-      dc_block: DcBlockStereo::new(sample_rate),
+      dc_block: DcBlock::new(sample_rate),
       limiter: Limiter::new(sample_rate, 2., 10., 40., 0.966051),
       smooth_parameters: SmoothParameters::new(sample_rate),
     }
@@ -174,7 +174,7 @@ impl SpaceEcho {
     let average = self
       .average
       .process(Self::take_loudest_channel(delay_output));
-    let gain_compensation = if average > 0.4 { 0.4 / average } else { 1. };
+    let gain_compensation = Self::retrieve_gain_compensation(average, 0.4);
 
     let filter_output = self.apply_filter(
       delay_output,
@@ -184,11 +184,11 @@ impl SpaceEcho {
       lowpass_res,
       filter_gain,
     );
-    let feedback_matrix_output = self.apply_channel_mode(filter_output, channel_mode);
-    let db_block_output = self.dc_block.process(feedback_matrix_output);
-    self.write_to_delay_lines(delay_input, db_block_output, feedback, average);
+    let dc_block_output = self.dc_block.process(filter_output);
+    let feedback_matrix_output = self.apply_channel_mode(dc_block_output, channel_mode);
+    self.write_to_delay_lines(delay_input, feedback_matrix_output, feedback, average);
 
-    let stereo_output = self.apply_stereo_amount(filter_output, stereo);
+    let stereo_output = self.apply_stereo_amount(dc_block_output, stereo);
     let reverb_output = self.reverb.process(
       self.apply_gain(stereo_output, gain_compensation),
       reverb,
@@ -262,19 +262,18 @@ impl SpaceEcho {
     lowpass_freq: f32,
     lowpass_res: f32,
     filter_gain: f32,
-  ) -> (f32, f32) {
+  ) -> f32x2 {
+    let input = f32x2::from_array([input.0, input.1]);
+
     match filter_gain {
       0. => input,
-      1. => {
-        let filter_out = self.get_filter_output(
-          input,
-          highpass_freq,
-          highpass_res,
-          lowpass_freq,
-          lowpass_res,
-        );
-        (filter_out[0], filter_out[1])
-      }
+      1. => self.get_filter_output(
+        input,
+        highpass_freq,
+        highpass_res,
+        lowpass_freq,
+        lowpass_res,
+      ),
       _ => {
         let filter_out = self.get_filter_output(
           input,
@@ -283,37 +282,29 @@ impl SpaceEcho {
           lowpass_freq,
           lowpass_res,
         );
-        (
-          input.0 + (filter_out[0] - input.0) * filter_gain,
-          input.1 + (filter_out[1] - input.1) * filter_gain,
-        )
+        input + (filter_out - input) * f32x2::splat(filter_gain)
       }
     }
   }
 
   fn get_filter_output(
     &mut self,
-    input: (f32, f32),
+    input: f32x2,
     highpass_freq: f32,
     highpass_res: f32,
     lowpass_freq: f32,
     lowpass_res: f32,
-  ) -> [f32; 2] {
-    let highpass_filter_out = self.highpass_filter.process(
-      f32x2::from_array([input.0, input.1]),
-      highpass_freq,
-      highpass_res,
-      FilterType::Highpass,
-    );
-    self
-      .lowpass_filter
-      .process(
-        highpass_filter_out,
-        lowpass_freq,
-        lowpass_res,
-        FilterType::Lowpass,
-      )
-      .to_array()
+  ) -> f32x2 {
+    let highpass_filter_out =
+      self
+        .highpass_filter
+        .process(input, highpass_freq, highpass_res, FilterType::Highpass);
+    self.lowpass_filter.process(
+      highpass_filter_out,
+      lowpass_freq,
+      lowpass_res,
+      FilterType::Lowpass,
+    )
   }
 
   fn apply_channel_mode(&mut self, input: (f32, f32), channel_mode: i32) -> (f32, f32) {
@@ -354,6 +345,14 @@ impl SpaceEcho {
       input.0
     } else {
       input.1
+    }
+  }
+
+  fn retrieve_gain_compensation(average: f32, threshold: f32) -> f32 {
+    if average > threshold {
+      threshold / average
+    } else {
+      1.
     }
   }
 }
