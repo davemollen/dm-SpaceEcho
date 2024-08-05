@@ -16,7 +16,6 @@ mod shared {
   pub mod param_filter;
   pub mod phasor;
   pub mod random_oscillator;
-  pub mod slide;
 }
 
 use {
