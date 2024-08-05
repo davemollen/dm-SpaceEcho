@@ -11,12 +11,6 @@ impl Saturation {
   }
 
   fn saturate(x: f32) -> f32 {
-    if x < -2.65155 {
-      1.
-    } else if x > 2.65155 {
-      -1.
-    } else {
-      (0.97239411 - 0.19194795 * x * x) * x
-    }
+    x / (x * x + 1.).sqrt()
   }
 }
