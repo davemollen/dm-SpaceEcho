@@ -68,7 +68,7 @@ impl SpaceEcho {
       variable_delay_read_left: VariableDelayRead::new(sample_rate),
       variable_delay_read_right: VariableDelayRead::new(sample_rate),
       wow_and_flutter: WowAndFlutter::new(sample_rate),
-      average: Average::new(21_f32.mstosamps(sample_rate) as usize),
+      average: Average::new(sample_rate, 20.),
       highpass_filter: TSKFilterStereo::new(sample_rate),
       lowpass_filter: TSKFilterStereo::new(sample_rate),
       reverb: Reverb::new(sample_rate),
@@ -191,11 +191,9 @@ impl SpaceEcho {
     let stereo_output =
       self.apply_stereo_amount(dc_block_output, stereo) * f32x2::splat(gain_compensation);
 
-    let reverb_output = self.reverb.process(
-      (stereo_output[0], stereo_output[1]),
-      reverb,
-      decay,
-    );
+    let reverb_output = self
+      .reverb
+      .process((stereo_output[0], stereo_output[1]), reverb, decay);
     let ducking_output = self.duck.process(reverb_output, input, duck_threshold);
     let space_echo_output = self.apply_gain(ducking_output, output_level);
     let mix_output = Mix::process(input, space_echo_output, mix);
