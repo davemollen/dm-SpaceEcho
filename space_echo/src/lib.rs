@@ -1,6 +1,5 @@
 #![feature(portable_simd)]
 mod average;
-mod dc_block;
 mod duck;
 mod limiter;
 mod reverb;
@@ -22,7 +21,6 @@ mod shared {
 
 use {
   average::Average,
-  dc_block::DcBlock,
   duck::Duck,
   limiter::Limiter,
   saturation::Saturation,
@@ -49,7 +47,6 @@ pub struct SpaceEcho {
   lowpass_filter: TSKFilterStereo,
   reverb: Reverb,
   duck: Duck,
-  dc_block: DcBlock,
   limiter: Limiter,
   smooth_parameters: SmoothParameters,
 }
@@ -73,7 +70,6 @@ impl SpaceEcho {
       lowpass_filter: TSKFilterStereo::new(sample_rate),
       reverb: Reverb::new(sample_rate),
       duck: Duck::new(sample_rate),
-      dc_block: DcBlock::new(sample_rate),
       limiter: Limiter::new(sample_rate, 2., 10., 40., 0.966051),
       smooth_parameters: SmoothParameters::new(sample_rate),
     }
@@ -184,12 +180,11 @@ impl SpaceEcho {
       lowpass_res,
       filter_gain,
     );
-    let dc_block_output = self.dc_block.process(filter_output);
-    let feedback_matrix_output = self.apply_channel_mode(dc_block_output, channel_mode);
+    let feedback_matrix_output = self.apply_channel_mode(filter_output, channel_mode);
     self.write_to_delay_lines(delay_input, feedback_matrix_output, feedback, average);
 
     let stereo_output =
-      self.apply_stereo_amount(dc_block_output, stereo) * f32x2::splat(gain_compensation);
+      self.apply_stereo_amount(filter_output, stereo) * f32x2::splat(gain_compensation);
 
     let reverb_output = self
       .reverb
