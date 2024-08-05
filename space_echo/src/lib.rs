@@ -31,7 +31,7 @@ use {
     mix::Mix,
   },
   smooth_parameters::SmoothParameters,
-  std::simd::f32x2,
+  std::simd::{f32x2, num::SimdFloat},
   tsk_filter_stereo::{FilterType, TSKFilterStereo},
   variable_delay_read::VariableDelayRead,
   wow_and_flutter::{WowAndFlutter, MAX_WOW_AND_FLUTTER_TIME_IN_SECS},
@@ -188,9 +188,11 @@ impl SpaceEcho {
     let feedback_matrix_output = self.apply_channel_mode(dc_block_output, channel_mode);
     self.write_to_delay_lines(delay_input, feedback_matrix_output, feedback, average);
 
-    let stereo_output = self.apply_stereo_amount(dc_block_output, stereo);
+    let stereo_output =
+      self.apply_stereo_amount(dc_block_output, stereo) * f32x2::splat(gain_compensation);
+
     let reverb_output = self.reverb.process(
-      self.apply_gain(stereo_output, gain_compensation),
+      (stereo_output[0], stereo_output[1]),
       reverb,
       decay,
     );
@@ -204,12 +206,12 @@ impl SpaceEcho {
     (input.0 * gain, input.1 * gain)
   }
 
-  fn get_delay_input(&self, input: (f32, f32), channel_mode: i32, gain: f32) -> (f32, f32) {
+  fn get_delay_input(&self, input: (f32, f32), channel_mode: i32, gain: f32) -> f32x2 {
     let input = self.apply_gain(input, gain);
 
     match channel_mode {
-      1 => ((input.0 + input.1) * 0.5, 0.),
-      _ => input,
+      1 => f32x2::from_array([(input.0 + input.1) * 0.5, 0.]),
+      _ => f32x2::from_array([input.0, input.1]),
     }
   }
 
@@ -220,7 +222,7 @@ impl SpaceEcho {
     time_mode: i32,
     wow_gain: f32,
     flutter_gain: f32,
-  ) -> (f32, f32) {
+  ) -> f32x2 {
     let wow_and_flutter_time = if wow_gain > 0. {
       self.wow_and_flutter.process(wow_gain, flutter_gain)
     } else {
@@ -235,7 +237,7 @@ impl SpaceEcho {
         .delay_line_right
         .read(time_right + wow_and_flutter_time, Interpolation::Linear);
 
-      (delay_out_left, delay_out_right)
+      f32x2::from_array([delay_out_left, delay_out_right])
     } else {
       let delay_out_left = self.variable_delay_read_left.read(
         &mut self.delay_line_left,
@@ -250,21 +252,19 @@ impl SpaceEcho {
         Interpolation::Linear,
       );
 
-      (delay_out_left, delay_out_right)
+      f32x2::from_array([delay_out_left, delay_out_right])
     }
   }
 
   fn apply_filter(
     &mut self,
-    input: (f32, f32),
+    input: f32x2,
     highpass_freq: f32,
     highpass_res: f32,
     lowpass_freq: f32,
     lowpass_res: f32,
     filter_gain: f32,
   ) -> f32x2 {
-    let input = f32x2::from_array([input.0, input.1]);
-
     match filter_gain {
       0. => input,
       1. => self.get_filter_output(
@@ -307,45 +307,35 @@ impl SpaceEcho {
     )
   }
 
-  fn apply_channel_mode(&mut self, input: (f32, f32), channel_mode: i32) -> (f32, f32) {
+  fn apply_channel_mode(&mut self, input: f32x2, channel_mode: i32) -> f32x2 {
     match channel_mode {
-      1 => (input.1, input.0),
+      1 => input.reverse(),
       _ => input,
     }
   }
 
   fn write_to_delay_lines(
     &mut self,
-    dry_input: (f32, f32),
-    feedback_input: (f32, f32),
+    dry_input: f32x2,
+    feedback_input: f32x2,
     feedback: f32,
     saturation_mix: f32,
   ) {
-    let feedback_output = (
-      dry_input.0 + feedback_input.0 * feedback,
-      dry_input.1 + feedback_input.1 * feedback,
-    );
+    let feedback_output = dry_input + feedback_input * f32x2::splat(feedback);
     let saturation_output = Saturation::process(feedback_output, saturation_mix);
 
-    self.delay_line_left.write(saturation_output.0);
-    self.delay_line_right.write(saturation_output.1);
+    self.delay_line_left.write(saturation_output[0]);
+    self.delay_line_right.write(saturation_output[1]);
   }
 
-  fn apply_stereo_amount(&self, input: (f32, f32), stereo: f32) -> (f32, f32) {
+  fn apply_stereo_amount(&self, input: f32x2, stereo: f32) -> f32x2 {
     let factor = (1. - stereo) * 0.5;
 
-    (
-      input.0 + (input.1 - input.0) * factor,
-      input.1 + (input.0 - input.1) * factor,
-    )
+    input + (input - input.reverse()) * f32x2::splat(factor)
   }
 
-  fn take_loudest_channel(input: (f32, f32)) -> f32 {
-    if input.0.abs() > input.1.abs() {
-      input.0
-    } else {
-      input.1
-    }
+  fn take_loudest_channel(input: f32x2) -> f32 {
+    input.abs().reduce_max()
   }
 
   fn retrieve_gain_compensation(average: f32, threshold: f32) -> f32 {

@@ -15,11 +15,11 @@ impl DcBlock {
     }
   }
 
-  pub fn process(&mut self, x: f32x2) -> (f32, f32) {
+  pub fn process(&mut self, x: f32x2) -> f32x2 {
     let coeff = f32x2::splat(1. - (220.5 * self.sample_period));
     let y = x - self.xm1 + coeff * self.ym1;
     self.xm1 = x;
     self.ym1 = y;
-    (y[0], y[1])
+    y
   }
 }
