@@ -19,7 +19,7 @@
 	mod:brand "DM" ;
 	mod:label "SpaceEcho" ;
 	rdfs:comment """
-A space echo effect written in Rust.
+A delay and reverb effect inspired by the Space Echo.
 """ ;
 	lv2:requiredFeature lv2:inPlaceBroken ;
 	lv2:optionalFeature lv2:hardRTCapable ;
