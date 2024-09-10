@@ -52,8 +52,8 @@ impl VariableDelayRead {
     let window = (ramp * FRAC_PI_2).fast_cos();
     let window = window * window;
 
-    let a = delay_line.read(self.previous_time + added_time, interp);
-    let b = delay_line.read(self.next_time + added_time, interp);
+    let a = delay_line.read(self.next_time + added_time, interp);
+    let b = delay_line.read(self.previous_time + added_time, interp);
     a + (b - a) * window
   }
 }
