@@ -1,33 +1,32 @@
-#[path="./editor/time_controls.rs"]
-mod time_controls;
-#[path="./editor/reverb_filter_controls.rs"]
-mod reverb_filter_controls;
-#[path="./editor/level_controls.rs"]
+#[path = "./editor/level_controls.rs"]
 mod level_controls;
+#[path = "./editor/reverb_filter_controls.rs"]
+mod reverb_filter_controls;
+#[path = "./editor/time_controls.rs"]
+mod time_controls;
 mod ui_data;
-pub use ui_data::{UiData, ParamChangeEvent};
-use nih_plug::prelude::Editor;
-use nih_plug_vizia::{ViziaState, ViziaTheming, create_vizia_editor};
-use nih_plug_vizia::vizia::{
-  views::HStack, 
-  modifiers::StyleModifiers, 
-  model::Model
-};
-use std::sync::Arc;
 use crate::space_echo_parameters::SpaceEchoParameters;
+use nih_plug::prelude::Editor;
+use nih_plug_vizia::vizia::{model::Model, modifiers::StyleModifiers, views::HStack};
+use nih_plug_vizia::{create_vizia_editor, ViziaState, ViziaTheming};
+use std::sync::Arc;
+pub use ui_data::{ParamChangeEvent, UiData};
 
 const STYLE: &str = include_str!("./editor/style.css");
 
 // Makes sense to also define this here, makes it a bit easier to keep track of
 pub(crate) fn default_state() -> Arc<ViziaState> {
-    ViziaState::new(|| (800, 360))
+  ViziaState::new(|| (800, 360))
 }
 
 pub(crate) fn create(
-    params: Arc<SpaceEchoParameters>,
-    editor_state: Arc<ViziaState>,
+  params: Arc<SpaceEchoParameters>,
+  editor_state: Arc<ViziaState>,
 ) -> Option<Box<dyn Editor>> {
-    create_vizia_editor(editor_state, ViziaTheming::Custom, move |cx, gui_context| { 
+  create_vizia_editor(
+    editor_state,
+    ViziaTheming::Custom,
+    move |cx, gui_context| {
       let _ = cx.add_stylesheet(STYLE);
 
       UiData {
@@ -40,6 +39,8 @@ pub(crate) fn create(
         time_controls::build(cx, params.clone());
         reverb_filter_controls::build(cx, params.clone());
         level_controls::build(cx, params.clone());
-      }).background_color("#161616");
-    })
+      })
+      .background_color("#161616");
+    },
+  )
 }

@@ -51,6 +51,24 @@ textbox:checked.caret {
   caret-color: #e1d9d1;
 }
 
+button {
+  background-color: #363636;
+  border-width: 0px;
+}
+
+button:hover {
+  background-color: #363636;
+}
+
+button.active:hover {
+  background-color: #51afef;
+}
+
+button.active {
+  background-color: #51afef;
+  border-width: 0px;
+}
+
 .hide {
   display: none;
 }

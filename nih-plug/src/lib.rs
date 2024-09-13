@@ -8,11 +8,13 @@ mod editor;
 struct DmSpaceEcho {
   params: Arc<SpaceEchoParameters>,
   space_echo: SpaceEcho,
+  is_active: bool,
 }
 
 impl DmSpaceEcho {
   fn get_params(
     &self,
+    context: &mut impl ProcessContext<Self>,
   ) -> (
     f32,
     i32,
@@ -36,7 +38,7 @@ impl DmSpaceEcho {
   ) {
     let hold = self.params.hold.value();
     let wow_and_flutter = self.params.wow_and_flutter.value();
-
+    let (time_left, time_right) = self.get_time_params(context);
     (
       if hold {
         0.
@@ -45,12 +47,8 @@ impl DmSpaceEcho {
       },
       self.params.channel_mode.value() as i32,
       self.params.time_mode.value() as i32,
-      self.params.time_left.value(),
-      if self.params.time_link.value() {
-        self.params.time_left.value()
-      } else {
-        self.params.time_right.value()
-      },
+      time_left,
+      time_right,
       if hold {
         1.
       } else {
@@ -75,6 +73,51 @@ impl DmSpaceEcho {
       if self.params.hold.value() { 0. } else { 1. },
     )
   }
+
+  fn get_time_params(&self, context: &mut impl ProcessContext<Self>) -> (f32, f32) {
+    let bpm = context.transport().tempo.unwrap_or(120.) as f32;
+    let beat_time = 60000. / bpm;
+
+    let time_left = if self.params.sync_left.value() {
+      self.get_synced_time(beat_time, self.params.division_left.value())
+    } else {
+      self.params.time_left.value()
+    };
+
+    let time_right = match (
+      self.params.time_link.value(),
+      self.params.sync_right.value(),
+    ) {
+      (true, _) => time_left,
+      (false, true) => self.get_synced_time(beat_time, self.params.division_right.value()),
+      (false, false) => self.params.time_right.value(),
+    };
+
+    (time_left, time_right)
+  }
+
+  fn get_synced_time(&self, beat_time: f32, division: i32) -> f32 {
+    let factor = match division {
+      0 => 0.125,
+      1 => 0.166666666666667,
+      2 => 0.1875,
+      3 => 0.25,
+      4 => 0.333333333333333,
+      5 => 0.375,
+      6 => 0.5,
+      7 => 0.666666666666667,
+      8 => 0.75,
+      9 => 1.,
+      10 => 1.333333333333333,
+      11 => 1.5,
+      12 => 2.,
+      13 => 2.666666666666667,
+      14 => 3.,
+      15 => 4.,
+      _ => panic!("synced_time value is out of range."),
+    };
+    beat_time * factor
+  }
 }
 
 impl Default for DmSpaceEcho {
@@ -83,6 +126,7 @@ impl Default for DmSpaceEcho {
     Self {
       params: params.clone(),
       space_echo: SpaceEcho::new(44100.),
+      is_active: false,
     }
   }
 }
@@ -123,42 +167,6 @@ impl Plugin for DmSpaceEcho {
     _context: &mut impl InitContext<Self>,
   ) -> bool {
     self.space_echo = SpaceEcho::new(buffer_config.sample_rate);
-    let (
-      input_level,
-      _channel_mode,
-      _time_mode,
-      time_left,
-      time_right,
-      feedback,
-      flutter_gain,
-      highpass_freq,
-      _highpass_res,
-      lowpass_freq,
-      _lowpass_res,
-      reverb,
-      decay,
-      stereo,
-      _duck_threshold,
-      output_level,
-      mix,
-      _limiter,
-      filter_gain,
-    ) = self.get_params();
-    self.space_echo.initialize_params_to_smooth(
-      input_level,
-      time_left,
-      time_right,
-      feedback,
-      flutter_gain,
-      highpass_freq,
-      lowpass_freq,
-      reverb,
-      decay,
-      stereo,
-      output_level,
-      mix,
-      filter_gain,
-    );
     true
   }
 
@@ -166,7 +174,7 @@ impl Plugin for DmSpaceEcho {
     &mut self,
     buffer: &mut Buffer,
     _aux: &mut AuxiliaryBuffers,
-    _context: &mut impl ProcessContext<Self>,
+    context: &mut impl ProcessContext<Self>,
   ) -> ProcessStatus {
     let (
       input_level,
@@ -188,7 +196,25 @@ impl Plugin for DmSpaceEcho {
       mix,
       limiter,
       filter_gain,
-    ) = self.get_params();
+    ) = self.get_params(context);
+    if !self.is_active {
+      self.space_echo.initialize_params_to_smooth(
+        input_level,
+        time_left,
+        time_right,
+        feedback,
+        flutter_gain,
+        highpass_freq,
+        lowpass_freq,
+        reverb,
+        decay,
+        stereo,
+        output_level,
+        mix,
+        filter_gain,
+      );
+      self.is_active = true;
+    }
 
     buffer.iter_samples().for_each(|mut channel_samples| {
       let channel_iterator = &mut channel_samples.iter_mut();

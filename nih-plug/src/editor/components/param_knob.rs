@@ -29,7 +29,7 @@ impl ParamKnobSize {
   }
 }
 
-pub struct ParamKnob {}
+pub struct ParamKnob;
 
 impl ParamKnob {
   pub fn new<'a, L, P, F, M, C>(
@@ -59,9 +59,7 @@ impl ParamKnob {
       Knob::new(
         cx,
         lens.map(move |p| params_to_param(p).default_normalized_value()),
-        lens.map(move |p| {
-          params_to_param(p).preview_normalized(params_to_param(p).modulated_plain_value())
-        }),
+        lens.map(move |p| params_to_param(p).modulated_normalized_value()),
         false,
       )
       .on_changing(move |cx, val| {

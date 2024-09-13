@@ -8,7 +8,9 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-nih_plug = { git = "https://github.com/robbert-vdh/nih-plug", features = ["assert_process_allocs"] }
+nih_plug = { git = "https://github.com/robbert-vdh/nih-plug", features = [
+    "assert_process_allocs",
+] }
 nih_plug_vizia = { git = "https://github.com/robbert-vdh/nih-plug.git" }
 space_echo = { path = "../space_echo" }
 

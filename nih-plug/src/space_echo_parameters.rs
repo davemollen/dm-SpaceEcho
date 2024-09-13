@@ -1,12 +1,12 @@
 use nih_plug::{
   formatters::{s2v_f32_hz_then_khz, s2v_f32_percentage, v2s_f32_hz_then_khz, v2s_f32_percentage},
-  params::{enums::Enum, EnumParam},
-  prelude::{BoolParam, FloatParam, FloatRange, Params},
+  params::{enums::Enum, EnumParam, IntParam},
+  prelude::{BoolParam, FloatParam, FloatRange, IntRange, Params},
 };
 use std::sync::Arc;
 mod custom_formatters;
 use crate::editor;
-use custom_formatters::v2s_f32_digits;
+use custom_formatters::{s2v_f32_synced_time, v2s_f32_digits, v2s_f32_synced_time};
 use nih_plug_vizia::ViziaState;
 
 #[derive(Enum, PartialEq)]
@@ -39,11 +39,23 @@ pub struct SpaceEchoParameters {
   #[id = "time_link"]
   pub time_link: BoolParam,
 
+  #[id = "sync_left"]
+  pub sync_left: BoolParam,
+
+  #[id = "sync_right"]
+  pub sync_right: BoolParam,
+
   #[id = "time_left"]
   pub time_left: FloatParam,
 
   #[id = "time_right"]
   pub time_right: FloatParam,
+
+  #[id = "division_left"]
+  pub division_left: IntParam,
+
+  #[id = "division_right"]
+  pub division_right: IntParam,
 
   #[id = "feedback"]
   pub feedback: FloatParam,
@@ -108,6 +120,10 @@ impl Default for SpaceEchoParameters {
 
       time_mode: EnumParam::new("Time Mode", TimeMode::Repitch),
 
+      sync_left: BoolParam::new("Sync Left", false),
+
+      sync_right: BoolParam::new("Sync Right", false),
+
       time_link: BoolParam::new("Link", true),
 
       time_left: FloatParam::new(
@@ -133,6 +149,14 @@ impl Default for SpaceEchoParameters {
       )
       .with_unit(" ms")
       .with_value_to_string(v2s_f32_digits(2)),
+
+      division_left: IntParam::new("Division Left", 9, IntRange::Linear { min: 0, max: 15 })
+        .with_value_to_string(v2s_f32_synced_time())
+        .with_string_to_value(s2v_f32_synced_time()),
+
+      division_right: IntParam::new("Division Right", 9, IntRange::Linear { min: 0, max: 15 })
+        .with_value_to_string(v2s_f32_synced_time())
+        .with_string_to_value(s2v_f32_synced_time()),
 
       feedback: FloatParam::new("Feedback", 0.5, FloatRange::Linear { min: 0., max: 1.5 })
         .with_unit(" %")
@@ -198,7 +222,6 @@ impl Default for SpaceEchoParameters {
         .with_value_to_string(v2s_f32_percentage(2))
         .with_string_to_value(s2v_f32_percentage()),
 
-      // TODO: add an AsymmetricalSkewed option to the FloatRange enum
       output: FloatParam::new(
         "Output",
         0.,
