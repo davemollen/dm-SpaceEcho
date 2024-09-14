@@ -5,16 +5,16 @@ function(event) {
       case "time_link":
             const time_link = event.icon.find("[mod-port-symbol=time_link]");
             const time_right = event.icon.find("[mod-port-symbol=time_right]");
-            const synced_time_right = event.icon.find(".synced-time-knob");
+            const linked_time_right = event.icon.find(".linked-time-knob");
 
             if(value == 1) {
               time_link.addClass("on");
               time_right.addClass("hide");
-              synced_time_right.removeClass("hide");
+              linked_time_right.removeClass("hide");
             } else {
               time_link.removeClass("on");
               time_right.removeClass("hide");
-              synced_time_right.addClass("hide");
+              linked_time_right.addClass("hide");
             }
             break;
         case "limiter":
