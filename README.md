@@ -1,6 +1,6 @@
 ## dm-SpaceEcho
 
-A delay and reverb effect inspired by the legendary Space Echo written in Rust.
+A delay and reverb effect inspired by Space Echo devices written in Rust.
 
 The effect can be compiled to a [MOD audio](https://mod.audio/), VST3 or CLAP plugin.
 
