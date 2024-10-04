@@ -4,8 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-lv2 = { version = "0.6.0", features = ["minimal_plugin"] }
+lv2 = { git = "https://github.com/davemollen/rust-lv2.git", features = ["minimal_plugin"] }
 space_echo = { path = "../space_echo" }
+
+[patch.crates-io]
+lv2-sys = { git = "https://github.com/davemollen/rust-lv2.git", package = "lv2-sys" }
+lv2-core = { git = "https://github.com/davemollen/rust-lv2.git", package = "lv2-core" }
 
 [lib]
 crate-type = ["cdylib"]
