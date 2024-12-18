@@ -1,7 +1,7 @@
 extern crate lv2;
 extern crate space_echo;
 use lv2::prelude::*;
-use space_echo::{FloatExt, SpaceEcho, MIN_DUCK_THRESHOLD};
+use space_echo::{FloatExt, SmoothParameters, SpaceEcho, MIN_DUCK_THRESHOLD};
 
 #[derive(PortCollection)]
 struct Ports {
@@ -34,7 +34,7 @@ struct Ports {
 #[uri("https://github.com/davemollen/dm-SpaceEcho")]
 struct DmSpaceEcho {
   space_echo: SpaceEcho,
-  is_active: bool,
+  smooth_parameters: SmoothParameters,
 }
 
 impl DmSpaceEcho {
@@ -106,10 +106,12 @@ impl Plugin for DmSpaceEcho {
   type AudioFeatures = ();
 
   // Create a new instance of the plugin; Trivial in this case.
-  fn new(_plugin_info: &PluginInfo, _features: &mut ()) -> Option<Self> {
+  fn new(plugin_info: &PluginInfo, _features: &mut ()) -> Option<Self> {
+    let sample_rate = plugin_info.sample_rate() as f32;
+
     Some(Self {
-      space_echo: SpaceEcho::new(_plugin_info.sample_rate() as f32),
-      is_active: false,
+      space_echo: SpaceEcho::new(sample_rate),
+      smooth_parameters: SmoothParameters::new(sample_rate)
     })
   }
 
@@ -137,25 +139,7 @@ impl Plugin for DmSpaceEcho {
       limiter,
       filter_gain,
     ) = self.get_params(ports);
-
-    if !self.is_active {
-      self.space_echo.initialize_params_to_smooth(
-        input_level,
-        time_left,
-        time_right,
-        feedback,
-        flutter_gain,
-        highpass_freq,
-        lowpass_freq,
-        reverb,
-        decay,
-        stereo,
-        output_level,
-        mix,
-        filter_gain,
-      );
-      self.is_active = true;
-    }
+    self.smooth_parameters.set_targets(input_level, time_left, time_right, feedback, flutter_gain, highpass_freq, lowpass_freq, reverb, decay, stereo, output_level, mix, filter_gain);
 
     let input_channels = ports.input_left.iter().zip(ports.input_right.iter());
     let output_channels = ports
@@ -166,30 +150,16 @@ impl Plugin for DmSpaceEcho {
     for ((input_left, input_right), (output_left, output_right)) in
       input_channels.zip(output_channels)
     {
-      let (space_echo_left, space_echo_right) = self.space_echo.process(
+      (*output_left, *output_right) = self.space_echo.process(
         (*input_left, *input_right),
-        input_level,
         channel_mode,
         time_mode,
-        time_left,
-        time_right,
-        feedback,
-        flutter_gain,
-        highpass_freq,
         highpass_res,
-        lowpass_freq,
         lowpass_res,
-        reverb,
-        decay,
-        stereo,
         duck_threshold,
-        output_level,
-        mix,
         limiter,
-        filter_gain,
+        &mut self.smooth_parameters,
       );
-      *output_left = space_echo_left;
-      *output_right = space_echo_right;
     }
   }
 }

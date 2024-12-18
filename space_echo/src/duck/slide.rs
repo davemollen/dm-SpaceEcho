@@ -16,10 +16,10 @@ impl Slide {
   }
 
   pub fn process(&mut self, input: f32) -> f32 {
-    if input.is_equal_to(self.z) {
+    let difference = input - self.z;
+    if difference.abs() <= f32::EPSILON {
       input
     } else {
-      let difference = input - self.z;
       self.z += difference
         * if input > self.z {
           self.slide_up

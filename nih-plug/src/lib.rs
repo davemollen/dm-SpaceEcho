@@ -1,5 +1,5 @@
 use nih_plug::prelude::*;
-use space_echo::{FloatExt, SpaceEcho, MIN_DUCK_THRESHOLD};
+use space_echo::{FloatExt, SpaceEcho, MIN_DUCK_THRESHOLD, SmoothParameters};
 mod space_echo_parameters;
 use space_echo_parameters::SpaceEchoParameters;
 use std::sync::Arc;
@@ -8,7 +8,7 @@ mod editor;
 struct DmSpaceEcho {
   params: Arc<SpaceEchoParameters>,
   space_echo: SpaceEcho,
-  is_active: bool,
+  smooth_parameters: SmoothParameters,
 }
 
 impl DmSpaceEcho {
@@ -126,7 +126,7 @@ impl Default for DmSpaceEcho {
     Self {
       params: params.clone(),
       space_echo: SpaceEcho::new(44100.),
-      is_active: false,
+      smooth_parameters: SmoothParameters::new(44100.),
     }
   }
 }
@@ -167,6 +167,7 @@ impl Plugin for DmSpaceEcho {
     _context: &mut impl InitContext<Self>,
   ) -> bool {
     self.space_echo = SpaceEcho::new(buffer_config.sample_rate);
+    self.smooth_parameters = SmoothParameters::new(buffer_config.sample_rate);
     true
   }
 
@@ -197,55 +198,23 @@ impl Plugin for DmSpaceEcho {
       limiter,
       filter_gain,
     ) = self.get_params(context);
-    if !self.is_active {
-      self.space_echo.initialize_params_to_smooth(
-        input_level,
-        time_left,
-        time_right,
-        feedback,
-        flutter_gain,
-        highpass_freq,
-        lowpass_freq,
-        reverb,
-        decay,
-        stereo,
-        output_level,
-        mix,
-        filter_gain,
-      );
-      self.is_active = true;
-    }
+    self.smooth_parameters.set_targets(input_level, time_left, time_right, feedback, flutter_gain, highpass_freq, lowpass_freq, reverb, decay, stereo, output_level, mix, filter_gain);
 
     buffer.iter_samples().for_each(|mut channel_samples| {
       let channel_iterator = &mut channel_samples.iter_mut();
       let left_channel = channel_iterator.next().unwrap();
       let right_channel = channel_iterator.next().unwrap();
 
-      let (space_echo_left, space_echo_right) = self.space_echo.process(
+      (*left_channel, *right_channel) = self.space_echo.process(
         (*left_channel, *right_channel),
-        input_level,
         channel_mode,
         time_mode,
-        time_left,
-        time_right,
-        feedback,
-        flutter_gain,
-        highpass_freq,
         highpass_res,
-        lowpass_freq,
         lowpass_res,
-        reverb,
-        decay,
-        stereo,
         duck_threshold,
-        output_level,
-        mix,
         limiter,
-        filter_gain,
+        &mut self.smooth_parameters,
       );
-
-      *left_channel = space_echo_left;
-      *right_channel = space_echo_right;
     });
     ProcessStatus::Normal
   }
