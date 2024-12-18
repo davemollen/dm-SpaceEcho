@@ -13,7 +13,6 @@ mod shared {
   pub mod delta;
   pub mod float_ext;
   pub mod mix;
-  pub mod param_filter;
   pub mod phasor;
   pub mod random_oscillator;
 }
@@ -27,13 +26,18 @@ use {
     delay_line::{DelayLine, Interpolation},
     mix::Mix,
   },
-  smooth_parameters::SmoothParameters,
+  smooth_parameters::Smoother,
   std::simd::{f32x2, num::SimdFloat},
   tsk_filter_stereo::{FilterType, TSKFilterStereo},
   variable_delay_read::VariableDelayRead,
   wow_and_flutter::{WowAndFlutter, MAX_WOW_AND_FLUTTER_TIME_IN_SECS},
 };
-pub use {duck::MIN_DUCK_THRESHOLD, reverb::Reverb, shared::float_ext::FloatExt};
+pub use {
+  duck::MIN_DUCK_THRESHOLD, 
+  reverb::Reverb, 
+  shared::float_ext::FloatExt, 
+  smooth_parameters::SmoothParameters
+};
 
 pub struct SpaceEcho {
   delay_line_left: DelayLine,
@@ -47,7 +51,6 @@ pub struct SpaceEcho {
   reverb: Reverb,
   duck: Duck,
   limiter: Limiter,
-  smooth_parameters: SmoothParameters,
 }
 
 impl SpaceEcho {
@@ -70,101 +73,36 @@ impl SpaceEcho {
       reverb: Reverb::new(sample_rate),
       duck: Duck::new(sample_rate),
       limiter: Limiter::new(sample_rate, 2., 10., 40., 0.966051),
-      smooth_parameters: SmoothParameters::new(sample_rate),
     }
-  }
-
-  pub fn initialize_params_to_smooth(
-    &mut self,
-    input_level: f32,
-    time_left: f32,
-    time_right: f32,
-    feedback: f32,
-    flutter_gain: f32,
-    highpass_freq: f32,
-    lowpass_freq: f32,
-    reverb: f32,
-    decay: f32,
-    stereo: f32,
-    output_level: f32,
-    mix: f32,
-    filter_gain: f32,
-  ) {
-    self.smooth_parameters.initialize(
-      input_level,
-      time_left,
-      time_right,
-      feedback,
-      flutter_gain,
-      highpass_freq,
-      lowpass_freq,
-      reverb,
-      decay,
-      stereo,
-      output_level,
-      mix,
-      filter_gain,
-    );
   }
 
   pub fn process(
     &mut self,
     input: (f32, f32),
-    input_level: f32,
     channel_mode: i32,
     time_mode: i32,
-    time_left: f32,
-    time_right: f32,
-    feedback: f32,
-    flutter_gain: f32,
-    highpass_freq: f32,
     highpass_res: f32,
-    lowpass_freq: f32,
     lowpass_res: f32,
-    reverb: f32,
-    decay: f32,
-    stereo: f32,
     duck_threshold: f32,
-    output_level: f32,
-    mix: f32,
     limiter: bool,
-    filter_gain: f32,
+    smooth_parameters: &mut SmoothParameters
   ) -> (f32, f32) {
-    let (
-      input_level,
-      feedback,
-      wow_gain,
-      flutter_gain,
-      highpass_freq,
-      lowpass_freq,
-      reverb,
-      decay,
-      stereo,
-      output_level,
-      mix,
-      filter_gain,
-      time_left,
-      time_right,
-    ) = self.smooth_parameters.get_params(
-      input_level,
-      time_mode,
-      time_left,
-      time_right,
-      feedback,
-      flutter_gain,
-      highpass_freq,
-      lowpass_freq,
-      reverb,
-      decay,
-      stereo,
-      output_level,
-      mix,
-      filter_gain,
-    );
+    let input_level = smooth_parameters.input_level.next();
+    let feedback = smooth_parameters.feedback.next();
+    let flutter_gain = smooth_parameters.flutter_gain.next();
+    let highpass_freq = smooth_parameters.highpass_freq.next();
+    let lowpass_freq = smooth_parameters.lowpass_freq.next();
+    let reverb = smooth_parameters.reverb.next();
+    let decay = smooth_parameters.decay.next();
+    let stereo = smooth_parameters.stereo.next();
+    let output_level = smooth_parameters.output_level.next();
+    let mix = smooth_parameters.mix.next();
+    let filter_gain = smooth_parameters.filter_gain.next();
+    let (time_left, time_right) = smooth_parameters.get_time(time_mode);
 
     let delay_input = self.get_delay_input(input, channel_mode, input_level);
     let delay_output =
-      self.read_from_delay_lines(time_left, time_right, time_mode, wow_gain, flutter_gain);
+      self.read_from_delay_lines(time_left, time_right, time_mode, flutter_gain);
 
     let average = self
       .average
@@ -212,11 +150,10 @@ impl SpaceEcho {
     time_left: f32,
     time_right: f32,
     time_mode: i32,
-    wow_gain: f32,
     flutter_gain: f32,
   ) -> f32x2 {
-    let wow_and_flutter_time = if wow_gain > 0. {
-      self.wow_and_flutter.process(wow_gain, flutter_gain)
+    let wow_and_flutter_time = if flutter_gain > 0. {
+      self.wow_and_flutter.process(flutter_gain)
     } else {
       0.
     };

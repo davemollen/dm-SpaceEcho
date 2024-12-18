@@ -26,10 +26,10 @@ impl RampSlide {
   }
 
   pub fn process(&mut self, input: f32) -> f32 {
-    if input.is_equal_to(self.z) {
+    let difference = input - self.z;
+    if difference.abs() <= f32::EPSILON {
       input
     } else {
-      let difference = input - self.z;
       if difference <= 0. {
         self.ramp_down(input, difference)
       } else {
