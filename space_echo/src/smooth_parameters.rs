@@ -18,6 +18,12 @@ pub struct SmoothParameters {
   pub filter_gain: ExponentialSmooth,
   time_left: LogarithmicSmooth,
   time_right: LogarithmicSmooth,
+  pub channel_mode: i32,
+  pub time_mode: i32,
+  pub highpass_res: f32,
+  pub lowpass_res: f32,
+  pub duck_threshold: f32,
+  pub limiter: bool,
 }
 
 impl SmoothParameters {
@@ -36,23 +42,35 @@ impl SmoothParameters {
       filter_gain: ExponentialSmooth::new(3.5, sample_rate),
       time_left: LogarithmicSmooth::new(TIME_SMOOTHING_FACTOR, sample_rate),
       time_right: LogarithmicSmooth::new(TIME_SMOOTHING_FACTOR, sample_rate),
+      channel_mode: 0,
+      time_mode: 0,
+      highpass_res: 0.,
+      lowpass_res: 0.,
+      duck_threshold: 0.,
+      limiter: false,
     }
   }
 
   pub fn set_targets(
     &mut self,
     input_level: f32,
+    channel_mode: i32,
+    time_mode: i32,
     time_left: f32,
     time_right: f32,
     feedback: f32,
     flutter_gain: f32,
     highpass_freq: f32,
+    highpass_res: f32,
     lowpass_freq: f32,
+    lowpass_res: f32,
     reverb: f32,
     decay: f32,
     stereo: f32,
+    duck_threshold: f32,
     output_level: f32,
     mix: f32,
+    limiter: bool,
     filter_gain: f32,
   ) {
     self.input_level.set_target(input_level);
@@ -68,6 +86,12 @@ impl SmoothParameters {
     self.filter_gain.set_target(filter_gain);
     self.time_left.set_target(time_left);
     self.time_right.set_target(time_right);
+    self.channel_mode = channel_mode;
+    self.time_mode = time_mode;
+    self.highpass_res = highpass_res;
+    self.lowpass_res = lowpass_res;
+    self.duck_threshold = duck_threshold;
+    self.limiter = limiter;
   }
 
   pub fn get_time(&mut self, time_mode: i32) -> (f32, f32) {

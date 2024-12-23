@@ -198,7 +198,27 @@ impl Plugin for DmSpaceEcho {
       limiter,
       filter_gain,
     ) = self.get_params(context);
-    self.smooth_parameters.set_targets(input_level, time_left, time_right, feedback, flutter_gain, highpass_freq, lowpass_freq, reverb, decay, stereo, output_level, mix, filter_gain);
+    self.smooth_parameters.set_targets(
+      input_level, 
+      channel_mode, 
+      time_mode, 
+      time_left, 
+      time_right, 
+      feedback, 
+      flutter_gain, 
+      highpass_freq, 
+      highpass_res, 
+      lowpass_freq, 
+      lowpass_res, 
+      reverb, 
+      decay, 
+      stereo, 
+      duck_threshold, 
+      output_level, 
+      mix, 
+      limiter, 
+      filter_gain
+    );
 
     buffer.iter_samples().for_each(|mut channel_samples| {
       let channel_iterator = &mut channel_samples.iter_mut();
@@ -207,12 +227,6 @@ impl Plugin for DmSpaceEcho {
 
       (*left_channel, *right_channel) = self.space_echo.process(
         (*left_channel, *right_channel),
-        channel_mode,
-        time_mode,
-        highpass_res,
-        lowpass_res,
-        duck_threshold,
-        limiter,
         &mut self.smooth_parameters,
       );
     });

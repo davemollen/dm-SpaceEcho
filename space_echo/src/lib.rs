@@ -79,14 +79,17 @@ impl SpaceEcho {
   pub fn process(
     &mut self,
     input: (f32, f32),
-    channel_mode: i32,
-    time_mode: i32,
-    highpass_res: f32,
-    lowpass_res: f32,
-    duck_threshold: f32,
-    limiter: bool,
     smooth_parameters: &mut SmoothParameters
   ) -> (f32, f32) {
+    let SmoothParameters { 
+      time_mode, 
+      channel_mode, 
+      lowpass_res, 
+      highpass_res, 
+      duck_threshold, 
+      limiter, 
+      .. 
+    } = *smooth_parameters;
     let input_level = smooth_parameters.input_level.next();
     let feedback = smooth_parameters.feedback.next();
     let flutter_gain = smooth_parameters.flutter_gain.next();
