@@ -1,7 +1,7 @@
 extern crate lv2;
 extern crate space_echo;
 use lv2::prelude::*;
-use space_echo::{FloatExt, SmoothParameters, SpaceEcho, MIN_DUCK_THRESHOLD};
+use space_echo::{Params, SpaceEcho};
 
 #[derive(PortCollection)]
 struct Ports {
@@ -34,67 +34,7 @@ struct Ports {
 #[uri("https://github.com/davemollen/dm-SpaceEcho")]
 struct DmSpaceEcho {
   space_echo: SpaceEcho,
-  smooth_parameters: SmoothParameters,
-}
-
-impl DmSpaceEcho {
-  pub fn get_params(
-    &self,
-    ports: &mut Ports,
-  ) -> (
-    f32,
-    i32,
-    i32,
-    f32,
-    f32,
-    f32,
-    f32,
-    f32,
-    f32,
-    f32,
-    f32,
-    f32,
-    f32,
-    f32,
-    f32,
-    f32,
-    f32,
-    bool,
-    f32,
-  ) {
-    let hold = *ports.hold == 1.;
-    let wow_and_flutter = *ports.wow_and_flutter * 0.01;
-
-    (
-      if hold { 0. } else { (*ports.input).dbtoa() },
-      *ports.channel_mode as i32 - 1,
-      *ports.time_mode as i32 - 1,
-      *ports.time_left,
-      if *ports.time_link == 1. {
-        *ports.time_left
-      } else {
-        *ports.time_right
-      },
-      if hold { 1. } else { *ports.feedback * 0.01 },
-      if hold {
-        0.
-      } else {
-        wow_and_flutter * wow_and_flutter * wow_and_flutter
-      },
-      *ports.highpass_freq,
-      *ports.highpass_res * 0.01,
-      *ports.lowpass_freq,
-      *ports.lowpass_res * 0.01,
-      *ports.reverb * 0.01,
-      *ports.decay * 0.005,
-      *ports.stereo * 0.01,
-      (*ports.duck * 0.01 * MIN_DUCK_THRESHOLD).dbtoa(),
-      (*ports.output).dbtoa(),
-      *ports.mix * 0.01,
-      *ports.limiter == 1.,
-      if hold { 0. } else { 1. },
-    )
-  }
+  params: Params,
 }
 
 impl Plugin for DmSpaceEcho {
@@ -111,54 +51,34 @@ impl Plugin for DmSpaceEcho {
 
     Some(Self {
       space_echo: SpaceEcho::new(sample_rate),
-      smooth_parameters: SmoothParameters::new(sample_rate)
+      params: Params::new(sample_rate)
     })
   }
 
   // Process a chunk of audio. The audio ports are dereferenced to slices, which the plugin
   // iterates over.
   fn run(&mut self, ports: &mut Ports, _features: &mut (), _sample_count: u32) {
-    let (
-      input_level,
-      channel_mode,
-      time_mode,
-      time_left,
-      time_right,
-      feedback,
-      flutter_gain,
-      highpass_freq,
-      highpass_res,
-      lowpass_freq,
-      lowpass_res,
-      reverb,
-      decay,
-      stereo,
-      duck_threshold,
-      output_level,
-      mix,
-      limiter,
-      filter_gain,
-    ) = self.get_params(ports);
-    self.smooth_parameters.set_targets(
-      input_level, 
-      channel_mode,
-      time_mode,
-      time_left, 
-      time_right, 
-      feedback, 
-      flutter_gain, 
-      highpass_freq, 
-      highpass_res,
-      lowpass_freq,
-      lowpass_res,
-      reverb, 
-      decay, 
-      stereo, 
-      duck_threshold,
-      output_level, 
-      mix, 
-      limiter,
-      filter_gain
+    self.params.set(
+      *ports.input, 
+      *ports.channel_mode as i32 - 1,
+      *ports.time_mode as i32 - 1,
+      *ports.time_link == 1.,
+      *ports.time_left, 
+      *ports.time_right, 
+      *ports.feedback * 0.01, 
+      *ports.wow_and_flutter * 0.01, 
+      *ports.highpass_freq, 
+      *ports.highpass_res * 0.01,
+      *ports.lowpass_freq,
+      *ports.lowpass_res * 0.01,
+      *ports.reverb * 0.01,
+      *ports.decay * 0.005,
+      *ports.stereo * 0.01, 
+      *ports.duck * 0.01,
+      *ports.output, 
+      *ports.mix * 0.01, 
+      *ports.limiter == 1.,
+      *ports.hold == 1.,
     );
 
     let input_channels = ports.input_left.iter().zip(ports.input_right.iter());
@@ -172,7 +92,7 @@ impl Plugin for DmSpaceEcho {
     {
       (*output_left, *output_right) = self.space_echo.process(
         (*input_left, *input_right),
-        &mut self.smooth_parameters,
+        &mut self.params,
       );
     }
   }
