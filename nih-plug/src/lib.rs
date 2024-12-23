@@ -1,5 +1,5 @@
 use nih_plug::prelude::*;
-use space_echo::{FloatExt, SpaceEcho, MIN_DUCK_THRESHOLD, SmoothParameters};
+use space_echo::{SpaceEcho, Params as ProcessedParams};
 mod space_echo_parameters;
 use space_echo_parameters::SpaceEchoParameters;
 use std::sync::Arc;
@@ -8,72 +8,10 @@ mod editor;
 struct DmSpaceEcho {
   params: Arc<SpaceEchoParameters>,
   space_echo: SpaceEcho,
-  smooth_parameters: SmoothParameters,
+  processed_params: ProcessedParams,
 }
 
 impl DmSpaceEcho {
-  fn get_params(
-    &self,
-    context: &mut impl ProcessContext<Self>,
-  ) -> (
-    f32,
-    i32,
-    i32,
-    f32,
-    f32,
-    f32,
-    f32,
-    f32,
-    f32,
-    f32,
-    f32,
-    f32,
-    f32,
-    f32,
-    f32,
-    f32,
-    f32,
-    bool,
-    f32,
-  ) {
-    let hold = self.params.hold.value();
-    let wow_and_flutter = self.params.wow_and_flutter.value();
-    let (time_left, time_right) = self.get_time_params(context);
-    (
-      if hold {
-        0.
-      } else {
-        self.params.input.value().dbtoa()
-      },
-      self.params.channel_mode.value() as i32,
-      self.params.time_mode.value() as i32,
-      time_left,
-      time_right,
-      if hold {
-        1.
-      } else {
-        self.params.feedback.value()
-      },
-      if hold {
-        0.
-      } else {
-        wow_and_flutter * wow_and_flutter * wow_and_flutter
-      },
-      self.params.highpass_freq.value(),
-      self.params.highpass_res.value(),
-      self.params.lowpass_freq.value(),
-      self.params.lowpass_res.value(),
-      self.params.reverb.value(),
-      self.params.decay.value() * 0.5,
-      self.params.stereo.value(),
-      (self.params.duck.value() * MIN_DUCK_THRESHOLD).dbtoa(),
-      self.params.output.value().dbtoa(),
-      self.params.mix.value(),
-      self.params.limiter.value(),
-      if self.params.hold.value() { 0. } else { 1. },
-    )
-  }
-
   fn get_time_params(&self, context: &mut impl ProcessContext<Self>) -> (f32, f32) {
     let bpm = context.transport().tempo.unwrap_or(120.) as f32;
     let beat_time = 60000. / bpm;
@@ -126,7 +64,7 @@ impl Default for DmSpaceEcho {
     Self {
       params: params.clone(),
       space_echo: SpaceEcho::new(44100.),
-      smooth_parameters: SmoothParameters::new(44100.),
+      processed_params: ProcessedParams::new(44100.),
     }
   }
 }
@@ -167,7 +105,7 @@ impl Plugin for DmSpaceEcho {
     _context: &mut impl InitContext<Self>,
   ) -> bool {
     self.space_echo = SpaceEcho::new(buffer_config.sample_rate);
-    self.smooth_parameters = SmoothParameters::new(buffer_config.sample_rate);
+    self.processed_params = ProcessedParams::new(buffer_config.sample_rate);
     true
   }
 
@@ -177,47 +115,28 @@ impl Plugin for DmSpaceEcho {
     _aux: &mut AuxiliaryBuffers,
     context: &mut impl ProcessContext<Self>,
   ) -> ProcessStatus {
-    let (
-      input_level,
-      channel_mode,
-      time_mode,
-      time_left,
-      time_right,
-      feedback,
-      flutter_gain,
-      highpass_freq,
-      highpass_res,
-      lowpass_freq,
-      lowpass_res,
-      reverb,
-      decay,
-      stereo,
-      duck_threshold,
-      output_level,
-      mix,
-      limiter,
-      filter_gain,
-    ) = self.get_params(context);
-    self.smooth_parameters.set_targets(
-      input_level, 
-      channel_mode, 
-      time_mode, 
+    let (time_left, time_right) = self.get_time_params(context);
+    self.processed_params.set(
+      self.params.input.value(), 
+      self.params.channel_mode.value() as i32, 
+      self.params.time_mode.value() as i32, 
+      self.params.time_link.value(), 
       time_left, 
       time_right, 
-      feedback, 
-      flutter_gain, 
-      highpass_freq, 
-      highpass_res, 
-      lowpass_freq, 
-      lowpass_res, 
-      reverb, 
-      decay, 
-      stereo, 
-      duck_threshold, 
-      output_level, 
-      mix, 
-      limiter, 
-      filter_gain
+      self.params.feedback.value(), 
+      self.params.wow_and_flutter.value(), 
+      self.params.highpass_freq.value(), 
+      self.params.highpass_res.value(), 
+      self.params.lowpass_freq.value(), 
+      self.params.lowpass_res.value(), 
+      self.params.reverb.value(), 
+      self.params.decay.value(), 
+      self.params.stereo.value(), 
+      self.params.duck.value(), 
+      self.params.output.value(), 
+      self.params.mix.value(), 
+      self.params.limiter.value(), 
+      self.params.hold.value(),
     );
 
     buffer.iter_samples().for_each(|mut channel_samples| {
@@ -225,9 +144,9 @@ impl Plugin for DmSpaceEcho {
       let left_channel = channel_iterator.next().unwrap();
       let right_channel = channel_iterator.next().unwrap();
 
-      (*left_channel, *right_channel) = self.space_echo.process(
+      (*left_channel, *right_channel)  = self.space_echo.process(
         (*left_channel, *right_channel),
-        &mut self.smooth_parameters,
+        &mut self.processed_params,
       );
     });
     ProcessStatus::Normal

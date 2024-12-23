@@ -4,7 +4,7 @@ mod duck;
 mod limiter;
 mod reverb;
 mod saturation;
-mod smooth_parameters;
+mod params;
 mod tsk_filter_stereo;
 mod variable_delay_read;
 mod wow_and_flutter;
@@ -18,25 +18,15 @@ mod shared {
 }
 
 use {
-  average::Average,
-  duck::Duck,
-  limiter::Limiter,
-  saturation::Saturation,
-  shared::{
+  average::Average, duck::Duck, limiter::Limiter, params::Smoother, saturation::Saturation, shared::{
     delay_line::{DelayLine, Interpolation},
+    float_ext::FloatExt,
     mix::Mix,
-  },
-  smooth_parameters::Smoother,
-  std::simd::{f32x2, num::SimdFloat},
-  tsk_filter_stereo::{FilterType, TSKFilterStereo},
-  variable_delay_read::VariableDelayRead,
-  wow_and_flutter::{WowAndFlutter, MAX_WOW_AND_FLUTTER_TIME_IN_SECS},
+  }, std::simd::{f32x2, num::SimdFloat}, tsk_filter_stereo::{FilterType, TSKFilterStereo}, variable_delay_read::VariableDelayRead, wow_and_flutter::{WowAndFlutter, MAX_WOW_AND_FLUTTER_TIME_IN_SECS}
 };
 pub use {
-  duck::MIN_DUCK_THRESHOLD, 
   reverb::Reverb, 
-  shared::float_ext::FloatExt, 
-  smooth_parameters::SmoothParameters
+  params::Params
 };
 
 pub struct SpaceEcho {
@@ -79,9 +69,9 @@ impl SpaceEcho {
   pub fn process(
     &mut self,
     input: (f32, f32),
-    smooth_parameters: &mut SmoothParameters
+    params: &mut Params
   ) -> (f32, f32) {
-    let SmoothParameters { 
+    let Params { 
       time_mode, 
       channel_mode, 
       lowpass_res, 
@@ -89,19 +79,19 @@ impl SpaceEcho {
       duck_threshold, 
       limiter, 
       .. 
-    } = *smooth_parameters;
-    let input_level = smooth_parameters.input_level.next();
-    let feedback = smooth_parameters.feedback.next();
-    let flutter_gain = smooth_parameters.flutter_gain.next();
-    let highpass_freq = smooth_parameters.highpass_freq.next();
-    let lowpass_freq = smooth_parameters.lowpass_freq.next();
-    let reverb = smooth_parameters.reverb.next();
-    let decay = smooth_parameters.decay.next();
-    let stereo = smooth_parameters.stereo.next();
-    let output_level = smooth_parameters.output_level.next();
-    let mix = smooth_parameters.mix.next();
-    let filter_gain = smooth_parameters.filter_gain.next();
-    let (time_left, time_right) = smooth_parameters.get_time(time_mode);
+    } = *params;
+    let input_level = params.input_level.next();
+    let feedback = params.feedback.next();
+    let flutter_gain = params.flutter_gain.next();
+    let highpass_freq = params.highpass_freq.next();
+    let lowpass_freq = params.lowpass_freq.next();
+    let reverb = params.reverb.next();
+    let decay = params.decay.next();
+    let stereo = params.stereo.next();
+    let output_level = params.output_level.next();
+    let mix = params.mix.next();
+    let filter_gain = params.filter_gain.next();
+    let (time_left, time_right) = params.get_time(time_mode);
 
     let delay_input = self.get_delay_input(input, channel_mode, input_level);
     let delay_output =
