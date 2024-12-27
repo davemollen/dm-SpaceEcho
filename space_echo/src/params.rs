@@ -24,31 +24,33 @@ pub struct Params {
   pub output_level: ExponentialSmooth,
   pub mix: ExponentialSmooth,
   pub limiter: bool,
-  pub filter_gain: ExponentialSmooth,
+  pub filter_fader: ExponentialSmooth,
+  is_initialized: bool,
 }
 
 impl Params {
   pub fn new(sample_rate: f32) -> Self {
     Self {
-      input_level: ExponentialSmooth::new(7., sample_rate),
+      input_level: ExponentialSmooth::new(sample_rate, 7.),
       channel_mode: 0,
       time_mode: 0,
-      time_left: LogarithmicSmooth::new(TIME_SMOOTHING_FACTOR, sample_rate),
-      time_right: LogarithmicSmooth::new(TIME_SMOOTHING_FACTOR, sample_rate),
-      feedback: ExponentialSmooth::new(7., sample_rate),
-      flutter_gain: ExponentialSmooth::new(7., sample_rate),
-      highpass_freq: ExponentialSmooth::new(7., sample_rate),
+      time_left: LogarithmicSmooth::new(sample_rate, TIME_SMOOTHING_FACTOR),
+      time_right: LogarithmicSmooth::new(sample_rate, TIME_SMOOTHING_FACTOR),
+      feedback: ExponentialSmooth::new(sample_rate, 7.),
+      flutter_gain: ExponentialSmooth::new(sample_rate, 7.),
+      highpass_freq: ExponentialSmooth::new(sample_rate, 7.),
       highpass_res: 0.,
-      lowpass_freq: ExponentialSmooth::new(7., sample_rate),
+      lowpass_freq: ExponentialSmooth::new(sample_rate, 7.),
       lowpass_res: 0.,
-      reverb: ExponentialSmooth::new(7., sample_rate),
-      decay: ExponentialSmooth::new(7., sample_rate),
-      stereo: ExponentialSmooth::new(7., sample_rate),
+      reverb: ExponentialSmooth::new(sample_rate, 7.),
+      decay: ExponentialSmooth::new(sample_rate, 7.),
+      stereo: ExponentialSmooth::new(sample_rate, 7.),
       duck_threshold: 0.,
-      output_level: ExponentialSmooth::new(7., sample_rate),
-      mix: ExponentialSmooth::new(7., sample_rate),
+      output_level: ExponentialSmooth::new(sample_rate, 7.),
+      mix: ExponentialSmooth::new(sample_rate, 7.),
       limiter: false,
-      filter_gain: ExponentialSmooth::new(3.5, sample_rate),
+      filter_fader: ExponentialSmooth::new(sample_rate, 3.5),
+      is_initialized: false,
     }
   }
 
@@ -75,33 +77,55 @@ impl Params {
     limiter: bool,
     hold: bool,
   ) {
-    self
-      .input_level
-      .set_target(if hold { 0. } else { input_level.dbtoa() });
     self.channel_mode = channel_mode;
     self.time_mode = time_mode;
-    self.time_left.set_target(time_left);
-    self
-      .time_right
-      .set_target(if time_link { time_left } else { time_right });
-    self.feedback.set_target(if hold { 1. } else { feedback });
-    self.flutter_gain.set_target(if hold {
+    self.highpass_res = highpass_res;
+    self.lowpass_res = lowpass_res;
+    self.duck_threshold = (duck * MIN_DUCK_THRESHOLD).dbtoa();
+    self.limiter = limiter;
+
+    let input_level = if hold { 0. } else { input_level.dbtoa() };
+    let time_right = if time_link { time_left } else { time_right };
+    let feedback = if hold { 1. } else { feedback };
+    let flutter_gain = if hold {
       0.
     } else {
       wow_and_flutter * wow_and_flutter * wow_and_flutter
-    });
-    self.highpass_freq.set_target(highpass_freq);
-    self.highpass_res = highpass_res;
-    self.lowpass_freq.set_target(lowpass_freq);
-    self.lowpass_res = lowpass_res;
-    self.reverb.set_target(reverb);
-    self.decay.set_target(decay * 0.5);
-    self.stereo.set_target(stereo);
-    self.duck_threshold = (duck * MIN_DUCK_THRESHOLD).dbtoa();
-    self.output_level.set_target(output_level.dbtoa());
-    self.mix.set_target(mix);
-    self.limiter = limiter;
-    self.filter_gain.set_target(if hold { 0. } else { 1. });
+    };
+    let decay = decay * 0.5;
+    let output_level = output_level.dbtoa();
+    let filter_fader = if hold { 0. } else { 1. };
+
+    if self.is_initialized {
+      self.input_level.set_target(input_level);
+      self.time_left.set_target(time_left);
+      self.time_right.set_target(time_right);
+      self.feedback.set_target(feedback);
+      self.flutter_gain.set_target(flutter_gain);
+      self.highpass_freq.set_target(highpass_freq);
+      self.lowpass_freq.set_target(lowpass_freq);
+      self.reverb.set_target(reverb);
+      self.decay.set_target(decay);
+      self.stereo.set_target(stereo);
+      self.output_level.set_target(output_level);
+      self.mix.set_target(mix);
+      self.filter_fader.set_target(filter_fader);
+    } else {
+      self.input_level.reset(input_level);
+      self.time_left.reset(time_left);
+      self.time_right.reset(time_right);
+      self.feedback.reset(feedback);
+      self.flutter_gain.reset(flutter_gain);
+      self.highpass_freq.reset(highpass_freq);
+      self.lowpass_freq.reset(lowpass_freq);
+      self.reverb.reset(reverb);
+      self.decay.reset(decay);
+      self.stereo.reset(stereo);
+      self.output_level.reset(output_level);
+      self.mix.reset(mix);
+      self.filter_fader.reset(filter_fader);
+      self.is_initialized = true;
+    }
   }
 
   pub fn get_time(&mut self, time_mode: i32) -> (f32, f32) {

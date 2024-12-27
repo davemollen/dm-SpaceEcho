@@ -1,5 +1,5 @@
 use nih_plug::prelude::*;
-use space_echo::{Params as ProcessedParams, SpaceEcho};
+use space_echo::{Params as ProcessParams, SpaceEcho};
 mod space_echo_parameters;
 use space_echo_parameters::SpaceEchoParameters;
 use std::sync::Arc;
@@ -8,7 +8,7 @@ mod editor;
 struct DmSpaceEcho {
   params: Arc<SpaceEchoParameters>,
   space_echo: SpaceEcho,
-  processed_params: ProcessedParams,
+  process_params: ProcessParams,
 }
 
 impl DmSpaceEcho {
@@ -64,7 +64,7 @@ impl Default for DmSpaceEcho {
     Self {
       params: params.clone(),
       space_echo: SpaceEcho::new(44100.),
-      processed_params: ProcessedParams::new(44100.),
+      process_params: ProcessParams::new(44100.),
     }
   }
 }
@@ -105,7 +105,7 @@ impl Plugin for DmSpaceEcho {
     _context: &mut impl InitContext<Self>,
   ) -> bool {
     self.space_echo = SpaceEcho::new(buffer_config.sample_rate);
-    self.processed_params = ProcessedParams::new(buffer_config.sample_rate);
+    self.process_params = ProcessParams::new(buffer_config.sample_rate);
     true
   }
 
@@ -116,7 +116,7 @@ impl Plugin for DmSpaceEcho {
     context: &mut impl ProcessContext<Self>,
   ) -> ProcessStatus {
     let (time_left, time_right) = self.get_time_params(context);
-    self.processed_params.set(
+    self.process_params.set(
       self.params.input.value(),
       self.params.channel_mode.value() as i32,
       self.params.time_mode.value() as i32,
@@ -146,7 +146,7 @@ impl Plugin for DmSpaceEcho {
 
       (*left_channel, *right_channel) = self
         .space_echo
-        .process((*left_channel, *right_channel), &mut self.processed_params);
+        .process((*left_channel, *right_channel), &mut self.process_params);
     });
     ProcessStatus::Normal
   }

@@ -92,7 +92,7 @@ impl SpaceEcho {
     let stereo = params.stereo.next();
     let output_level = params.output_level.next();
     let mix = params.mix.next();
-    let filter_gain = params.filter_gain.next();
+    let filter_fader = params.filter_fader.next();
     let (time_left, time_right) = params.get_time(time_mode);
 
     let delay_input = self.get_delay_input(input, channel_mode, input_level);
@@ -109,7 +109,7 @@ impl SpaceEcho {
       highpass_res,
       lowpass_freq,
       lowpass_res,
-      filter_gain,
+      filter_fader,
     );
     let feedback_matrix_output = self.apply_channel_mode(filter_output, channel_mode);
     self.write_to_delay_lines(delay_input, feedback_matrix_output, feedback, average);
@@ -186,9 +186,9 @@ impl SpaceEcho {
     highpass_res: f32,
     lowpass_freq: f32,
     lowpass_res: f32,
-    filter_gain: f32,
+    filter_fader: f32,
   ) -> f32x2 {
-    match filter_gain {
+    match filter_fader {
       0. => input,
       1. => self.get_filter_output(
         input,
@@ -205,7 +205,7 @@ impl SpaceEcho {
           lowpass_freq,
           lowpass_res,
         );
-        input + (filter_out - input) * f32x2::splat(filter_gain)
+        input + (filter_out - input) * f32x2::splat(filter_fader)
       }
     }
   }
