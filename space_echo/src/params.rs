@@ -1,7 +1,7 @@
 mod smooth;
-use smooth::{ExponentialSmooth, LogarithmicSmooth};
+use crate::{duck::MIN_DUCK_THRESHOLD, FloatExt};
 pub use smooth::Smoother;
-use crate::{FloatExt, duck::MIN_DUCK_THRESHOLD};
+use smooth::{ExponentialSmooth, LogarithmicSmooth};
 
 const TIME_SMOOTHING_FACTOR: f32 = 0.25;
 
@@ -75,15 +75,15 @@ impl Params {
     limiter: bool,
     hold: bool,
   ) {
-    self.input_level.set_target(if hold { 0. } else { input_level.dbtoa() });
+    self
+      .input_level
+      .set_target(if hold { 0. } else { input_level.dbtoa() });
     self.channel_mode = channel_mode;
     self.time_mode = time_mode;
     self.time_left.set_target(time_left);
-    self.time_right.set_target(if time_link {
-      time_left
-    } else {
-      time_right
-    });
+    self
+      .time_right
+      .set_target(if time_link { time_left } else { time_right });
     self.feedback.set_target(if hold { 1. } else { feedback });
     self.flutter_gain.set_target(if hold {
       0.
@@ -106,10 +106,7 @@ impl Params {
 
   pub fn get_time(&mut self, time_mode: i32) -> (f32, f32) {
     if time_mode == 0 {
-      (
-        self.time_left.next(),
-        self.time_right.next(),
-      )
+      (self.time_left.next(), self.time_right.next())
     } else {
       (self.time_left.get_target(), self.time_right.get_target())
     }

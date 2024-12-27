@@ -1,5 +1,5 @@
 use nih_plug::prelude::*;
-use space_echo::{SpaceEcho, Params as ProcessedParams};
+use space_echo::{Params as ProcessedParams, SpaceEcho};
 mod space_echo_parameters;
 use space_echo_parameters::SpaceEchoParameters;
 use std::sync::Arc;
@@ -117,25 +117,25 @@ impl Plugin for DmSpaceEcho {
   ) -> ProcessStatus {
     let (time_left, time_right) = self.get_time_params(context);
     self.processed_params.set(
-      self.params.input.value(), 
-      self.params.channel_mode.value() as i32, 
-      self.params.time_mode.value() as i32, 
-      self.params.time_link.value(), 
-      time_left, 
-      time_right, 
-      self.params.feedback.value(), 
-      self.params.wow_and_flutter.value(), 
-      self.params.highpass_freq.value(), 
-      self.params.highpass_res.value(), 
-      self.params.lowpass_freq.value(), 
-      self.params.lowpass_res.value(), 
-      self.params.reverb.value(), 
-      self.params.decay.value(), 
-      self.params.stereo.value(), 
-      self.params.duck.value(), 
-      self.params.output.value(), 
-      self.params.mix.value(), 
-      self.params.limiter.value(), 
+      self.params.input.value(),
+      self.params.channel_mode.value() as i32,
+      self.params.time_mode.value() as i32,
+      self.params.time_link.value(),
+      time_left,
+      time_right,
+      self.params.feedback.value(),
+      self.params.wow_and_flutter.value(),
+      self.params.highpass_freq.value(),
+      self.params.highpass_res.value(),
+      self.params.lowpass_freq.value(),
+      self.params.lowpass_res.value(),
+      self.params.reverb.value(),
+      self.params.decay.value(),
+      self.params.stereo.value(),
+      self.params.duck.value(),
+      self.params.output.value(),
+      self.params.mix.value(),
+      self.params.limiter.value(),
       self.params.hold.value(),
     );
 
@@ -144,10 +144,9 @@ impl Plugin for DmSpaceEcho {
       let left_channel = channel_iterator.next().unwrap();
       let right_channel = channel_iterator.next().unwrap();
 
-      (*left_channel, *right_channel)  = self.space_echo.process(
-        (*left_channel, *right_channel),
-        &mut self.processed_params,
-      );
+      (*left_channel, *right_channel) = self
+        .space_echo
+        .process((*left_channel, *right_channel), &mut self.processed_params);
     });
     ProcessStatus::Normal
   }

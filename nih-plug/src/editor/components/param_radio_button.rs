@@ -1,11 +1,17 @@
-use std::any::Any;
 use nih_plug::params::{internals::ParamPtr, Param};
 use nih_plug_vizia::vizia::{
-  prelude::{Context, TextModifiers, LayoutModifiers, LensExt, StyleModifiers, Units::{Pixels, Stretch}},
-  views::{HStack, Label, RadioButton, VStack}, context::EmitContext, style::FontWeightKeyword, 
-  view::Handle, 
-  binding::Lens, layout::Units::Auto
+  binding::Lens,
+  context::EmitContext,
+  layout::Units::Auto,
+  prelude::{
+    Context, LayoutModifiers, LensExt, StyleModifiers, TextModifiers,
+    Units::{Pixels, Stretch},
+  },
+  style::FontWeightKeyword,
+  view::Handle,
+  views::{HStack, Label, RadioButton, VStack},
 };
+use std::any::Any;
 
 pub struct ParamRadioButton;
 
@@ -18,7 +24,7 @@ impl ParamRadioButton {
     params_to_param: F,
     on_change: C,
     variants: &'static [&'static str],
-  ) -> Handle<'a, VStack> 
+  ) -> Handle<'a, VStack>
   where
     L: 'static + Lens + Copy + Send + Sync,
     <L as Lens>::Source: 'static,
@@ -33,34 +39,35 @@ impl ParamRadioButton {
         .font_weight(FontWeightKeyword::SemiBold)
         .text_wrap(false)
         .child_space(Stretch(1.0));
-      
+
       VStack::new(cx, |cx| {
         variants.iter().for_each(|variant| {
           let variant = *variant;
 
           HStack::new(cx, |cx| {
-            let normalized_option = lens.map(move |p| {
-              params_to_param(p).string_to_normalized_value(variant)
-            }).get(cx).unwrap();
+            let normalized_option = lens
+              .map(move |p| params_to_param(p).string_to_normalized_value(variant))
+              .get(cx)
+              .unwrap();
 
             RadioButton::new(
               cx,
-              lens.map(move |p| params_to_param(p).modulated_normalized_value() == normalized_option)
+              lens
+                .map(move |p| params_to_param(p).modulated_normalized_value() == normalized_option),
             )
-            .on_select(move |cx| {
-              cx.emit(on_change(param_ptr, normalized_option))
-            })
+            .on_select(move |cx| cx.emit(on_change(param_ptr, normalized_option)))
             .id(format!("{name}_{variant}"));
 
             Label::new(cx, variant)
               .font_size(12.0)
               .describing(format!("{name}_{variant}"));
-            })
-            .size(Auto)
-            .col_between(Pixels(8.0))
-            .child_space(Pixels(4.0));
+          })
+          .size(Auto)
+          .col_between(Pixels(8.0))
+          .child_space(Pixels(4.0));
         });
-      }).size(Auto);
+      })
+      .size(Auto);
     })
     .size(Auto)
     .child_space(Stretch(1.0))

@@ -2,9 +2,9 @@
 mod average;
 mod duck;
 mod limiter;
+mod params;
 mod reverb;
 mod saturation;
-mod params;
 mod tsk_filter_stereo;
 mod variable_delay_read;
 mod wow_and_flutter;
@@ -18,16 +18,22 @@ mod shared {
 }
 
 use {
-  average::Average, duck::Duck, limiter::Limiter, params::Smoother, saturation::Saturation, shared::{
+  average::Average,
+  duck::Duck,
+  limiter::Limiter,
+  params::Smoother,
+  saturation::Saturation,
+  shared::{
     delay_line::{DelayLine, Interpolation},
     float_ext::FloatExt,
     mix::Mix,
-  }, std::simd::{f32x2, num::SimdFloat}, tsk_filter_stereo::{FilterType, TSKFilterStereo}, variable_delay_read::VariableDelayRead, wow_and_flutter::{WowAndFlutter, MAX_WOW_AND_FLUTTER_TIME_IN_SECS}
+  },
+  std::simd::{f32x2, num::SimdFloat},
+  tsk_filter_stereo::{FilterType, TSKFilterStereo},
+  variable_delay_read::VariableDelayRead,
+  wow_and_flutter::{WowAndFlutter, MAX_WOW_AND_FLUTTER_TIME_IN_SECS},
 };
-pub use {
-  reverb::Reverb, 
-  params::Params
-};
+pub use {params::Params, reverb::Reverb};
 
 pub struct SpaceEcho {
   delay_line_left: DelayLine,
@@ -66,19 +72,15 @@ impl SpaceEcho {
     }
   }
 
-  pub fn process(
-    &mut self,
-    input: (f32, f32),
-    params: &mut Params
-  ) -> (f32, f32) {
-    let Params { 
-      time_mode, 
-      channel_mode, 
-      lowpass_res, 
-      highpass_res, 
-      duck_threshold, 
-      limiter, 
-      .. 
+  pub fn process(&mut self, input: (f32, f32), params: &mut Params) -> (f32, f32) {
+    let Params {
+      time_mode,
+      channel_mode,
+      lowpass_res,
+      highpass_res,
+      duck_threshold,
+      limiter,
+      ..
     } = *params;
     let input_level = params.input_level.next();
     let feedback = params.feedback.next();
@@ -94,8 +96,7 @@ impl SpaceEcho {
     let (time_left, time_right) = params.get_time(time_mode);
 
     let delay_input = self.get_delay_input(input, channel_mode, input_level);
-    let delay_output =
-      self.read_from_delay_lines(time_left, time_right, time_mode, flutter_gain);
+    let delay_output = self.read_from_delay_lines(time_left, time_right, time_mode, flutter_gain);
 
     let average = self
       .average

@@ -51,7 +51,7 @@ impl Plugin for DmSpaceEcho {
 
     Some(Self {
       space_echo: SpaceEcho::new(sample_rate),
-      params: Params::new(sample_rate)
+      params: Params::new(sample_rate),
     })
   }
 
@@ -59,24 +59,24 @@ impl Plugin for DmSpaceEcho {
   // iterates over.
   fn run(&mut self, ports: &mut Ports, _features: &mut (), _sample_count: u32) {
     self.params.set(
-      *ports.input, 
+      *ports.input,
       *ports.channel_mode as i32 - 1,
       *ports.time_mode as i32 - 1,
       *ports.time_link == 1.,
-      *ports.time_left, 
-      *ports.time_right, 
-      *ports.feedback * 0.01, 
-      *ports.wow_and_flutter * 0.01, 
-      *ports.highpass_freq, 
+      *ports.time_left,
+      *ports.time_right,
+      *ports.feedback * 0.01,
+      *ports.wow_and_flutter * 0.01,
+      *ports.highpass_freq,
       *ports.highpass_res * 0.01,
       *ports.lowpass_freq,
       *ports.lowpass_res * 0.01,
       *ports.reverb * 0.01,
       *ports.decay * 0.005,
-      *ports.stereo * 0.01, 
+      *ports.stereo * 0.01,
       *ports.duck * 0.01,
-      *ports.output, 
-      *ports.mix * 0.01, 
+      *ports.output,
+      *ports.mix * 0.01,
       *ports.limiter == 1.,
       *ports.hold == 1.,
     );
@@ -90,10 +90,9 @@ impl Plugin for DmSpaceEcho {
     for ((input_left, input_right), (output_left, output_right)) in
       input_channels.zip(output_channels)
     {
-      (*output_left, *output_right) = self.space_echo.process(
-        (*input_left, *input_right),
-        &mut self.params,
-      );
+      (*output_left, *output_right) = self
+        .space_echo
+        .process((*input_left, *input_right), &mut self.params);
     }
   }
 }

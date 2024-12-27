@@ -1,21 +1,23 @@
-#[path="./components/param_checkbox.rs"]
+#[path = "./components/param_checkbox.rs"]
 mod param_checkbox;
 use param_checkbox::ParamCheckbox;
-#[path="./components/param_knob.rs"]
+#[path = "./components/param_knob.rs"]
 mod param_knob;
-use param_knob::{ParamKnob, ParamKnobSize};
-use std::sync::Arc;
+use super::{ParamChangeEvent, UiData};
+use crate::space_echo_parameters::SpaceEchoParameters;
+use nih_plug::params::Param;
 use nih_plug_vizia::vizia::{
+  layout::Units::Auto,
   prelude::{
     Context, LayoutModifiers, StyleModifiers, TextModifiers,
-    Units::{Pixels, Stretch}
+    Units::{Pixels, Stretch},
   },
-  views::{HStack, VStack, Label},
-  view::Handle, layout::Units::Auto, style::FontWeightKeyword
+  style::FontWeightKeyword,
+  view::Handle,
+  views::{HStack, Label, VStack},
 };
-use nih_plug::params::Param;
-use crate::space_echo_parameters::SpaceEchoParameters;
-use super::{UiData, ParamChangeEvent};
+use param_knob::{ParamKnob, ParamKnobSize};
+use std::sync::Arc;
 
 pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<VStack> {
   VStack::new(cx, |cx| {
@@ -27,7 +29,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<VStac
         params.output.as_ptr(),
         |params| &params.output,
         |param_ptr, val| ParamChangeEvent::SetParam(param_ptr, val),
-        ParamKnobSize::Regular
+        ParamKnobSize::Regular,
       );
       ParamKnob::new(
         cx,
@@ -36,7 +38,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<VStac
         params.mix.as_ptr(),
         |params| &params.mix,
         |param_ptr, val| ParamChangeEvent::SetParam(param_ptr, val),
-        ParamKnobSize::Regular
+        ParamKnobSize::Regular,
       );
       ParamCheckbox::new(
         cx,
@@ -45,7 +47,8 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<VStac
         params.limiter.as_ptr(),
         |params| &params.limiter,
         |param_ptr, val| ParamChangeEvent::SetParam(param_ptr, val),
-      ).left(Pixels(4.0));
+      )
+      .left(Pixels(4.0));
     })
     .size(Auto);
 
@@ -57,7 +60,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<VStac
         params.duck.as_ptr(),
         |params| &params.duck,
         |param_ptr, val| ParamChangeEvent::SetParam(param_ptr, val),
-        ParamKnobSize::Regular
+        ParamKnobSize::Regular,
       );
       ParamKnob::new(
         cx,
@@ -66,7 +69,7 @@ pub fn build(cx: &mut Context, params: Arc<SpaceEchoParameters>) -> Handle<VStac
         params.stereo.as_ptr(),
         |params| &params.stereo,
         |param_ptr, val| ParamChangeEvent::SetParam(param_ptr, val),
-        ParamKnobSize::Regular
+        ParamKnobSize::Regular,
       );
     })
     .size(Auto)
