@@ -1,12 +1,15 @@
 use nih_plug::{
-  formatters::{s2v_f32_hz_then_khz, s2v_f32_percentage, v2s_f32_hz_then_khz, v2s_f32_percentage},
+  formatters::{
+    s2v_f32_hz_then_khz, s2v_f32_percentage, v2s_f32_hz_then_khz, v2s_f32_percentage,
+    v2s_f32_rounded,
+  },
   params::{enums::Enum, EnumParam, IntParam},
   prelude::{BoolParam, FloatParam, FloatRange, IntRange, Params},
 };
 use std::sync::Arc;
 mod custom_formatters;
 use crate::editor;
-use custom_formatters::{s2v_f32_synced_time, v2s_f32_digits, v2s_f32_synced_time};
+use custom_formatters::{s2v_f32_synced_time, v2s_f32_synced_time};
 use nih_plug_vizia::ViziaState;
 
 #[derive(Enum, PartialEq)]
@@ -114,7 +117,7 @@ impl Default for SpaceEchoParameters {
         },
       )
       .with_unit(" dB")
-      .with_value_to_string(v2s_f32_digits(2)),
+      .with_value_to_string(v2s_f32_rounded(2)),
 
       channel_mode: EnumParam::new("Channel Mode", ChannelMode::Stereo),
 
@@ -136,7 +139,7 @@ impl Default for SpaceEchoParameters {
         },
       )
       .with_unit(" ms")
-      .with_value_to_string(v2s_f32_digits(2)),
+      .with_value_to_string(v2s_f32_rounded(2)),
 
       time_right: FloatParam::new(
         "Time Right",
@@ -148,7 +151,7 @@ impl Default for SpaceEchoParameters {
         },
       )
       .with_unit(" ms")
-      .with_value_to_string(v2s_f32_digits(2)),
+      .with_value_to_string(v2s_f32_rounded(2)),
 
       division_left: IntParam::new("Division Left", 9, IntRange::Linear { min: 0, max: 15 })
         .with_value_to_string(v2s_f32_synced_time())
@@ -225,11 +228,10 @@ impl Default for SpaceEchoParameters {
       output: FloatParam::new(
         "Output",
         0.,
-        FloatRange::SymmetricalSkewed {
+        FloatRange::Skewed {
           min: -70.,
           max: 12.,
-          factor: 0.333333,
-          center: 0.,
+          factor: 2.,
         },
       )
       .with_unit(" dB")
