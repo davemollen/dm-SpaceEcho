@@ -163,13 +163,13 @@ impl SpaceEcho {
       f32x2::from_array([delay_out_left, delay_out_right])
     } else {
       let delay_out_left = self.variable_delay_read_left.read(
-        &mut self.delay_line_left,
+        &self.delay_line_left,
         time_left,
         wow_and_flutter_time,
         Interpolation::Linear,
       );
       let delay_out_right = self.variable_delay_read_right.read(
-        &mut self.delay_line_right,
+        &self.delay_line_right,
         time_right,
         wow_and_flutter_time,
         Interpolation::Linear,
