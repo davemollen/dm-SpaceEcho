@@ -160,7 +160,7 @@ jobs:
           name: ${{github.ref_name}}
           files: ${{ env.ARCHIVE_NAME }}.zip
 
-  package-mod-plugin:
+  package-mod-desktop-plugin:
     name: Package mod desktop plugin
     runs-on: macos-latest
 
@@ -178,7 +178,7 @@ jobs:
       - name: Run build script
         run: |
           sudo ./scripts/build-lv2-for-mod-desktop-mac.sh
-      
+
       - name: Determine build archive name
         run: |
           echo "ARCHIVE_NAME=$plugin_name-mod-desktop-mac" >> "$GITHUB_ENV"
