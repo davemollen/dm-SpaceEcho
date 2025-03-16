@@ -1,8 +1,6 @@
 name: Build and release
 
-on:
-  release:
-    types: [created]
+on: push
 
 defaults:
   run:
@@ -154,6 +152,41 @@ jobs:
           mkdir -p $ARCHIVE_NAME
           docker cp mpb:/root/mod-workdir/${{ matrix.platform }}/plugins/$plugin_name.lv2 $ARCHIVE_NAME
           cp .github/workflows/readme-Mod.txt "$ARCHIVE_NAME/README.txt"
+          zip -r $ARCHIVE_NAME.zip $ARCHIVE_NAME
+
+      - name: Add zip to release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{github.ref_name}}
+          files: ${{ env.ARCHIVE_NAME }}.zip
+
+  package-mod-plugin:
+    name: Package mod desktop plugin
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Rust toolchain
+        # Needed for SIMD
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          # The macOS x86_64 build is done from an AArch64 macOS CI runner, so
+          # it needs to be cross compiled
+          targets: x86_64-apple-darwin
+
+      - name: Run build script
+        run: |
+          sudo ./scripts/build-lv2-for-mod-desktop-mac.sh
+      
+      - name: Determine build archive name
+        run: |
+          echo "ARCHIVE_NAME=$plugin_name-mod-desktop-mac" >> "$GITHUB_ENV"
+
+      - name: Move all packaged plugin into a directory
+        run: |
+          mkdir -p $ARCHIVE_NAME
+          mv ./lv2/$plugin_name.lv2 $ARCHIVE_NAME
           zip -r $ARCHIVE_NAME.zip $ARCHIVE_NAME
 
       - name: Add zip to release
