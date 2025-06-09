@@ -8,7 +8,7 @@ mod ui_data;
 use crate::space_echo_parameters::SpaceEchoParameters;
 use nih_plug::prelude::Editor;
 use nih_plug_vizia::vizia::{model::Model, modifiers::StyleModifiers, views::HStack};
-use nih_plug_vizia::{create_vizia_editor, ViziaState, ViziaTheming};
+use nih_plug_vizia::{create_vizia_editor, vizia_assets, ViziaState, ViziaTheming};
 use std::sync::Arc;
 pub use ui_data::{ParamChangeEvent, UiData};
 
@@ -27,7 +27,9 @@ pub(crate) fn create(
     editor_state,
     ViziaTheming::Custom,
     move |cx, gui_context| {
-      let _ = cx.add_stylesheet(STYLE);
+      vizia_assets::register_roboto(cx);
+      vizia_assets::register_roboto_bold(cx);
+      cx.add_stylesheet(STYLE).ok();
 
       UiData {
         params: params.clone(),
