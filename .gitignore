@@ -1,3 +1,6 @@
 target
 .DS_Store
 *.svg
+*libdm_space_echo.so
+*libdm_space_echo.dylib
+*libdm_space_echo.dll
