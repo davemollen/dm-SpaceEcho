@@ -29,6 +29,7 @@ pub(crate) fn create(
     move |cx, gui_context| {
       vizia_assets::register_roboto(cx);
       vizia_assets::register_roboto_bold(cx);
+      cx.set_default_font(&[vizia_assets::ROBOTO]);
       cx.add_stylesheet(STYLE).ok();
 
       UiData {
