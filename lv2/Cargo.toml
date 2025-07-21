@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-lv2 = { git = "https://github.com/davemollen/rust-lv2.git", features = [
+lv2 = { git = "https://github.com/davemollen/rust-lv2.git", branch = "master", features = [
     "minimal_plugin",
 ] }
 space_echo = { path = "../space_echo" }
