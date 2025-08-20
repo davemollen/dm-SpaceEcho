@@ -70,7 +70,7 @@ impl Default for DmSpaceEcho {
 }
 
 impl Plugin for DmSpaceEcho {
-  const NAME: &'static str = "dm-SpaceEcho";
+  const NAME: &'static str = "SpaceEcho";
   const VENDOR: &'static str = "DM";
   const URL: &'static str = "https://github.com/davemollen/dm-SpaceEcho";
   const EMAIL: &'static str = "davemollen@gmail.com";
