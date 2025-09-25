@@ -47,6 +47,7 @@ pub struct SpaceEcho {
   reverb: Reverb,
   duck: Duck,
   limiter: Limiter,
+  mix: Mix,
 }
 
 impl SpaceEcho {
@@ -69,6 +70,7 @@ impl SpaceEcho {
       reverb: Reverb::new(sample_rate),
       duck: Duck::new(sample_rate),
       limiter: Limiter::new(sample_rate, 2., 10., 40., 0.966051),
+      mix: Mix::new(),
     }
   }
 
@@ -122,7 +124,7 @@ impl SpaceEcho {
       .process((stereo_output[0], stereo_output[1]), reverb, decay);
     let ducking_output = self.duck.process(reverb_output, input, duck_threshold);
     let space_echo_output = self.apply_gain(ducking_output, output_level);
-    let mix_output = Mix::process(input, space_echo_output, mix);
+    let mix_output = self.mix.process(input, space_echo_output, mix);
     self.limiter.process(mix_output, limiter)
   }
 

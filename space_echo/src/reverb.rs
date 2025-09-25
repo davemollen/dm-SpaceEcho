@@ -27,6 +27,7 @@ pub struct Reverb {
   one_pole_filter: OnePoleFilter,
   random_lfo: [RandomOscillator; 4],
   phasor: Phasor,
+  mix: Mix,
 }
 
 impl Reverb {
@@ -48,6 +49,7 @@ impl Reverb {
       one_pole_filter: OnePoleFilter::new(sample_rate, 6000.),
       random_lfo: [RandomOscillator::new(); 4],
       phasor: Phasor::new(sample_rate, 3.7),
+      mix: Mix::new(),
     }
   }
 
@@ -56,7 +58,7 @@ impl Reverb {
       let early_reflections_out = self.apply_early_reflections(input);
       let reverb_out = self.apply_reverb_tail(early_reflections_out, decay);
 
-      Mix::process(input, reverb_out, reverb)
+      self.mix.process(input, reverb_out, reverb)
     } else {
       input
     }
