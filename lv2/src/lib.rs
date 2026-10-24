@@ -1,7 +1,7 @@
 extern crate lv2;
 extern crate space_echo;
 use lv2::prelude::*;
-use space_echo::{Params, SpaceEcho};
+use space_echo::{Bypass, Params, SpaceEcho};
 
 #[derive(PortCollection)]
 struct Ports {
@@ -29,12 +29,14 @@ struct Ports {
   input_right: InputPort<InPlaceAudio>,
   output_left: OutputPort<InPlaceAudio>,
   output_right: OutputPort<InPlaceAudio>,
+  enabled: InputPort<InPlaceControl>,
 }
 
 #[uri("https://github.com/davemollen/dm-SpaceEcho")]
 struct DmSpaceEcho {
   space_echo: SpaceEcho,
   params: Params,
+  bypass: Bypass,
 }
 
 impl Plugin for DmSpaceEcho {
@@ -52,6 +54,7 @@ impl Plugin for DmSpaceEcho {
     Some(Self {
       space_echo: SpaceEcho::new(sample_rate),
       params: Params::new(sample_rate),
+      bypass: Bypass::new(sample_rate),
     })
   }
 
@@ -59,11 +62,17 @@ impl Plugin for DmSpaceEcho {
   fn activate(&mut self, _features: &mut Self::InitFeatures) {
     self.space_echo.reset();
     self.params.reset();
+    self.bypass.reset();
   }
 
   // Process a chunk of audio. The audio ports are dereferenced to slices, which the plugin
   // iterates over.
   fn run(&mut self, ports: &mut Ports, _features: &mut (), _sample_count: u32) {
+    self.bypass.set_enabled(ports.enabled.get() == 0., || {
+      self.space_echo.reset();
+      self.params.reset();
+    });
+
     self.params.set(
       ports.input.get(),
       ports.channel_mode.get() as i32 - 1,
@@ -89,13 +98,16 @@ impl Plugin for DmSpaceEcho {
 
     let input_channels = ports.input_left.iter().zip(ports.input_right.iter());
     let output_channels = ports.output_left.iter().zip(ports.output_right.iter());
-
     for ((input_left, input_right), (output_left, output_right)) in
       input_channels.zip(output_channels)
     {
-      let output = self
-        .space_echo
-        .process((input_left.get(), input_right.get()), &mut self.params);
+      let dry = (input_left.get(), input_right.get());
+      let output = if self.bypass.is_enabled() {
+        dry
+      } else {
+        let wet = self.space_echo.process(dry, &mut self.params);
+        self.bypass.process(dry, wet)
+      };
       output_left.set(output.0);
       output_right.set(output.1);
     }

@@ -1,5 +1,6 @@
 #![feature(portable_simd)]
 mod average;
+mod bypass;
 mod duck;
 mod limiter;
 mod params;
@@ -33,7 +34,7 @@ use {
   variable_delay_read::VariableDelayRead,
   wow_and_flutter::{WowAndFlutter, MAX_WOW_AND_FLUTTER_TIME_IN_SECS},
 };
-pub use {params::Params, reverb::Reverb};
+pub use {bypass::Bypass, params::Params, reverb::Reverb};
 
 pub struct SpaceEcho {
   delay_line_left: DelayLine,

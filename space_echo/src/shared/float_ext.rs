@@ -3,27 +3,21 @@ use std::f32::consts::{FRAC_PI_2, PI};
 pub trait FloatExt {
   fn dbtoa(self) -> Self;
   fn scale(self, in_low: Self, in_high: Self, out_low: Self, out_high: Self) -> Self;
-  fn mix(self, right: f32, factor: f32) -> Self;
-  fn fast_atan1(self) -> Self;
-  fn fast_atan2(self) -> Self;
-  fn fast_tanh1(self) -> Self;
-  fn fast_tanh2(self) -> Self;
-  fn fast_tanh3(self) -> Self;
+  fn mix(self, right: Self, factor: Self) -> Self;
+  fn cubic_spline_curve(self) -> Self;
   fn fast_sin(self) -> Self;
   fn fast_cos(self) -> Self;
-  fn fast_sin_bhaskara(self) -> Self;
-  fn fast_cos_bhaskara(self) -> Self;
-  fn fast_pow(self, exponent: Self) -> Self;
-  fn fast_exp(self) -> Self;
   fn mstosamps(self, sample_rate: Self) -> Self;
 }
 
 impl FloatExt for f32 {
   /// Converts decibels to a linear amplitude value
+  #[inline(always)]
   fn dbtoa(self) -> Self {
     (10_f32).powf(self * 0.05)
   }
 
+  #[inline(always)]
   fn scale(self, in_low: Self, in_high: Self, out_low: Self, out_high: Self) -> Self {
     let in_scale = 1. / (in_high - in_low);
     let out_range = out_high - out_low;
@@ -31,58 +25,18 @@ impl FloatExt for f32 {
     normalized_value * out_range + out_low
   }
 
+  #[inline(always)]
   fn mix(self, right: f32, factor: f32) -> Self {
     self + (right - self) * factor
   }
 
-  /// This is an atan approximation
-  fn fast_atan1(self) -> Self {
-    let a1 = 0.99997726;
-    let a3 = -0.33262347;
-    let a5 = 0.19354346;
-    let a7 = -0.11643287;
-    let a9 = 0.05265332;
-    let a11 = -0.01172120;
-    let squared_self = self * self;
-    self
-      * (a1
-        + squared_self
-          * (a3
-            + squared_self * (a5 + squared_self * (a7 + squared_self * (a9 + squared_self * a11)))))
-  }
-
-  /// This is an atan approximation, not atan2. This variant only amplifies the first harmonic instead of multiple.
-  /// https://www.dsprelated.com/showarticle/1052.php
-  fn fast_atan2(self) -> Self {
-    let n1 = 0.97239411;
-    let n2 = -0.19194795;
-    (n1 + n2 * self * self) * self
-  }
-
-  /// This is a tanh approximation.
-  fn fast_tanh1(self) -> Self {
-    let squared_self = self * self;
-    let a = self * (135135. + squared_self * (17325. + squared_self * (378. + squared_self)));
-    let b = 135135. + squared_self * (62370. + squared_self * (3150. + squared_self * 28.));
-    a / b
-  }
-
-  /// This is a tanh approximation. It's cheaper than fast_tanh1, but looses accuracy for higher input values (< -1 and > 1).
-  fn fast_tanh2(self) -> Self {
-    let x2 = self * self;
-    let x3 = x2 * self;
-    let x4 = x3 * self;
-    (105. * self + 10. * x3) / (105. + 45. * x2 + x4)
-  }
-
-  /// This is a tanh approximation. For more accuracy (less aliasing) choose fast_tanh1 or fast_tanh2.
-  fn fast_tanh3(self) -> Self {
-    let a = self.abs();
-    let b = 1.26175667589988239 + a * (-0.54699348440059470 + a * (2.66559097474027817));
-    (b * self) / (b * a + 1.)
+  #[inline(always)]
+  fn cubic_spline_curve(self) -> Self {
+    self * self * (3.0 - 2.0 * self)
   }
 
   /// This is a sine approximation. Use this to safe processing power.
+  #[inline(always)]
   fn fast_sin(self) -> Self {
     const TWOPI: f32 = 6.2831853071795865;
     const INVTWOPI: f32 = 0.15915494309189534;
@@ -93,6 +47,7 @@ impl FloatExt for f32 {
   }
 
   /// This is a cosine approximation. Use this to safe processing power.
+  #[inline(always)]
   fn fast_cos(self) -> Self {
     const TWOPI: f32 = 6.2831853071795865;
     const INVTWOPI: f32 = 0.15915494309189534;
@@ -103,32 +58,8 @@ impl FloatExt for f32 {
     sin_approx(x_new)
   }
 
-  /// This is the Bhaskara sine approximation.
-  /// It only works with input values between zero and half pi.
-  fn fast_sin_bhaskara(self) -> Self {
-    let pi_squared = 9.869604401089358;
-    let a = self * (PI - self);
-    (16. * a) / (5. * pi_squared - 4. * a)
-  }
-
-  /// This is the Bhaskara cosine approximation.
-  /// It only works with input values between zero and half pi.
-  fn fast_cos_bhaskara(self) -> Self {
-    let x_squared = self * self;
-    let pi_squared = 9.869604401089358;
-    (pi_squared - 4. * x_squared) / (pi_squared + x_squared)
-  }
-
-  fn fast_pow(self, exponent: Self) -> Self {
-    pow2(exponent * log2(self))
-  }
-
-  /// Exponential function.
-  fn fast_exp(self) -> Self {
-    pow2(1.442695040_f32 * self)
-  }
-
   /// Convert milliseconds to samples based on the samplerate.
+  #[inline(always)]
   fn mstosamps(self, sample_rate: Self) -> Self {
     self * 0.001 * sample_rate
   }
@@ -170,55 +101,8 @@ mod tests {
   }
 
   #[test]
-  fn fast_atan1() {
-    assert_approximately_eq((0.5).fast_atan1(), (0.5f32).atan(), 5);
-    assert_approximately_eq((-0.5).fast_atan1(), (-0.5f32).atan(), 5);
-    assert_approximately_eq((1.).fast_atan1(), (1f32).atan(), 5);
-    assert_approximately_eq((-1.).fast_atan1(), (-1f32).atan(), 5);
-  }
-
-  #[test]
-  fn fast_atan2() {
-    assert_approximately_eq((0.5).fast_atan2(), (0.5f32).atan(), 2);
-    assert_approximately_eq((-0.5).fast_atan2(), (-0.5f32).atan(), 2);
-    assert_approximately_eq((1.).fast_atan2(), (1f32).atan(), 2);
-    assert_approximately_eq((-1.).fast_atan2(), (-1f32).atan(), 2);
-  }
-
-  #[test]
-  fn fast_tanh1() {
-    assert_approximately_eq((0.5).fast_tanh1(), (0.5f32).tanh(), 21);
-    assert_approximately_eq((-0.5).fast_tanh1(), (-0.5f32).tanh(), 21);
-    assert_approximately_eq((1.).fast_tanh1(), (1f32).tanh(), 21);
-    assert_approximately_eq((-1.).fast_tanh1(), (-1f32).tanh(), 21);
-    assert_approximately_eq((1.5).fast_tanh1(), (1.5f32).tanh(), 21);
-    assert_approximately_eq((-1.5).fast_tanh1(), (-1.5f32).tanh(), 21);
-  }
-
-  #[test]
-  fn fast_tanh2() {
-    assert_approximately_eq((0.5).fast_tanh2(), (0.5f32).tanh(), 4);
-    assert_approximately_eq((-0.5).fast_tanh2(), (-0.5f32).tanh(), 4);
-    assert_approximately_eq((1.).fast_tanh2(), (1f32).tanh(), 4);
-    assert_approximately_eq((-1.).fast_tanh2(), (-1f32).tanh(), 4);
-    assert_approximately_eq((1.5).fast_tanh2(), (1.5f32).tanh(), 4);
-    assert_approximately_eq((-1.5).fast_tanh2(), (-1.5f32).tanh(), 4);
-  }
-
-  #[test]
-  fn fast_tanh3() {
-    assert_approximately_eq((0.5).fast_tanh2(), (0.5f32).tanh(), 4);
-    assert_approximately_eq((-0.5).fast_tanh2(), (-0.5f32).tanh(), 4);
-    assert_approximately_eq((1.).fast_tanh2(), (1f32).tanh(), 4);
-    assert_approximately_eq((-1.).fast_tanh2(), (-1f32).tanh(), 4);
-    assert_approximately_eq((1.5).fast_tanh2(), (1.5f32).tanh(), 4);
-    assert_approximately_eq((-1.5).fast_tanh2(), (-1.5f32).tanh(), 4);
-  }
-
-  #[test]
   fn fast_sin() {
     assert_approximately_eq((0.1).fast_sin(), (0.1f32).sin(), 3);
-    assert_approximately_eq((0.5 * PI).fast_sin_bhaskara(), (0.5 * PI).sin(), 2);
     assert_approximately_eq((PI).fast_sin(), (PI).sin(), 3);
     assert_approximately_eq((PI * 1.5).fast_sin(), (PI * 1.5).sin(), 3);
     assert_approximately_eq((PI * -1.9).fast_sin(), (PI * -1.9).sin(), 3);
@@ -231,32 +115,6 @@ mod tests {
     assert_approximately_eq((PI * 1.5).fast_cos(), (PI * 1.5).cos(), 3);
     assert_approximately_eq((PI * 1.9).fast_cos(), (PI * 1.9).cos(), 3);
   }
-
-  #[test]
-  fn fast_sin_bhaskara() {
-    assert_approximately_eq((0.0).fast_sin_bhaskara(), (0.0f32).sin(), 21);
-    assert_approximately_eq((0.25 * PI).fast_sin_bhaskara(), (0.25 * PI).sin(), 2);
-    assert_approximately_eq((0.5 * PI).fast_sin_bhaskara(), (0.5 * PI).sin(), 6);
-  }
-
-  #[test]
-  fn fast_cos_bhaskara() {
-    assert_approximately_eq((0.0).fast_cos_bhaskara(), (0.0f32).cos(), 21);
-    assert_approximately_eq((0.25 * PI).fast_cos_bhaskara(), (0.25 * PI).cos(), 2);
-    assert_approximately_eq((0.5 * PI).fast_cos_bhaskara(), (0.5 * PI).cos(), 7);
-  }
-}
-
-fn log2(x: f32) -> f32 {
-  let mut y = x.to_bits() as f32;
-  y *= 1.1920928955078125e-7_f32;
-  y - 126.94269504_f32
-}
-
-fn pow2(p: f32) -> f32 {
-  let clipp = if p < -126.0 { -126.0_f32 } else { p };
-  let v = ((1 << 23) as f32 * (clipp + 126.94269504_f32)) as u32;
-  f32::from_bits(v)
 }
 
 fn sin_approx(x: f32) -> f32 {

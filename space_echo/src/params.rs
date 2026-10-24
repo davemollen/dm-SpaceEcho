@@ -1,7 +1,7 @@
 mod smooth;
 use crate::{duck::MIN_DUCK_THRESHOLD, FloatExt};
-pub use smooth::Smoother;
 use smooth::{ExponentialSmooth, LogarithmicSmooth};
+pub use smooth::{LinearSmooth, Smoother};
 
 const TIME_SMOOTHING_FACTOR: f32 = 0.25;
 
@@ -136,7 +136,7 @@ impl Params {
     if time_mode == 0 {
       (self.time_left.next(), self.time_right.next())
     } else {
-      (self.time_left.get_target(), self.time_right.get_target())
+      (self.time_left.target, self.time_right.target)
     }
   }
 }
