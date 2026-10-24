@@ -74,6 +74,19 @@ impl SpaceEcho {
     }
   }
 
+  pub fn reset(&mut self) {
+    self.delay_line_left.reset();
+    self.delay_line_right.reset();
+    self.variable_delay_read_left.reset();
+    self.variable_delay_read_right.reset();
+    self.average.reset();
+    self.highpass_filter.reset();
+    self.lowpass_filter.reset();
+    self.reverb.reset();
+    self.duck.reset();
+    self.limiter.reset();
+  }
+
   pub fn process(&mut self, input: (f32, f32), params: &mut Params) -> (f32, f32) {
     let Params {
       time_mode,

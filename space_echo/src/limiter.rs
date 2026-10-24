@@ -29,6 +29,12 @@ impl Limiter {
     }
   }
 
+  pub fn reset(&mut self) {
+    self.buffer.fill((0., 0.));
+    self.slide.reset();
+    self.moving_min.reset();
+  }
+
   pub fn process(&mut self, input: (f32, f32), is_on: bool) -> (f32, f32) {
     if is_on {
       let limiter_gain = self.get_limiter_gain(input);

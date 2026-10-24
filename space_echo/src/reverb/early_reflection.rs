@@ -13,6 +13,10 @@ impl EarlyReflection {
     }
   }
 
+  pub fn reset(&mut self) {
+    self.delay_line.reset();
+  }
+
   pub fn process(&mut self, input: (f32, f32)) -> (f32, f32) {
     let added_channels = input.0 + input.1;
     let subtracted_channels = input.0 - input.1;

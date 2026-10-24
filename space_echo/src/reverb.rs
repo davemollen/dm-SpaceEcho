@@ -13,6 +13,7 @@ use {
   std::simd::f32x4,
 };
 
+const DELAY_LINE_TIMES: [f32; 4] = [60., 71.9345, 86.7545, 95.945];
 const MATRIX: [[f32; 4]; 4] = [
   [1.0, 1.0, 1.0, 1.0],
   [1.0, -1.0, 1.0, -1.0],
@@ -32,8 +33,6 @@ pub struct Reverb {
 
 impl Reverb {
   pub fn new(sample_rate: f32) -> Self {
-    let delay_times = [60., 71.9345, 86.7545, 95.945];
-
     Self {
       early_reflections: [
         EarlyReflection::new(sample_rate, 5.43216),
@@ -43,14 +42,24 @@ impl Reverb {
         EarlyReflection::new(sample_rate, 34.3876),
         EarlyReflection::new(sample_rate, 55.5437),
       ],
-      time: delay_times,
-      delay_line: delay_times
+      time: DELAY_LINE_TIMES,
+      delay_line: DELAY_LINE_TIMES
         .map(|time| DelayLine::new((sample_rate * time / 1000.) as usize + 1, sample_rate)),
       one_pole_filter: OnePoleFilter::new(sample_rate, 6000.),
       random_lfo: [RandomOscillator::new(); 4],
       phasor: Phasor::new(sample_rate, 3.7),
       mix: Mix::new(),
     }
+  }
+
+  pub fn reset(&mut self) {
+    for early_reflection in self.early_reflections.iter_mut() {
+      early_reflection.reset();
+    }
+    for delay_line in self.delay_line.iter_mut() {
+      delay_line.reset();
+    }
+    self.one_pole_filter.reset();
   }
 
   pub fn process(&mut self, input: (f32, f32), reverb: f32, decay: f32) -> (f32, f32) {

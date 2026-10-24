@@ -54,6 +54,10 @@ impl Params {
     }
   }
 
+  pub fn reset(&mut self) {
+    self.is_initialized = false;
+  }
+
   pub fn set(
     &mut self,
     input_level: f32,

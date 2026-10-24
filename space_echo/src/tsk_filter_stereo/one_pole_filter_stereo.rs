@@ -19,6 +19,10 @@ impl OnePoleFilterStereo {
     }
   }
 
+  pub fn reset(&mut self) {
+    self.z = f32x2::splat(0.);
+  }
+
   pub fn process(&mut self, input: f32x2, freq: f32, filter_type: FilterType) -> f32x2 {
     match filter_type {
       FilterType::Lowpass => self.apply_filter(input, freq),

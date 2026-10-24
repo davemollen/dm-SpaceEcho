@@ -24,6 +24,13 @@ impl TSKFilterStereo {
     }
   }
 
+  pub fn reset(&mut self) {
+    for filter in self.one_pole_filters.iter_mut() {
+      filter.reset();
+    }
+    self.z = f32x2::splat(0.);
+  }
+
   pub fn process(
     &mut self,
     input: f32x2,

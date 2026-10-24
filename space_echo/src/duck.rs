@@ -20,6 +20,10 @@ impl Duck {
     }
   }
 
+  pub fn reset(&mut self) {
+    self.slide.reset();
+  }
+
   pub fn process(
     &mut self,
     input: (f32, f32),

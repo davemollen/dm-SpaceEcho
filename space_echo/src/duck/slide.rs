@@ -15,6 +15,10 @@ impl Slide {
     }
   }
 
+  pub fn reset(&mut self) {
+    self.z = 1.;
+  }
+
   pub fn process(&mut self, input: f32) -> f32 {
     let difference = input - self.z;
     if difference.abs() <= f32::EPSILON {

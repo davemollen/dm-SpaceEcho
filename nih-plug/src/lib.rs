@@ -109,6 +109,11 @@ impl Plugin for DmSpaceEcho {
     true
   }
 
+  fn reset(&mut self) {
+    self.space_echo.reset();
+    self.process_params.reset();
+  }
+
   fn process(
     &mut self,
     buffer: &mut Buffer,

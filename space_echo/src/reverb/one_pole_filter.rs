@@ -18,6 +18,10 @@ impl OnePoleFilter {
     }
   }
 
+  pub fn reset(&mut self) {
+    self.z = f32x4::splat(0.);
+  }
+
   pub fn process(&mut self, input: f32x4) -> f32x4 {
     self.z = input * self.a0 + self.z * self.b1;
     self.z

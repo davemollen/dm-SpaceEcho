@@ -18,6 +18,10 @@ impl VariableDelayRead {
     }
   }
 
+  pub fn reset(&mut self) {
+    self.ramp.reset();
+  }
+
   pub fn read(
     &mut self,
     delay_line: &DelayLine,

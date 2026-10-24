@@ -15,6 +15,10 @@ impl Average {
     }
   }
 
+  pub fn reset(&mut self) {
+    self.z = 0.;
+  }
+
   pub fn process(&mut self, input: f32) -> f32 {
     let squared = input * input;
     let filtered = self.filter(squared);

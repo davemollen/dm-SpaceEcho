@@ -21,6 +21,13 @@ impl MovingMin {
     }
   }
 
+  pub fn reset(&mut self) {
+    self.current_min = self.limit;
+    self.next_min = self.limit;
+    self.next_hold_length = 0;
+    self.hold_index = self.hold_length;
+  }
+
   /// If gain_reduction is below current current_min, then replace current_min immediately. <br />
   /// Else if hold_time has passed, then reset min gain_reduction that occured during the hold_time window and reset the hold_time to when the next peak occured in the hold_time window. <br />
   /// Else, keep the current_min value untouched for hold_time.
