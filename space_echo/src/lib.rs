@@ -13,6 +13,7 @@ mod shared {
   pub mod delay_line;
   pub mod delta;
   pub mod float_ext;
+  pub mod macros;
   pub mod mix;
   pub mod phasor;
   pub mod random_oscillator;

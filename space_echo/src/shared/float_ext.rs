@@ -1,8 +1,7 @@
-use std::f32::consts::{FRAC_PI_2, PI};
+use std::f32::consts::FRAC_PI_2;
 
 pub trait FloatExt {
   fn dbtoa(self) -> Self;
-  fn scale(self, in_low: Self, in_high: Self, out_low: Self, out_high: Self) -> Self;
   fn mix(self, right: Self, factor: Self) -> Self;
   fn cubic_spline_curve(self) -> Self;
   fn fast_sin(self) -> Self;
@@ -15,14 +14,6 @@ impl FloatExt for f32 {
   #[inline(always)]
   fn dbtoa(self) -> Self {
     (10_f32).powf(self * 0.05)
-  }
-
-  #[inline(always)]
-  fn scale(self, in_low: Self, in_high: Self, out_low: Self, out_high: Self) -> Self {
-    let in_scale = 1. / (in_high - in_low);
-    let out_range = out_high - out_low;
-    let normalized_value = (self - in_low) * in_scale;
-    normalized_value * out_range + out_low
   }
 
   #[inline(always)]
@@ -68,29 +59,14 @@ impl FloatExt for f32 {
 #[cfg(test)]
 mod tests {
   use super::FloatExt;
+  use crate::assert_approximately_eq;
   use std::f32::consts::PI;
-
-  fn assert_approximately_eq(left: f32, right: f32, digits: usize) {
-    let tol = 10f32.powi(-(digits as i32));
-    let diff = (left - right).abs();
-    assert!(
-      diff <= tol,
-      "Values are not approximately equal: left={left}, right={right}, diff={diff}, tol={tol}"
-    );
-  }
 
   #[test]
   fn dbtoa() {
     assert_eq!((-3f32).dbtoa(), 0.70794576);
     assert_eq!((-6f32).dbtoa(), 0.5011872);
     assert_eq!((-12f32).dbtoa(), 0.25118864);
-  }
-
-  #[test]
-  fn scale() {
-    assert_eq!((1f32).scale(1., 500., -6., -15.), -6.);
-    assert_eq!((250f32).scale(1., 500., -6., -15.), -10.490982);
-    assert_eq!((500f32).scale(1., 500., -6., -15.), -15.);
   }
 
   #[test]
@@ -102,18 +78,18 @@ mod tests {
 
   #[test]
   fn fast_sin() {
-    assert_approximately_eq((0.1).fast_sin(), (0.1f32).sin(), 3);
-    assert_approximately_eq((PI).fast_sin(), (PI).sin(), 3);
-    assert_approximately_eq((PI * 1.5).fast_sin(), (PI * 1.5).sin(), 3);
-    assert_approximately_eq((PI * -1.9).fast_sin(), (PI * -1.9).sin(), 3);
+    assert_approximately_eq!((0.1).fast_sin(), (0.1f32).sin(), 3);
+    assert_approximately_eq!((PI).fast_sin(), (PI).sin(), 3);
+    assert_approximately_eq!((PI * 1.5).fast_sin(), (PI * 1.5).sin(), 3);
+    assert_approximately_eq!((PI * -1.9).fast_sin(), (PI * -1.9).sin(), 3);
   }
 
   #[test]
   fn fast_cos() {
-    assert_approximately_eq((0.1).fast_cos(), (0.1f32).cos(), 3);
-    assert_approximately_eq((PI * 0.5).fast_cos(), (PI * 0.5).cos(), 3);
-    assert_approximately_eq((PI * 1.5).fast_cos(), (PI * 1.5).cos(), 3);
-    assert_approximately_eq((PI * 1.9).fast_cos(), (PI * 1.9).cos(), 3);
+    assert_approximately_eq!((0.1).fast_cos(), (0.1f32).cos(), 3);
+    assert_approximately_eq!((PI * 0.5).fast_cos(), (PI * 0.5).cos(), 3);
+    assert_approximately_eq!((PI * 1.5).fast_cos(), (PI * 1.5).cos(), 3);
+    assert_approximately_eq!((PI * 1.9).fast_cos(), (PI * 1.9).cos(), 3);
   }
 }
 
