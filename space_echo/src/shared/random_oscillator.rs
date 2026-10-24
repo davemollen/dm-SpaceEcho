@@ -1,5 +1,4 @@
 use crate::shared::{delta::Delta, float_ext::FloatExt};
-use std::f32::consts::PI;
 
 #[derive(Clone, Copy)]
 pub struct RandomOscillator {
@@ -29,11 +28,7 @@ impl RandomOscillator {
       };
     }
 
-    self.cosine_interp(phase)
-  }
-
-  fn cosine_interp(&self, mix: f32) -> f32 {
-    let cosine_mix = (1. - (mix * PI).fast_cos()) * 0.5;
-    self.origin * (1. - cosine_mix) + self.target * cosine_mix
+    let mix = phase.cubic_spline_curve();
+    self.origin.mix(self.target, mix)
   }
 }

@@ -1,7 +1,6 @@
 mod ramp;
 use super::{shared::float_ext::FloatExt, DelayLine, Interpolation};
 use ramp::Ramp;
-use std::f32::consts::FRAC_PI_2;
 
 pub struct VariableDelayRead {
   ramp: Ramp,
@@ -48,11 +47,9 @@ impl VariableDelayRead {
 
   fn crossfade(&mut self, delay_line: &DelayLine, added_time: f32, interp: Interpolation) -> f32 {
     let ramp = self.ramp.process();
-    let window = (ramp * FRAC_PI_2).fast_cos();
-    let window = window * window;
-
-    let a = delay_line.read(self.next_time + added_time, interp);
-    let b = delay_line.read(self.previous_time + added_time, interp);
-    a + (b - a) * window
+    let mix = ramp.cubic_spline_curve();
+    let a = delay_line.read(self.previous_time + added_time, interp);
+    let b = delay_line.read(self.next_time + added_time, interp);
+    a.mix(b, mix)
   }
 }
