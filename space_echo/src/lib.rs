@@ -270,8 +270,7 @@ impl SpaceEcho {
 
   fn apply_stereo_amount(&self, input: f32x2, stereo: f32) -> f32x2 {
     let factor = (1. - stereo) * 0.5;
-
-    input + (input - input.reverse()) * f32x2::splat(factor)
+    input + (input.reverse() - input) * f32x2::splat(factor)
   }
 
   fn take_loudest_channel(input: f32x2) -> f32 {
@@ -283,6 +282,32 @@ impl SpaceEcho {
       threshold / average
     } else {
       1.
+    }
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use crate::SpaceEcho;
+  use std::simd::f32x2;
+
+  #[test]
+  fn should_apply_stereo_parameter_correctly() {
+    let input = f32x2::from_array([1., 0.]);
+    let stereo = [0., 0.25, 0.5, 0.75, 1.];
+    let expected = [
+      [0.5, 0.5],
+      [0.625, 0.375],
+      [0.75, 0.25],
+      [0.875, 0.125],
+      [1., 0.],
+    ];
+    let space_echo = SpaceEcho::new(44100.);
+
+    for (stereo, expected) in stereo.iter().zip(expected) {
+      let actual = space_echo.apply_stereo_amount(input, *stereo);
+      assert_eq!(actual[0], expected[0]);
+      assert_eq!(actual[1], expected[1]);
     }
   }
 }
