@@ -30,12 +30,19 @@ impl Bypass {
     self.prev_enabled = enabled;
   }
 
-  pub fn is_enabled(&self) -> bool {
+  pub fn is_done_activating(&self) -> bool {
     self.mix_factor.target == 0. && self.mix_factor.current == 0.
   }
 
   pub fn process(&mut self, dry: (f32, f32), wet: (f32, f32)) -> (f32, f32) {
+    if self.is_done_deactivating() {
+      return wet;
+    }
     let mix_factor = self.mix_factor.next().cubic_spline_curve();
     (dry.0.mix(wet.0, mix_factor), dry.1.mix(wet.1, mix_factor))
+  }
+
+  fn is_done_deactivating(&self) -> bool {
+    self.mix_factor.target == 1. && self.mix_factor.current == 1.
   }
 }

@@ -258,8 +258,8 @@ A delay and reverb effect inspired by the Space Echo.
 	] , [
 		a lv2:InputPort, lv2:ControlPort ;
 		lv2:index 24 ;
-		lv2:symbol "enable" ;
-		lv2:name "Enable" ;
+		lv2:symbol "enabled" ;
+		lv2:name "Enabled" ;
 		lv2:designation lv2:enabled ;
 		lv2:portProperty lv2:integer, lv2:toggled ;
 		lv2:default 1 ;
